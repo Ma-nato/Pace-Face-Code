@@ -12,14 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PaceFace">
         <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.PaceFace">
+            android:name=".HelpScreenActivity"
+            android:exported="false">
         </activity>
         <activity
-            android:name=".HelpScreenActivity"
-            android:exported="true">
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.PaceFace.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
