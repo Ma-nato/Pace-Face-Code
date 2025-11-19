@@ -181,7 +181,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-
+            android:layout_marginBottom="7dp"
             android:src="@drawable/gear_button" />
 
     </LinearLayout>
