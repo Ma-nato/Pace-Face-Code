@@ -120,8 +120,7 @@
     <LinearLayout
         android:id="@+id/bottom_nav"
         android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="80dp"
         android:background="#E0E0E0"
         android:gravity="center"
         android:orientation="horizontal"
@@ -138,6 +137,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
+            android:layout_marginBottom="7dp"
             android:src="@drawable/home_button" />
 
         <ImageButton
@@ -148,6 +148,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
+            android:layout_marginBottom="7dp"
             android:src="@drawable/passing_button" />
 
         <ImageButton
@@ -158,6 +159,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
+            android:layout_marginBottom="7dp"
             android:src="@drawable/history_button" />
 
         <ImageButton
@@ -168,6 +170,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
+            android:layout_marginBottom="7dp"
             android:src="@drawable/emotion_button" />
 
         <ImageButton
@@ -178,6 +181,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
+            android:layout_marginBottom="7dp"
             android:src="@drawable/gear_button" />
 
     </LinearLayout>
