@@ -25,6 +25,12 @@ class HomeScreenActivity : AppCompatActivity() {
             overridePendingTransition(0, 0) // 遷移時のアニメーションを無効化
         }
 
+        // 設定ボタンがクリックされた時の処理
+        binding.gearButton.setOnClickListener {
+            val intent = Intent(this, UserSettingsScreenActivity::class.java)
+            startActivity(intent)
+        }
+
         // ここに速度表示の更新などのロジックを記述していきます
     }
 }
