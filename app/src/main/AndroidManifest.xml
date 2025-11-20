@@ -2,21 +2,33 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Bluetoothの接続状態を確認するための権限 -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PaceFace">
+        <activity android:name=".HomeScreenActivity" android:exported="false" />
         <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.PaceFace">
-        </activity>
+            android:name=".DeviceConnectionGuideScreenActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserRegistrationCompleteScreenActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserRegistrationConfirmationScreenActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserRegistrationScreenActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true" />
         <activity
             android:name=".HelpScreenActivity"
             android:exported="false">
@@ -24,11 +36,21 @@
         <activity
             android:name=".SelectionScreenActivity"
             android:exported="true">
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.PaceFace.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".UserSettingsScreenActivity"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".ProximityHistoryScreenActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

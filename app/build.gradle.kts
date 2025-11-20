@@ -45,6 +45,7 @@ android {
 dependencies {
     // 基本ライブラリ
     implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-splashscreen:1.0.1") // Splash screen API (安定版に変更)
     implementation("androidx.appcompat:appcompat:1.6.1") // AppCompatActivity
     implementation("com.google.android.material:material:1.11.0") // Material Components
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")

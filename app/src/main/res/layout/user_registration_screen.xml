@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DCE6F5">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <!-- タイトル -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="新規登録"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- ユーザー名ラベル -->
+        <TextView
+            android:id="@+id/tvUserNameLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="ユーザー名"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- 必須（ユーザー名） -->
+        <TextView
+            android:id="@+id/tvUserNameRequired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="必須"
+            android:textColor="#FF0000"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvUserNameLabel"
+            app:layout_constraintStart_toEndOf="@id/tvUserNameLabel" />
+
+        <!-- ユーザー名入力欄 -->
+        <EditText
+            android:id="@+id/etUserName"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:background="@android:drawable/edit_text"
+            android:hint="例）鹿児島 太郎"
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/tvUserNameLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- ユーザー名エラー -->
+        <TextView
+            android:id="@+id/tvUserNameError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="※ユーザー名が入力されていません"
+            android:textColor="#FF0000"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/etUserName"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- メールアドレス -->
+        <TextView
+            android:id="@+id/tvEmailLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="メールアドレス"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/tvUserNameError"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvEmailRequired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="必須"
+            android:textColor="#FF0000"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/tvEmailLabel"
+            app:layout_constraintStart_toEndOf="@id/tvEmailLabel" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp"
+            android:hint="例）example@gmail.com"
+            android:inputType="textEmailAddress"
+            android:padding="10dp"
+            android:background="@android:drawable/edit_text"
+            app:layout_constraintTop_toBottomOf="@id/tvEmailLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvEmailError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="※正しいメールアドレスを入力してください"
+            android:textSize="12sp"
+            android:textColor="#FF0000"
+            android:layout_marginTop="2dp"
+            app:layout_constraintTop_toBottomOf="@id/etEmail"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- パスワード -->
+        <TextView
+            android:id="@+id/tvPasswordLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="パスワード（8文字以上）"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/tvEmailError"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvPasswordRequired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="必須"
+            android:textColor="#FF0000"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/tvPasswordLabel"
+            app:layout_constraintStart_toEndOf="@id/tvPasswordLabel" />
+
+        <!-- パスワード入力（目アイコン付き） -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/passwordContainer"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:background="@android:drawable/edit_text"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvPasswordLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:inputType="textPassword"
+                android:background="@android:color/transparent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnPasswordEye" />
+
+            <ImageButton
+                android:id="@+id/btnPasswordEye"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_menu_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/tvPasswordError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="※パスワードは8文字以上にしてください"
+            android:textSize="12sp"
+            android:textColor="#FF0000"
+            android:layout_marginTop="2dp"
+            app:layout_constraintTop_toBottomOf="@id/passwordContainer"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- パスワード（確認） -->
+        <TextView
+            android:id="@+id/tvPassword2Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="パスワード（確認用）"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/tvPasswordError"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvPassword2Required"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="必須"
+            android:textColor="#FF0000"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/tvPassword2Label"
+            app:layout_constraintStart_toEndOf="@id/tvPassword2Label" />
+
+        <!-- パスワード確認入力 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/password2Container"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:background="@android:drawable/edit_text"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvPassword2Label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <EditText
+                android:id="@+id/etPassword2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:inputType="textPassword"
+                android:background="@android:color/transparent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnPassword2Eye" />
+
+            <ImageButton
+                android:id="@+id/btnPassword2Eye"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_menu_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/tvPassword2Error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="※同じパスワードを入力してください"
+            android:textColor="#FF0000"
+            android:textSize="12sp"
+            android:layout_marginTop="2dp"
+            app:layout_constraintTop_toBottomOf="@id/password2Container"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- 登録ボタン -->
+        <Button
+            android:id="@+id/btnRegister"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:text="登録"
+            android:textSize="30sp"
+            android:textColor="#000000"
+            android:layout_marginTop="24dp"
+            android:background="#E24A4A"
+            app:layout_constraintTop_toBottomOf="@id/tvPassword2Error"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
