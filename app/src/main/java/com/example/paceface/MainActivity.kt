@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // LoginActivity を起動して、MainActivity は終了する
-        val intent = Intent(this, LoginActivity::class.java)
+        val intent = Intent(this, UserRegistrationScreenActivity::class.java)
         startActivity(intent)
         finish()
     }

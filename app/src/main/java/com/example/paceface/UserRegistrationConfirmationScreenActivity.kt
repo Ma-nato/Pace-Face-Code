@@ -13,6 +13,12 @@ class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
         binding = UserRegistrationConfirmationScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // ここに戻るボタンや登録ボタンの処理を記述していきます
+        // 「戻る」ボタンがクリックされた時の処理
+        binding.btnBack.setOnClickListener {
+            // 現在の画面を終了して、前の画面（ユーザー登録画面）に戻る
+            finish()
+        }
+
+        // ここに登録ボタンの処理などを記述していきます
     }
 }
