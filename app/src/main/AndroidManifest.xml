@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PaceFace">
         <activity
+            android:name=".DeviceConnectionGuideScreenActivity"
+            android:exported="false" />
+        <activity
             android:name=".UserRegistrationCompleteScreenActivity"
             android:exported="false" />
         <activity

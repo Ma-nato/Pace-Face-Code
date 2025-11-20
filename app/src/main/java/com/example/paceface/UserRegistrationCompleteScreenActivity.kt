@@ -16,11 +16,8 @@ class UserRegistrationCompleteScreenActivity : AppCompatActivity() {
 
         // 「OK」ボタンがクリックされた時の処理
         binding.btnOk.setOnClickListener {
-            // ログイン画面に戻る
-            val intent = Intent(this, LoginActivity::class.java).apply {
-                // これまでのアクティビティスタックをクリアして、ホーム画面に遷移する(予定。今はログイン画面いれてる)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            }
+            // デバイス接続案内画面へ画面遷移
+            val intent = Intent(this, DeviceConnectionGuideScreenActivity::class.java)
             startActivity(intent)
         }
     }
