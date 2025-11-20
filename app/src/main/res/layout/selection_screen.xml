@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+　 <!-- ログイン済みの方はこちら -->
+    <TextView
+        android:id="@+id/textLoginGuide"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_margin="80dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ログイン済みの方はこちら"
+        android:textSize="18sp"
+        tools:layout_editor_absoluteX="85dp"
+        tools:layout_editor_absoluteY="40dp" />
+
+    <!-- 新規の方はこちら -->
+    <TextView
+        android:id="@+id/textRegisterGuide"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="新規の方はこちら"
+        android:textSize="18sp"
+        tools:layout_editor_absoluteX="121dp"
+        tools:layout_editor_absoluteY="195dp" />
+
+    <!-- 新規登録ボタン -->
+
+    <!-- ログインボタン -->
+
+    <Button
+        android:id="@+id/btnRegister"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textRegisterGuide"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:background="#50E3C2"
+        android:text="新規登録"
+        android:textColor="#ffffff"
+        tools:layout_editor_absoluteX="92dp"
+        tools:layout_editor_absoluteY="256dp" />
+
+    <Button
+        android:id="@+id/btnLogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textRegisterGuide"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:background="#50E3C2"
+        android:text="ログイン"
+        android:textColor="#ffffff"
+        tools:layout_editor_absoluteX="100dp"
+        tools:layout_editor_absoluteY="109dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
