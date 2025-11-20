@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <?xml version="1.0" encoding="utf-8"?>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#E6ECF8">
+        android:background="#E6ECF8"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="97dp">
 
         <!-- 左上の戻るボタン -->
 
@@ -27,117 +30,153 @@
             android:id="@+id/mainScroll"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/backButton"
-            app:layout_constraintBottom_toTopOf="@+id/bottomBar"
-            app:layout_constraintStart_toStartOf="parent"
+            android:padding="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:padding="16dp">
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal">
-
-                <TextView
-                    android:id="@+id/title"
-                    android:text="Pace Face"
-                    android:textSize="32sp"
-                    android:textStyle="bold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:id="@+id/subTitle"
-                    android:text="all stars"
-                    android:textSize="20sp"
-                    android:layout_marginTop="4dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:id="@+id/version"
-                    android:text="Var1.0"
-                    android:textSize="12sp"
-                    android:layout_marginTop="4dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:id="@+id/memberLabel"
-                    android:text="Member"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_marginTop="20dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <!-- メンバー一覧 -->
-                <TextView
-                    android:text="Higo Tenji"
-                    android:layout_marginTop="10dp"
-                    android:textSize="16sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:text="Yamauchi Syuto"
-                    android:textSize="16sp"
-                    android:layout_marginTop="6dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:text="Kovashiki Takumi"
-                    android:textSize="16sp"
-                    android:layout_marginTop="6dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-                <TextView
-                    android:text="Maeda Manato"
-                    android:textSize="16sp"
-                    android:layout_marginTop="6dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-            </LinearLayout>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/backButton">
 
         </ScrollView>
 
         <!-- 下部アイコンバー -->
         <LinearLayout
-            android:id="@+id/bottomBar"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:orientation="horizontal"
+            android:id="@+id/bottom_nav"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:background="#E0E0E0"
             android:gravity="center"
-            android:background="#FFFFFF"
+            android:orientation="horizontal"
             android:padding="8dp"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent">
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_home"/>
+            <ImageButton
+                android:id="@+id/home_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="7dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/home_button" />
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="24dp"
-                android:src="@drawable/ic_world"/>
+            <ImageButton
+                android:id="@+id/passing_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="7dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/passing_button" />
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="24dp"
-                android:src="@drawable/ic_mail"/>
+            <ImageButton
+                android:id="@+id/history_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="7dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/history_button" />
 
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginStart="24dp"
-                android:src="@drawable/ic_settings"/>
+            <ImageButton
+                android:id="@+id/emotion_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="7dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/emotion_button" />
+
+            <ImageButton
+                android:id="@+id/gear_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginBottom="7dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/gear_button" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="13dp"
+            tools:layout_editor_absoluteY="60dp">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pace Face"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/subTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="all stars"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Var1.0"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/memberLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Member"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- メンバー一覧 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Higo Tenji"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Yamauchi Syuto"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Kovashiki Takumi"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Maeda Manato"
+                android:textSize="16sp" />
+
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
