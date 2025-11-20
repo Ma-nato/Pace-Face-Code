@@ -52,6 +52,10 @@
         <activity
             android:name=".ProximityHistoryScreenActivity"
             android:exported="false" />
+        <activity
+            android:name=".AccountDeletionConfirmationScreenActivity"
+            android:exported="true" />
+
     </application>
 
 </manifest>
