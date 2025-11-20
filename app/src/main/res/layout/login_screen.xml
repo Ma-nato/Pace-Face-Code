@@ -14,10 +14,9 @@
         android:text="ログイン"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="24dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <!-- ラベル：ユーザー名 -->
     <TextView

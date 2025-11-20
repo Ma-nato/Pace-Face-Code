@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PaceFace">
         <activity
+            android:name=".UserRegistrationScreenActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true" />
         <activity
@@ -29,7 +32,7 @@
         </activity>
         <activity
             android:name=".UserSettingsScreenActivity"
-            android:exported="true">
+            android:exported="false">
         </activity>
     </application>
 
