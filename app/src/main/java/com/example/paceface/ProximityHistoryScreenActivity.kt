@@ -41,6 +41,18 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
             overridePendingTransition(0, 0) // 遷移時のアニメーションを無効化
         }
 
+        // バッジ一覧ボタンがクリックされた時の処理
+        binding.btnBadgeList.setOnClickListener {
+            val intent = Intent(this, BadgeScreenActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 設定ボタンがクリックされた時の処理
+        binding.gearButton.setOnClickListener {
+            val intent = Intent(this, UserSettingsScreenActivity::class.java)
+            startActivity(intent)
+        }
+
         displayProximityHistory()
     }
 
