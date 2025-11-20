@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:background="#D8E6F5">
+
+    <!-- タイトル：ログイン -->
+    <TextView
+        android:id="@+id/title_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ログイン"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- ラベル：ユーザー名 -->
+    <TextView
+        android:id="@+id/label_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ユーザー名"
+        android:textSize="16sp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/title_login"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 必須ラベル -->
+    <TextView
+        android:id="@+id/required_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="必須"
+        android:textColor="#FFFFFF"
+        android:background="#FF0000"
+        android:padding="4dp"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/label_username"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 入力欄：ユーザー名 -->
+    <EditText
+        android:id="@+id/input_username"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:hint="例）鹿児島 太郎"
+        android:inputType="text"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        app:layout_constraintStart_toEndOf="@id/required_user"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/required_user"
+        app:layout_constraintBottom_toBottomOf="@+id/required_user"
+        android:layout_marginStart="10dp" />
+
+    <!-- ラベル：パスワード -->
+    <TextView
+        android:id="@+id/label_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="パスワード（8文字以上）"
+        android:textSize="16sp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintTop_toBottomOf="@id/input_username"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 必須ラベル（パスワード） -->
+    <TextView
+        android:id="@+id/required_pass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="必須"
+        android:textColor="#FFFFFF"
+        android:background="#FF0000"
+        android:padding="4dp"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/label_password"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- パスワード可視化ボタン -->
+    <ImageButton
+        android:id="@+id/btn_eye"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@android:drawable/ic_menu_view"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toTopOf="@id/required_pass"
+        app:layout_constraintBottom_toBottomOf="@id/required_pass"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- パスワード入力欄 -->
+    <EditText
+        android:id="@+id/input_password"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:inputType="textPassword"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        app:layout_constraintStart_toEndOf="@id/required_pass"
+        app:layout_constraintEnd_toStartOf="@id/btn_eye"
+        app:layout_constraintTop_toTopOf="@id/required_pass"
+        app:layout_constraintBottom_toBottomOf="@id/required_pass"
+        android:layout_marginStart="10dp" />
+
+    <!-- エラーメッセージ -->
+    <TextView
+        android:id="@+id/error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="※ユーザー名またはパスワードが違います"
+        android:textColor="#FF0000"
+        android:textSize="12sp"
+        android:layout_marginTop="6dp"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@id/input_password"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- ログインボタン -->
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:text="ログイン"
+        android:textSize="18sp"
+        android:background="#4A90E2"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="40dp"
+        app:layout_constraintTop_toBottomOf="@id/error_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
