@@ -6,8 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "device_status",
-    indices = [Index(value = ["userId"]), Index(value = ["currentEmotionId"])],
+    tableName = "DeviceStatus",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -18,10 +17,11 @@ import androidx.room.PrimaryKey
         ForeignKey(
             entity = Emotion::class,
             parentColumns = ["emotionId"],
-            childColumns = ["currentEmotionId"],
-            onDelete = ForeignKey.SET_NULL
+            childColumns = ["currentEmotionId"], // Corrected from emotionId
+            onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["userId"]), Index(value = ["currentEmotionId"])] // Corrected from emotionId
 )
 data class DeviceStatus(
     @PrimaryKey(autoGenerate = true)
@@ -29,7 +29,6 @@ data class DeviceStatus(
     val userId: Int,
     val isConnected: Boolean,
     val batteryLevel: Int,
-    val lastUpdatedAt: Long,
     val currentSpeed: Float,
-    val currentEmotionId: Int?
+    val currentEmotionId: Int
 )

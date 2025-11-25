@@ -6,22 +6,28 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "proximity",
-    indices = [Index(value = ["userId"])],
+    tableName = "Proximity",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
             parentColumns = ["userId"],
             childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = User::class,
+            parentColumns = ["userId"],
+            childColumns = ["passedUserId"],
+            onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["userId"]), Index(value = ["passedUserId"])]
 )
 data class Proximity(
     @PrimaryKey(autoGenerate = true)
     val proximityId: Int = 0,
-    val userId: Int, // Self
-    val passedUserId: Int, // The user who was passed
+    val userId: Int,
+    val passedUserId: Int,
     val timestamp: Long,
-    val isConfirmed: Boolean = false
+    val isConfirmed: Boolean
 )

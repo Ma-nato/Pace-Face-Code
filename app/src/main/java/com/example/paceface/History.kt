@@ -6,8 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "history",
-    indices = [Index(value = ["userId"]), Index(value = ["emotionId"])],
+    tableName = "History",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -19,9 +18,10 @@ import androidx.room.PrimaryKey
             entity = Emotion::class,
             parentColumns = ["emotionId"],
             childColumns = ["emotionId"],
-            onDelete = ForeignKey.SET_NULL
+            onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["userId"]), Index(value = ["emotionId"])]
 )
 data class History(
     @PrimaryKey(autoGenerate = true)
@@ -29,6 +29,6 @@ data class History(
     val userId: Int,
     val timestamp: Long,
     val walkingSpeed: Float,
-    val acceleration: String, // e.g., "x,y,z"
-    val emotionId: Int?
+    val acceleration: String,
+    val emotionId: Int
 )

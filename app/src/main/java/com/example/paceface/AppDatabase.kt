@@ -13,20 +13,28 @@ import androidx.room.RoomDatabase
         SpeedRule::class,
         DeviceStatus::class,
         Proximity::class,
-        Achievement::class, // Renamed from Badge
-        UserAchievement::class, // Renamed from UserBadge
+        Badge::class, 
+        UserBadge::class, 
         DailyAverageSpeed::class,
         HourlyAverageSpeed::class,
         HourlyEmotionPercentage::class
     ],
-    version = 3, // Incremented version
+    version = 4, // Incremented version
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
     abstract fun emotionDao(): EmotionDao
-    abstract fun graphDataDao(): GraphDataDao
+    abstract fun historyDao(): HistoryDao
+    abstract fun speedRuleDao(): SpeedRuleDao
+    abstract fun deviceStatusDao(): DeviceStatusDao
+    abstract fun proximityDao(): ProximityDao
+    abstract fun badgeDao(): BadgeDao
+    abstract fun userBadgeDao(): UserBadgeDao
+    abstract fun dailyAverageSpeedDao(): DailyAverageSpeedDao
+    abstract fun hourlyAverageSpeedDao(): HourlyAverageSpeedDao
+    abstract fun hourlyEmotionPercentageDao(): HourlyEmotionPercentageDao
 
     companion object {
         @Volatile

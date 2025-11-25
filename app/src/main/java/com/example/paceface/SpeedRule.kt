@@ -6,8 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "speed_rules",
-    indices = [Index(value = ["userId"]), Index(value = ["emotionId"])],
+    tableName = "SpeedRule",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -21,7 +20,8 @@ import androidx.room.PrimaryKey
             childColumns = ["emotionId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["userId"]), Index(value = ["emotionId"])]
 )
 data class SpeedRule(
     @PrimaryKey(autoGenerate = true)

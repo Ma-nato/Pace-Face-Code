@@ -6,8 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "daily_average_speed",
-    indices = [Index(value = ["userId"])],
+    tableName = "DailyAverageSpeed",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -15,12 +14,13 @@ import androidx.room.PrimaryKey
             childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["userId"])]
 )
 data class DailyAverageSpeed(
     @PrimaryKey(autoGenerate = true)
     val dailySpeedId: Int = 0,
     val userId: Int,
-    val date: Long, // Midnight timestamp of the date
+    val date: Long,
     val averageSpeed: Float
 )
