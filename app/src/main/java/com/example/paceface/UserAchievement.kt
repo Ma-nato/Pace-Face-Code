@@ -3,10 +3,10 @@ package com.example.paceface
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
-import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "user_achievements",
+    primaryKeys = ["userId", "achievementId"], // Composite primary key
     indices = [Index(value = ["userId"]), Index(value = ["achievementId"])],
     foreignKeys = [
         ForeignKey(
@@ -24,8 +24,6 @@ import androidx.room.PrimaryKey
     ]
 )
 data class UserAchievement(
-    @PrimaryKey(autoGenerate = true)
-    val userAchievementId: Int = 0,
     val userId: Int,
     val achievementId: Int,
     val achievedAt: Long

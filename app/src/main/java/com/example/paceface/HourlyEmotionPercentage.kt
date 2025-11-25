@@ -6,8 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "hourly_emotion_percentage",
-    indices = [Index(value = ["userId"]), Index(value = ["emotionId"])],
+    tableName = "HourlyEmotionPercentage",
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -21,13 +20,14 @@ import androidx.room.PrimaryKey
             childColumns = ["emotionId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index(value = ["userId"]), Index(value = ["emotionId"])]
 )
 data class HourlyEmotionPercentage(
     @PrimaryKey(autoGenerate = true)
     val hourlyEmotionId: Int = 0,
     val userId: Int,
-    val timestamp: Long, // Start hour timestamp
+    val timestamp: Long,
     val emotionId: Int,
     val percentage: Float
 )

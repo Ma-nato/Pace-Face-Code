@@ -80,7 +80,7 @@ class HistoryScreenActivity : AppCompatActivity() {
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
                 val endTime = calendar.timeInMillis
 
-                val speedDataList = appDatabase.graphDataDao().getHourlyAverageSpeedForDate(currentUserId, startTime, endTime)
+                val speedDataList = appDatabase.hourlyAverageSpeedDao().getHourlyAverageSpeedForDate(currentUserId, startTime, endTime)
                 if (speedDataList.isNotEmpty()) {
                     updateChart(speedDataList)
                 } else {
@@ -124,7 +124,7 @@ class HistoryScreenActivity : AppCompatActivity() {
     private fun insertDummyData() {
         lifecycleScope.launch {
             val userDao = appDatabase.userDao()
-            val graphDao = appDatabase.graphDataDao()
+            val hourlyAverageSpeedDao = appDatabase.hourlyAverageSpeedDao()
 
             // Insert a dummy user if not exists
             var user = userDao.getUserById(currentUserId)
@@ -140,7 +140,7 @@ class HistoryScreenActivity : AppCompatActivity() {
                 for (hour in 8..20) {
                     calendar.set(Calendar.HOUR_OF_DAY, hour)
                     val speed = 5f + (Math.random() * 10).toFloat()
-                    graphDao.insertHourlyAverageSpeed(HourlyAverageSpeed(
+                    hourlyAverageSpeedDao.insert(HourlyAverageSpeed(
                         userId = currentUserId,
                         timestamp = calendar.timeInMillis,
                         averageSpeed = speed
