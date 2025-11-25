@@ -37,9 +37,7 @@
         <activity
             android:name=".HistoryScreenActivity"
             android:exported="false" />
-        <activity
-            android:name=".ProximityHistoryScreenActivity"
-            android:exported="false" />
+
         <activity
             android:name=".BadgeScreenActivity"
             android:exported="false" />
@@ -62,7 +60,7 @@
         <activity
             android:name=".AccountDeletionConfirmationScreenActivity"
             android:exported="true" />
-
+        <activity
             android:name=".UserInfoViewScreenActivity"
             android:exported="true">
         </activity>
