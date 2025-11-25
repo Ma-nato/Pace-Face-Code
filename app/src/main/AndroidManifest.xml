@@ -60,6 +60,10 @@
         <activity
             android:name=".AccountDeletionConfirmationScreenActivity"
             android:exported="true" />
+       　　　<activity
+        android:name=".AccountDeletionCompleteScreenActivity"
+        android:exported="true" />
+        　　　　　
         <activity
             android:name=".UserInfoViewScreenActivity"
             android:exported="true">
