@@ -43,7 +43,11 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         // --- Settings Button Listeners ---
 
         binding.btnUserInfo.setOnClickListener {
-            val intent = Intent(this, UserInfoViewScreenActivity::class.java)
+            // ★★★ ここを修正しました！ ★★★
+            val intent = Intent(this, UserInfoViewScreenActivity::class.java).apply {
+                // UserInfoViewScreenActivityに、表示したいユーザーのIDを荷物として渡します
+                putExtra(UserInfoViewScreenActivity.EXTRA_USER_ID, 1) // 仮にユーザーID 1 を渡します
+            }
             startActivity(intent)
         }
 
