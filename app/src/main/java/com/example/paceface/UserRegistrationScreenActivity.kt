@@ -1,14 +1,19 @@
 package com.example.paceface
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
 import android.view.View
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.UserRegistrationScreenBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserRegistrationScreenActivity : AppCompatActivity() {
 
@@ -20,62 +25,43 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
         binding = UserRegistrationScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // データベースインスタンスを取得
         appDatabase = AppDatabase.getDatabase(this)
 
-        setupPasswordVisibilityToggle()
+        setupPasswordVisibilityToggles()
 
         binding.btnRegister.setOnClickListener {
             if (validateInputs()) {
-                // This doesn't seem right, we go to confirmation screen, not register user directly.
-                // Let's go to confirmation screen with the data
-                val name = binding.etUsername.text.toString().trim()
-                val email = binding.etEmail.text.toString().trim()
-                val password = binding.etPassword.text.toString()
-
-                val intent = Intent(this@UserRegistrationScreenActivity, UserRegistrationConfirmationScreenActivity::class.java).apply {
-                    putExtra("USER_NAME", name)
-                    putExtra("USER_EMAIL", email)
-                    putExtra("USER_PASSWORD", password)
-                }
-                startActivity(intent)
-                // We should not finish here, so user can go back.
+                checkDuplicatesAndProceed()
             }
         }
     }
 
-    private fun setupPasswordVisibilityToggle() {
-        binding.btnPasswordEye.setOnClickListener {
-            // Toggle password visibility
-            val editText = binding.etPassword
-            if (editText.transformationMethod == null) {
-                // Hide password
-                editText.transformationMethod = PasswordTransformationMethod.getInstance()
-            } else {
-                // Show password
-                editText.transformationMethod = null
-            }
-            // Move cursor to the end
-            editText.setSelection(editText.text.length)
-        }
+    private fun setupPasswordVisibilityToggles() {
+        setupPasswordToggle(binding.etPassword, binding.btnPasswordEye)
+        setupPasswordToggle(binding.etPassword2, binding.btnPassword2Eye)
+    }
 
-        binding.btnPassword2Eye.setOnClickListener {
-            // Toggle password confirmation visibility
-            val editText = binding.etPassword2
+    private fun setupPasswordToggle(editText: EditText, eyeButton: ImageButton) {
+        // 初期状態：パスワードは非表示、アイコンはグレー
+        editText.transformationMethod = PasswordTransformationMethod.getInstance()
+        eyeButton.setColorFilter(Color.GRAY)
+
+        eyeButton.setOnClickListener {
             if (editText.transformationMethod == null) {
-                // Hide password
+                // 現在パスワードが表示されている場合 -> 非表示に
                 editText.transformationMethod = PasswordTransformationMethod.getInstance()
+                eyeButton.setColorFilter(Color.GRAY)
             } else {
-                // Show password
+                // 現在パスワードが非表示の場合 -> 表示に
                 editText.transformationMethod = null
+                eyeButton.clearColorFilter()
             }
-            // Move cursor to the end
+            // カーソルを末尾に移動
             editText.setSelection(editText.text.length)
         }
     }
 
     private fun validateInputs(): Boolean {
-        // Reset errors
         binding.tvUserNameError.visibility = View.GONE
         binding.tvEmailError.visibility = View.GONE
         binding.tvPasswordError.visibility = View.GONE
@@ -84,12 +70,14 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
         var isValid = true
 
         if (binding.etUsername.text.toString().trim().isEmpty()) {
+            binding.tvUserNameError.text = "※ユーザー名が入力されていません"
             binding.tvUserNameError.visibility = View.VISIBLE
             isValid = false
         }
 
         val email = binding.etEmail.text.toString().trim()
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tvEmailError.text = "※正しいメールアドレスを入力してください"
             binding.tvEmailError.visibility = View.VISIBLE
             isValid = false
         }
@@ -100,8 +88,7 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
             isValid = false
         }
 
-        val password2 = binding.etPassword2.text.toString()
-        if (password != password2) {
+        if (password != binding.etPassword2.text.toString()) {
             binding.tvPassword2Error.visibility = View.VISIBLE
             isValid = false
         }
@@ -109,38 +96,44 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
         return isValid
     }
 
-    // This function is no longer called from btnRegister, but let's keep it for now
-    // as it will be used from the confirmation screen.
-    private fun registerUser() {
+    private fun checkDuplicatesAndProceed() {
         val name = binding.etUsername.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
-        val password = binding.etPassword.text.toString()
 
-        // TODO: パスワードのハッシュ化をここに実装します
-
-        val user = User(
-            name = name,
-            email = email,
-            password = password // 注意: 現在は平文のままです
-        )
-
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) { // Use IO dispatcher for DB operations
             try {
-                appDatabase.userDao().insert(user)
-                Toast.makeText(this@UserRegistrationScreenActivity, "登録が完了しました", Toast.LENGTH_SHORT).show()
+                val userByName = appDatabase.userDao().getUserByName(name)
+                if (userByName != null) {
+                    withContext(Dispatchers.Main) { // Switch to Main for UI update
+                        binding.tvUserNameError.text = "※このユーザー名は既に使用されています"
+                        binding.tvUserNameError.visibility = View.VISIBLE
+                    }
+                    return@launch
+                }
 
-                // 登録完了画面へ遷移
-                val intent = Intent(this@UserRegistrationScreenActivity, UserRegistrationCompleteScreenActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish() // 登録画面を終了
+                val userByEmail = appDatabase.userDao().getUserByEmail(email)
+                if (userByEmail != null) {
+                    withContext(Dispatchers.Main) { // Switch to Main for UI update
+                        binding.tvEmailError.text = "※このメールアドレスは既に使用されています"
+                        binding.tvEmailError.visibility = View.VISIBLE
+                    }
+                    return@launch
+                }
+
+                // No duplicates, proceed to confirmation screen on Main thread
+                withContext(Dispatchers.Main) {
+                    val password = binding.etPassword.text.toString()
+                    val intent = Intent(this@UserRegistrationScreenActivity, UserRegistrationConfirmationScreenActivity::class.java).apply {
+                        putExtra("USER_NAME", name)
+                        putExtra("USER_EMAIL", email)
+                        putExtra("USER_PASSWORD", password)
+                    }
+                    startActivity(intent)
+                }
+
             } catch (e: Exception) {
-                // Handle potential conflicts (e.g., email already exists)
-                if (e is android.database.sqlite.SQLiteConstraintException) {
-                     binding.tvEmailError.text = "※このメールアドレスは既に使用されています"
-                     binding.tvEmailError.visibility = View.VISIBLE
-                } else {
-                     Toast.makeText(this@UserRegistrationScreenActivity, "登録に失敗しました: ${e.message}", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) { // Switch to Main for Toast
+                    Toast.makeText(this@UserRegistrationScreenActivity, "データベース確認中にエラーが発生しました。", Toast.LENGTH_LONG).show()
                 }
             }
         }
