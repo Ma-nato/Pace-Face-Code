@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">PaceFace</string>
+
+    <string name="home_title">現在の平均歩行速度</string>
+    <string name="home_speed_placeholder">-- km/h</string>
+    <string name="home_status_placeholder">速度：---</string>
+    <string name="home_last_update_placeholder">最終更新日時：----/-/- --:--</string>
+
+    <string name="content_description_face_icon">表情アイコン</string>
+    <string name="content_description_home_button">ホーム</string>
+    <string name="content_description_passing_button">すれちがい</string>
+    <string name="content_description_history_button">履歴</string>
+    <string name="content_description_emotion_button">表情</string>
+    <string name="content_description_gear_button">設定</string>
 </resources>

@@ -41,6 +41,16 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
             overridePendingTransition(0, 0) // 遷移時のアニメーションを無効化
         }
 
+        binding.passingButton.setOnClickListener {
+            // 現在の画面なので何もしない
+        }
+
+        binding.historyButton.setOnClickListener {
+            val intent = Intent(this, HistoryScreenActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)
+        }
+
         // バッジ一覧ボタンがクリックされた時の処理
         binding.btnBadgeList.setOnClickListener {
             val intent = Intent(this, BadgeScreenActivity::class.java)
@@ -51,6 +61,7 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
         binding.gearButton.setOnClickListener {
             val intent = Intent(this, UserSettingsScreenActivity::class.java)
             startActivity(intent)
+            overridePendingTransition(0, 0)
         }
 
         displayProximityHistory()
@@ -67,9 +78,7 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
         binding.tvCount.text = "${proximityHistory.size}人"
 
         // ヘッダー以外のすべての行を削除
-        for (i in binding.tlHistory.childCount - 1 downTo 1) {
-            binding.tlHistory.removeViewAt(i)
-        }
+        binding.tlHistory.removeAllViews()
 
         val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -81,6 +90,7 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
             // 日付
             val dateText = TextView(this)
             dateText.text = dateFormat.format(date)
+            dateText.layoutParams = TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1f)
             dateText.setPadding(8, 8, 8, 8)
             dateText.setTextColor(ContextCompat.getColor(this, android.R.color.black))
             tableRow.addView(dateText)
@@ -94,6 +104,7 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
             // 時間
             val timeText = TextView(this)
             timeText.text = timeFormat.format(date)
+            timeText.layoutParams = TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1f)
             timeText.setPadding(8, 8, 8, 8)
             timeText.setTextColor(ContextCompat.getColor(this, android.R.color.black))
             tableRow.addView(timeText)
@@ -109,6 +120,7 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
             if (date.time > lastSeen) {
                 newText.text = "NEW"
             }
+            newText.layoutParams = TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 0.5f)
             newText.setPadding(8, 8, 8, 8)
             newText.setTextColor(ContextCompat.getColor(this, android.R.color.black))
             tableRow.addView(newText)

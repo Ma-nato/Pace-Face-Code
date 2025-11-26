@@ -31,13 +31,12 @@
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
     <TextView
-        android:id="@+id/etName"
+        android:id="@+id/tv_user_name_value"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center_vertical"
         android:hint="例）鹿児島 太郎"
-        android:inputType="textPersonName"
         android:minHeight="40dp"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -52,16 +51,15 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etName" />
+        app:layout_constraintTop_toBottomOf="@id/tv_user_name_value" />
 
     <TextView
-        android:id="@+id/etEmail"
+        android:id="@+id/tv_email_value"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center_vertical"
         android:hint="例）example@gmail.com"
-        android:inputType="textEmailAddress"
         android:minHeight="40dp"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -76,15 +74,14 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etEmail" />
+        app:layout_constraintTop_toBottomOf="@id/tv_email_value" />
 
     <TextView
-        android:id="@+id/etPassword"
+        android:id="@+id/tv_password_value"
         android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center_vertical"
-        android:inputType="textPassword"
         android:text="12345678"
         android:minHeight="40dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -97,9 +94,9 @@
         android:layout_marginStart="12dp"
         android:src="@android:drawable/ic_menu_view"
         app:tint="#000000"
-        app:layout_constraintBottom_toBottomOf="@id/etPassword"
-        app:layout_constraintStart_toEndOf="@id/etPassword"
-        app:layout_constraintTop_toTopOf="@id/etPassword" />
+        app:layout_constraintBottom_toBottomOf="@id/tv_password_value"
+        app:layout_constraintStart_toEndOf="@id/tv_password_value"
+        app:layout_constraintTop_toTopOf="@id/tv_password_value" />
 
     <TextView
         android:id="@+id/tvConfirmMsg"
@@ -113,7 +110,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etPassword" />
+        app:layout_constraintTop_toBottomOf="@id/tv_password_value" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnBack"

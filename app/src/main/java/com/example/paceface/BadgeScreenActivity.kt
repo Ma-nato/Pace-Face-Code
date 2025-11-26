@@ -6,22 +6,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import com.example.paceface.databinding.BadgeItemBinding
 import com.example.paceface.databinding.BadgeScreenBinding
 
-data class Badge(val id: Int, val description: String, val isAchieved: Boolean)
+// Data class for displaying badge information in the UI
+data class BadgeDisplayInfo(val description: String, val isAchieved: Boolean)
 
 class BadgeScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: BadgeScreenBinding
 
-    // This would be replaced with data from your database
-    private val badges = listOf(
-        Badge(1, "すれちがい合計人数\n10人達成", true),
-        Badge(2, "すれちがい合計人数\n50人達成", false),
-        Badge(3, "すれちがい合計人数\n100人達成", false),
-        Badge(4, "１日で10人とすれちがう", true)
+    // This would be replaced with combined data from your Badge and UserBadge tables
+    private val badgesToDisplay = listOf(
+        BadgeDisplayInfo("すれちがい合計人数\n10人達成", true),
+        BadgeDisplayInfo("すれちがい合計人数\n50人達成", false),
+        BadgeDisplayInfo("すれちがい合計人数\n100人達成", false),
+        BadgeDisplayInfo("１日で10人とすれちがう", true)
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +46,12 @@ class BadgeScreenActivity : AppCompatActivity() {
             overridePendingTransition(0, 0)
         }
 
+        binding.historyButton.setOnClickListener { // Added this block
+            val intent = Intent(this, HistoryScreenActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)
+        }
+
         binding.gearButton.setOnClickListener {
             val intent = Intent(this, UserSettingsScreenActivity::class.java)
             startActivity(intent)
@@ -60,14 +66,14 @@ class BadgeScreenActivity : AppCompatActivity() {
 
         val marginInPx = (8 * resources.displayMetrics.density).toInt()
 
-        for (badge in badges) {
+        for (badgeInfo in badgesToDisplay) {
             val badgeItemBinding = BadgeItemBinding.inflate(LayoutInflater.from(this), binding.badgeContainer, false)
 
-            badgeItemBinding.badgeText.text = badge.description
+            badgeItemBinding.badgeText.text = badgeInfo.description
 
             val cardView = badgeItemBinding.root
 
-            if (badge.isAchieved) {
+            if (badgeInfo.isAchieved) {
                 // --- Style for achieved badge ---
                 cardView.setCardBackgroundColor(Color.WHITE)
                 badgeItemBinding.badgeIcon.setColorFilter(Color.WHITE) // White icon

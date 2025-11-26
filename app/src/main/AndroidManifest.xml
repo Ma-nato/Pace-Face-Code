@@ -35,6 +35,13 @@
             android:exported="false">
         </activity>
         <activity
+            android:name=".HistoryScreenActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".BadgeScreenActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.PaceFace.Splash">
@@ -48,6 +55,16 @@
             android:exported="false">
         </activity>
         <activity
+            android:name=".ProximityHistoryScreenActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AccountDeletionConfirmationScreenActivity"
+            android:exported="true" />
+       　　　<activity
+        android:name=".AccountDeletionCompleteScreenActivity"
+        android:exported="true" />
+        　　　　　
+        <activity
             android:name=".UserInfoViewScreenActivity"
             android:exported="true">
         </activity>
@@ -60,10 +77,18 @@
             android:name=".PasswordChangeCompleteScreenActivity"
             android:exported="true" />
         <activity
+
             android:name=".ExpressionCustomizationScreenActivity"
             android:exported="true" />
         <activity
             android:name=".ExpressionChangeCompleteScreenActivity"
+            android:exported="true" />
+        <activity
+            android:name=".AboutScreenActivity"
+            android:exported="true" />
+        <activity
+            android:name=".SelectionScreenActivity"
+
             android:exported="true" />
     </application>
 

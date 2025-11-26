@@ -14,7 +14,9 @@ class HelpScreenActivity : AppCompatActivity() {
         binding = HelpScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnBack.setOnClickListener { /*TODO*/ }
+        binding.btnBack.setOnClickListener {
+            finish() // この画面を閉じて前の画面に戻る
+        }
         binding.homeButton.setOnClickListener { /*TODO*/ }
         binding.passingButton.setOnClickListener { /*TODO*/ }
         binding.historyButton.setOnClickListener { /*TODO*/ }

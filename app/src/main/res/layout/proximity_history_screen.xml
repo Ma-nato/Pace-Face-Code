@@ -2,103 +2,105 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCE6F2">
+    tools:context=".ProximityHistoryScreenActivity">
 
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="今日のすれちがい人数"
-        android:textColor="#000000"
-        android:textSize="20sp"
+        android:layout_marginTop="16dp"
+        android:text="すれちがい履歴"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tvCount"
+        android:id="@+id/tv_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="0人"
-        android:textColor="#000000"
-        android:textSize="48sp"
-        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
 
-    <ScrollView
-        android:id="@+id/scrollViewTable"
-        android:layout_width="349dp"
-        android:layout_height="357dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintBottom_toTopOf="@id/btnBadgeList"
+    <Button
+        android:id="@+id/btn_badge_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="バッジ一覧"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvCount"
-        app:layout_constraintVertical_bias="0.088">
+        app:layout_constraintTop_toBottomOf="@+id/tv_count" />
+
+    <TableLayout
+        android:id="@+id/tl_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/btn_badge_list">
+
+        <TableRow
+            android:background="@color/table_header_bg">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:text="日付"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/white" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:text="時間"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/white" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:padding="8dp"
+                android:text="NEW"
+                android:textStyle="bold" />
+
+        </TableRow>
+
+    </TableLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
+        app:layout_constraintTop_toBottomOf="@+id/tl_header">
 
         <TableLayout
-            android:id="@+id/tlHistory"
+            android:id="@+id/tl_history"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:stretchColumns="0,2,4">
+            android:layout_height="wrap_content" />
 
-            <TableRow android:background="#4472C4">
-
-                <TextView
-                    android:padding="8dp"
-                    android:text="日付"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <TextView
-                    android:padding="8dp"
-                    android:text="時間"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold" />
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="#FFFFFF" />
-
-                <TextView
-                    android:padding="8dp"
-                    android:text=""
-                    android:textColor="#FFFFFF" />
-            </TableRow>
-
-        </TableLayout>
-    </ScrollView>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnBadgeList"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="132dp"
-        android:background="#4A90E2"
-        android:text="バッジ一覧"
-        android:textColor="#000000"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.507"
-        app:layout_constraintStart_toStartOf="parent" />
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:id="@+id/bottom_nav"
@@ -110,7 +112,6 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton
@@ -120,6 +121,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_home_button"
             android:scaleType="fitCenter"
             android:src="@drawable/home_button" />
 
@@ -131,6 +133,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_passing_button"
             android:scaleType="fitCenter"
             android:src="@drawable/passing_button" />
 
@@ -142,6 +145,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_history_button"
             android:scaleType="fitCenter"
             android:src="@drawable/history_button" />
 
@@ -153,6 +157,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_emotion_button"
             android:scaleType="fitCenter"
             android:src="@drawable/emotion_button" />
 
@@ -164,6 +169,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_gear_button"
             android:scaleType="fitCenter"
             android:src="@drawable/gear_button" />
 

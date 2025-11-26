@@ -18,17 +18,35 @@ class HomeScreenActivity : AppCompatActivity() {
         // 現在の画面に対応するボタンの背景色を変更
         binding.homeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.selected_nav_item_bg))
 
+        binding.homeButton.setOnClickListener {
+            // 現在の画面なので何もしない
+        }
+
         // すれちがいボタンがクリックされた時の処理
         binding.passingButton.setOnClickListener {
             val intent = Intent(this, ProximityHistoryScreenActivity::class.java)
             startActivity(intent)
-            overridePendingTransition(0, 0) // 遷移時のアニメーションを無効化
+            overridePendingTransition(0, 0)
+        }
+
+        // 履歴ボタンがクリックされた時の処理
+        binding.historyButton.setOnClickListener {
+            val intent = Intent(this, HistoryScreenActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0, 0)
+        }
+
+        binding.emotionButton.setOnClickListener {
+            // TODO: EmotionScreenActivity.kt を作成し、遷移を実装する
+            // val intent = Intent(this, EmotionScreenActivity::class.java)
+            // startActivity(intent)
         }
 
         // 設定ボタンがクリックされた時の処理
         binding.gearButton.setOnClickListener {
             val intent = Intent(this, UserSettingsScreenActivity::class.java)
             startActivity(intent)
+            overridePendingTransition(0, 0)
         }
 
         // ここに速度表示の更新などのロジックを記述していきます
