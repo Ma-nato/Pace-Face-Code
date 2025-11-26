@@ -31,60 +31,59 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
-        <!-- 各ボタン（背景色・余白・高さは図に近づけてある） -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUserInfo"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_marginTop="8dp"
-            android:background="#EFEFEF"
             android:text="ユーザー情報"
-            android:textColor="#000000" />
+            android:textColor="@android:color/black"
+            app:backgroundTint="#EFEFEF" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPasswordChange"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_marginTop="8dp"
-            android:background="#EFEFEF"
             android:text="パスワード変更"
-            android:textColor="#000000" />
+            android:textColor="@android:color/black"
+            app:backgroundTint="#EFEFEF" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnHelp"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_marginTop="8dp"
-            android:background="#EFEFEF"
             android:text="ヘルプ"
-            android:textColor="#000000" />
+            android:textColor="@android:color/black"
+            app:backgroundTint="#EFEFEF" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAbout"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_marginTop="8dp"
-            android:background="#EFEFEF"
             android:text="Pace Faceについて"
-            android:textColor="#000000" />
+            android:textColor="@android:color/black"
+            app:backgroundTint="#EFEFEF" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_marginTop="8dp"
-            android:background="#FFDDDD"
             android:text="ログアウト"
-            android:textColor="#FF0000" />
+            android:textColor="#FF0000"
+            app:backgroundTint="#FFDDDD" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDeleteAccount"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:layout_marginTop="8dp"
-            android:background="#FF8A8A"
             android:text="アカウントの削除"
-            android:textColor="#FFFFFF" />
+            android:textColor="@android:color/white"
+            app:backgroundTint="#FF8A8A" />
 
     </LinearLayout>
 

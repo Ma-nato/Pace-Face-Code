@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="selected_nav_item_bg">#BDBDBD</color>
     <color name="table_header_bg">#C0C0C0</color>
+
+    <color name="colorPrimary">#4A90E2</color>
 </resources>

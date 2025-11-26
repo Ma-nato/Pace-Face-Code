@@ -1,4 +1,7 @@
 <resources>
 
-    <style name="Theme.PaceFace" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+    <style name="Theme.PaceFace" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
 </resources>
