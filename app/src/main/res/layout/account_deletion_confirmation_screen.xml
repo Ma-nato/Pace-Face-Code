@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#DCE6F2"
     tools:context=".AccountDeletionConfirmationScreenActivity">
 
     <!-- 確認メッセージ -->
@@ -13,8 +14,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="アカウントを削除します\n本当によろしいでしょうか"
-        android:textStyle="bold"
         android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,7 +29,9 @@
         android:layout_height="57dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
+        android:backgroundTint="#82A9D3"
         android:text="戻る"
+        android:textColor="@android:color/white"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/button_delete"
         app:layout_constraintHorizontal_chainStyle="packed"
@@ -43,7 +46,7 @@
         android:layout_width="119dp"
         android:layout_height="57dp"
         android:layout_marginStart="8dp"
-        android:backgroundTint="@android:color/holo_red_light"
+        android:backgroundTint="#FF9999"
         android:text="削除"
         android:textColor="@android:color/white"
         android:textSize="16sp"
@@ -63,54 +66,59 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
+
         <ImageButton
             android:id="@+id/home_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:layout_marginBottom="7dp"
             android:src="@drawable/home_button" />
+
         <ImageButton
             android:id="@+id/passing_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="20dp"
+            android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:layout_marginBottom="7dp"
             android:src="@drawable/passing_button" />
+
         <ImageButton
             android:id="@+id/history_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="20dp"
+            android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:layout_marginBottom="7dp"
             android:src="@drawable/history_button" />
+
         <ImageButton
             android:id="@+id/emotion_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="20dp"
+            android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:layout_marginBottom="7dp"
             android:src="@drawable/emotion_button" />
+
         <ImageButton
             android:id="@+id/gear_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="20dp"
+            android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:layout_marginBottom="7dp"
             android:src="@drawable/gear_button" />
     </LinearLayout>
 
