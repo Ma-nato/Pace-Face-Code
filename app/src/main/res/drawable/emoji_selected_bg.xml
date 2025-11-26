@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- 内側の色は透明にする -->
+    <solid android:color="@android:color/transparent" />
+
+    <!-- 選択状態を示す青い枠線 -->
+    <stroke
+        android:width="3dp"
+        android:color="#007BFF" /> <!-- 青系の色 -->
+
+</shape>
+

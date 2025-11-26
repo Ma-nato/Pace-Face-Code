@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E6EEF5">
+
+    <!-- 質問タイトル -->
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="どの表情に変更しますか？"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 表情グリッド -->
+    <GridLayout
+        android:id="@+id/emojiGrid"
+        android:background="#FFFFFF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:columnCount="3"
+        android:rowCount="2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleText">
+
+        <!-- 6つの表情アイコン -->
+        <ImageView
+            android:id="@+id/emoji1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            android:src="@drawable/normal_expression" />
+
+        <ImageView
+            android:id="@+id/emoji2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            android:src="@drawable/troubled_expression" />
+
+        <ImageView
+            android:id="@+id/emoji3"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            android:src="@drawable/impatient_expression" />
+
+        <ImageView
+            android:id="@+id/emoji4"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            android:src="@drawable/smile_expression" />
+
+        <ImageView
+            android:id="@+id/emoji5"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            android:src="@drawable/sad_expression" />
+
+        <ImageView
+            android:id="@+id/emoji6"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            android:src="@drawable/angry_expression" />
+    </GridLayout>
+
+    <!-- 変更ボタン -->
+    <Button
+        android:id="@+id/changeBtn"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        android:background="#FF8A80"
+        android:text="変更"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/emojiGrid" />
+
+    <!-- スイッチ -->
+    <LinearLayout
+        android:id="@+id/switchContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/changeBtn">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="変更 ON/OFF" />
+
+        <Switch
+            android:id="@+id/changeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+    </LinearLayout>
+
+    <!-- 下部ナビゲーション -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:background="#FFFFFF"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/home_button" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/passing_button" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/history_button" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/emotion_button" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/gear_button" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

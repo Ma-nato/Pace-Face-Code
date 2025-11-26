@@ -77,10 +77,18 @@
             android:name=".PasswordChangeCompleteScreenActivity"
             android:exported="true" />
         <activity
+
+            android:name=".ExpressionCustomizationScreenActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ExpressionChangeCompleteScreenActivity"
+            android:exported="true" />
+        <activity
             android:name=".AboutScreenActivity"
             android:exported="true" />
         <activity
             android:name=".SelectionScreenActivity"
+
             android:exported="true" />
     </application>
 
