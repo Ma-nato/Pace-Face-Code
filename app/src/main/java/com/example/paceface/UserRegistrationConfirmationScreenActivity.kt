@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.UserRegistrationConfirmationScreenBinding
 import kotlinx.coroutines.launch
+import java.security.MessageDigest
 
 class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
 
@@ -29,6 +30,7 @@ class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
         // 取得したデータをTextViewに設定
         binding.tvUserNameValue.text = userName
         binding.tvEmailValue.text = email
+        // パスワードは伏字で表示
         binding.tvPasswordValue.text = "●".repeat(password?.length ?: 0)
 
         // 「戻る」ボタンがクリックされた時の処理
@@ -42,16 +44,25 @@ class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
         }
     }
 
+    private fun hashPassword(password: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(password.toByteArray())
+        return hashBytes.joinToString("") { "%02x".format(it) }
+    }
+
     private fun registerUserAndNavigate(userName: String?, email: String?, password: String?) {
         if (userName == null || email == null || password == null) {
             Toast.makeText(this, "登録情報が不足しています。前の画面に戻ってやり直してください。", Toast.LENGTH_LONG).show()
             return
         }
 
+        // パスワードをハッシュ化して保存
+        val hashedPassword = hashPassword(password)
+
         val user = User(
             name = userName,
             email = email,
-            password = password // 注意: 現在は平文のままです
+            password = hashedPassword // ハッシュ化されたパスワードを保存
         )
 
         lifecycleScope.launch {

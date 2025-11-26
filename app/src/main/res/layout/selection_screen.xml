@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
         android:text="登録済みの方はこちら"
-        android:textSize="18sp"
+        android:textSize="22sp"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,12 +23,13 @@
     <!-- ログインボタン -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
+        android:layout_width="119dp"
+        android:layout_height="57dp"
         android:layout_marginTop="8dp"
         android:text="ログイン"
-        android:textColor="#ffffff"
-        app:backgroundTint="#82A9D3"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:backgroundTint="#4A90E2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textLoginGuide" />
@@ -39,7 +41,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="新規の方はこちら"
-        android:textSize="18sp"
+        android:textSize="22sp"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
@@ -47,12 +50,13 @@
     <!-- 新規登録ボタン -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRegister"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
+        android:layout_width="119dp"
+        android:layout_height="57dp"
         android:layout_marginTop="8dp"
         android:text="新規登録"
-        android:textColor="#ffffff"
-        app:backgroundTint="#82A9D3"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:backgroundTint="#4A90E2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textRegisterGuide" />

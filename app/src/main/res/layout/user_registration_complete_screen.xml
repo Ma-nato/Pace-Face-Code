@@ -32,16 +32,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOk"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
+            android:layout_width="119dp"
+            android:layout_height="57dp"
             android:layout_marginTop="30dp"
-            android:background="#E24A4A"
+            app:backgroundTint="#E24A4A"
             android:text="OK"
-            android:textColor="#000000"
-            android:textSize="20sp"
-            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvMessage" />
