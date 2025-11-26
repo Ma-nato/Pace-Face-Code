@@ -17,6 +17,11 @@ class AccountDeletionCompleteScreenActivity : AppCompatActivity() {
         binding = AccountDeletionCompleteScreenBinding.inflate(layoutInflater)
         // 生成されたbindingのルートビューを画面に設定
         setContentView(binding.root)
+        // このActivityが表示するレイアウトファイルを指定します
+        setContentView(R.layout.account_deletion_complete_screen)
+
+        // XMLレイアウトから "OK" ボタンを見つけます
+        val okButton: Button = findViewById(R.id.btn_ok)
 
         // bindingオブジェクトを通して、ID 'btn_ok' のボタンを参照
         binding.btnOk.setOnClickListener {
