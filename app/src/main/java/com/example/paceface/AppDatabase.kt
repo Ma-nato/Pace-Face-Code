@@ -19,7 +19,7 @@ import androidx.room.RoomDatabase
         HourlyAverageSpeed::class,
         HourlyEmotionPercentage::class
     ],
-    version = 4, // Incremented version
+    version = 5, // Incremented version from 4 to 5
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -6,7 +6,10 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "users",
-    indices = [Index(value = ["email"], unique = true)]
+    indices = [
+        Index(value = ["email"], unique = true),
+        Index(value = ["name"], unique = true) // nameもuniqueに設定
+    ]
 )
 data class User(
     @PrimaryKey(autoGenerate = true)

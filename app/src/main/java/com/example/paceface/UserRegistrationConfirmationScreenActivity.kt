@@ -33,13 +33,11 @@ class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
 
         // 「戻る」ボタンがクリックされた時の処理
         binding.btnBack.setOnClickListener {
-            // 現在の画面を終了して、前の画面（ユーザー登録画面）に戻る
             finish()
         }
 
         // 「登録」ボタンがクリックされた時の処理
         binding.btnRegister.setOnClickListener {
-            // データをDBに登録する
             registerUserAndNavigate(userName, email, password)
         }
     }
@@ -68,9 +66,9 @@ class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
                 finish()
 
             } catch (e: Exception) {
-                // Handle potential conflicts (e.g., email already exists)
+                // Handle potential conflicts (e.g., email or name already exists)
                 if (e is android.database.sqlite.SQLiteConstraintException) {
-                    Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "このメールアドレスは既に使用されています。", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "ユーザー名またはメールアドレスが既に使用されています。", Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "登録に失敗しました: ${e.message}", Toast.LENGTH_LONG).show()
                 }
