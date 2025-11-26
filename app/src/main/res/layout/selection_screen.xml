@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#DCE6F2"
     tools:context=".SelectionScreenActivity">
 
     <!-- ログイン済みの方はこちら -->
@@ -26,7 +27,7 @@
         android:layout_marginTop="8dp"
         android:text="ログイン"
         android:textColor="#ffffff"
-        app:backgroundTint="#50E3C2"
+        app:backgroundTint="#82A9D3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textLoginGuide" />
@@ -51,7 +52,7 @@
         android:layout_marginTop="8dp"
         android:text="新規登録"
         android:textColor="#ffffff"
-        app:backgroundTint="#50E3C2"
+        app:backgroundTint="#82A9D3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textRegisterGuide" />
