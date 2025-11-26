@@ -19,9 +19,33 @@ import androidx.room.PrimaryKey
             parentColumns = ["userId"],
             childColumns = ["passedUserId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Badge::class,
+            parentColumns = ["badgeId"],
+            childColumns = ["badgeId"],
+            onDelete = ForeignKey.SET_NULL
+        ),
+        ForeignKey(
+            entity = Emotion::class,
+            parentColumns = ["emotionId"],
+            childColumns = ["emotionId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Emotion::class,
+            parentColumns = ["emotionId"],
+            childColumns = ["passedUserEmotionId"],
+            onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["userId"]), Index(value = ["passedUserId"])]
+    indices = [
+        Index(value = ["userId"]),
+        Index(value = ["passedUserId"]),
+        Index(value = ["badgeId"]),
+        Index(value = ["emotionId"]),
+        Index(value = ["passedUserEmotionId"])
+    ]
 )
 data class Proximity(
     @PrimaryKey(autoGenerate = true)
@@ -29,5 +53,8 @@ data class Proximity(
     val userId: Int,
     val passedUserId: Int,
     val timestamp: Long,
-    val isConfirmed: Boolean
+    val isConfirmed: Boolean,
+    val badgeId: Int?,
+    val emotionId: Int,
+    val passedUserEmotionId: Int
 )

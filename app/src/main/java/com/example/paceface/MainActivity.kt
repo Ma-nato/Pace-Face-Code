@@ -1,21 +1,33 @@
 package com.example.paceface
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.paceface.databinding.SelectionScreenBinding
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: SelectionScreenBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        // ★ 最初に SplashScreen をセット
+        // Handle the splash screen transition.
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
+        binding = SelectionScreenBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // LoginActivity を起動して、MainActivity は終了する
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-        finish()
+        // ログインボタンのクリックリスナー
+        binding.btnLogin.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 新規登録ボタンのクリックリスナー
+        binding.btnRegister.setOnClickListener {
+            val intent = Intent(this, UserRegistrationScreenActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

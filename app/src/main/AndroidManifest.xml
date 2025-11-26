@@ -29,7 +29,7 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".HelpScreenActivity"
             android:exported="false">
@@ -59,22 +59,23 @@
             android:exported="false" />
         <activity
             android:name=".AccountDeletionConfirmationScreenActivity"
-            android:exported="true" />
+            android:exported="false" />
        　　　<activity
         android:name=".AccountDeletionCompleteScreenActivity"
-        android:exported="true" />
+        android:exported="false" />
         　　　　　
         <activity
             android:name=".UserInfoViewScreenActivity"
-            android:exported="true">
+            android:exported="false">
         </activity>
         <activity
             android:name=".PasswordChangeScreenActivity"
-            android:exported="true"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan">
         </activity>
         <activity
             android:name=".PasswordChangeCompleteScreenActivity"
+            android:exported="false" />
             android:exported="true" />
         <activity
 

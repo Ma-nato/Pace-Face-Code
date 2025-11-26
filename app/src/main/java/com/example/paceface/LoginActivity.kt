@@ -11,7 +11,9 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.LoginScreenBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
@@ -67,8 +69,9 @@ class LoginActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            // Find user by username
-            val user = appDatabase.userDao().getUserByName(username)
+            val user = withContext(Dispatchers.IO) {
+                appDatabase.userDao().getUserByName(username)
+            }
 
             if (user != null && user.password == password) {
                 // Login success

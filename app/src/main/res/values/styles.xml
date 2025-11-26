@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.PaceFace.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo_inset</item>
-        <!-- <item name="windowSplashScreenIconSize">160dp</item> -->
-        <item name="postSplashScreenTheme">@style/Theme.PaceFace</item>
-    </style>
 
 </resources>
