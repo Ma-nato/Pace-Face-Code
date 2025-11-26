@@ -1,5 +1,6 @@
 package com.example.paceface
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -71,6 +72,14 @@ class LoginActivity : AppCompatActivity() {
 
             if (user != null && user.password == password) {
                 // Login success
+
+                // --- ログインしたユーザーのIDを保存 ---
+                val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                with(sharedPrefs.edit()) {
+                    putInt("LOGGED_IN_USER_ID", user.userId)
+                    apply()
+                }
+
                 // Navigate to HomeScreen and clear task
                 val intent = Intent(this@LoginActivity, HomeScreenActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
