@@ -76,6 +76,12 @@
         <activity
             android:name=".PasswordChangeCompleteScreenActivity"
             android:exported="true" />
+        <activity
+            android:name=".AboutScreenActivity"
+            android:exported="true" />
+        <activity
+            android:name=".SelectionScreenActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

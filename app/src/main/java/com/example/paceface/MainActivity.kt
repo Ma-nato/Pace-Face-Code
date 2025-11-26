@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
 
         // LoginActivity を起動して、MainActivity は終了する
         //テストするときはcls=の右を変更すること
-        val intent = Intent(this, UserRegistrationScreenActivity::class.java)
+        val intent = Intent(this, HomeScreenActivity::class.java)
         startActivity(intent)
         finish()
     }

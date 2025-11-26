@@ -15,13 +15,13 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         binding = UserSettingsScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 現在の画面に対応するボタンの背景色を変更
+        // --- Bottom Nav Listeners ---
         binding.gearButton.setBackgroundColor(ContextCompat.getColor(this, R.color.selected_nav_item_bg))
 
         binding.homeButton.setOnClickListener {
             val intent = Intent(this, HomeScreenActivity::class.java)
             startActivity(intent)
-            overridePendingTransition(0, 0) // 遷移時のアニメーションを無効化
+            overridePendingTransition(0, 0)
         }
 
         binding.passingButton.setOnClickListener {
@@ -37,7 +37,41 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         }
 
         binding.gearButton.setOnClickListener {
-            // 現在の画面なので何もしない
+            // Current screen, do nothing
+        }
+
+        // --- Settings Button Listeners ---
+
+        binding.btnUserInfo.setOnClickListener {
+            val intent = Intent(this, UserInfoViewScreenActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.btnPasswordChange.setOnClickListener {
+            val intent = Intent(this, PasswordChangeScreenActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.btnHelp.setOnClickListener {
+            val intent = Intent(this, HelpScreenActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.btnAbout.setOnClickListener {
+             val intent = Intent(this, AboutScreenActivity::class.java)
+             startActivity(intent)
+        }
+
+        binding.btnLogout.setOnClickListener {
+            // ログアウト後はログイン画面に遷移し、戻れないように設定
+            val intent = Intent(this, SelectionScreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+
+        binding.btnDeleteAccount.setOnClickListener {
+             val intent = Intent(this, AccountDeletionConfirmationScreenActivity::class.java)
+             startActivity(intent)
         }
     }
 }
