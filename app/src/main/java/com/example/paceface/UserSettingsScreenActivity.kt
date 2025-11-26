@@ -1,5 +1,6 @@
 package com.example.paceface
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -44,9 +45,14 @@ class UserSettingsScreenActivity : AppCompatActivity() {
 
         binding.btnUserInfo.setOnClickListener {
             // ★★★ ここを修正しました！ ★★★
+
+            // SharedPreferencesからログイン中のユーザーIDを読み出します
+            val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+            val loggedInUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1) // 保存されていない場合は-1
+
+            // UserInfoViewScreenActivityに、読み出したユーザーIDを渡します
             val intent = Intent(this, UserInfoViewScreenActivity::class.java).apply {
-                // UserInfoViewScreenActivityに、表示したいユーザーのIDを荷物として渡します
-                putExtra(UserInfoViewScreenActivity.EXTRA_USER_ID, 1) // 仮にユーザーID 1 を渡します
+                putExtra(UserInfoViewScreenActivity.EXTRA_USER_ID, loggedInUserId)
             }
             startActivity(intent)
         }
