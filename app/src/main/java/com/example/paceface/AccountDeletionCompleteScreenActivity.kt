@@ -13,7 +13,7 @@ class AccountDeletionCompleteScreenActivity : AppCompatActivity() {
         setContentView(R.layout.account_deletion_complete_screen)
 
         // XMLレイアウトから "OK" ボタンを見つけます
-        val okButton: Button = findViewById(R.id.button_ok)
+        val okButton: Button = findViewById(R.id.btn_ok)
 
         // "OK" ボタンがクリックされたときの動作を定義します
         okButton.setOnClickListener {
