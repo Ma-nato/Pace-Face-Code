@@ -32,7 +32,7 @@
             android:exported="false" />
         <activity
             android:name=".HelpScreenActivity"
-            android:exported="false">
+            android:exported="true">
         </activity>
         <activity
             android:name=".HistoryScreenActivity"
