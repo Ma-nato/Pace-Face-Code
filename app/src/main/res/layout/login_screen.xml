@@ -14,6 +14,7 @@
         android:text="ログイン"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:textColor="@color/black"
         android:layout_marginTop="24dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
@@ -26,6 +27,7 @@
         android:textStyle="bold"
         android:text="ユーザー名"
         android:textSize="16sp"
+        android:textColor="@color/black"
         android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@id/title_login"
         app:layout_constraintStart_toStartOf="parent" />
@@ -64,6 +66,7 @@
         android:textStyle="bold"
         android:text="パスワード（8文字以上）"
         android:textSize="16sp"
+        android:textColor="@color/black"
         android:layout_marginTop="20dp"
         app:layout_constraintTop_toBottomOf="@id/input_username"
         app:layout_constraintStart_toStartOf="parent" />

@@ -2,21 +2,29 @@ package com.example.paceface
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.example.paceface.databinding.AccountDeletionCompleteScreenBinding // View Bindingクラスをインポート
 
 class AccountDeletionCompleteScreenActivity : AppCompatActivity() {
+
+    // View Binding用の変数を宣言
+    private lateinit var binding: AccountDeletionCompleteScreenBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // View Bindingを使ってレイアウトをインフレート（準備）
+        binding = AccountDeletionCompleteScreenBinding.inflate(layoutInflater)
+        // 生成されたbindingのルートビューを画面に設定
+        setContentView(binding.root)
         // このActivityが表示するレイアウトファイルを指定します
         setContentView(R.layout.account_deletion_complete_screen)
 
         // XMLレイアウトから "OK" ボタンを見つけます
         val okButton: Button = findViewById(R.id.btn_ok)
 
-        // "OK" ボタンがクリックされたときの動作を定義します
-        okButton.setOnClickListener {
+        // bindingオブジェクトを通して、ID 'btn_ok' のボタンを参照
+        binding.btnOk.setOnClickListener {
             // これまでの画面の履歴をすべて消去し、
             // アプリの最初の選択画面に戻るための準備をします
             val intent = Intent(this, SelectionScreenActivity::class.java).apply {
