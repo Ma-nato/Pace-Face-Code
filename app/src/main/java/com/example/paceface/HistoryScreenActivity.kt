@@ -2,6 +2,7 @@ package com.example.paceface
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -141,9 +142,9 @@ class HistoryScreenActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
+        binding.historyButton.setBackgroundColor(Color.parseColor("#33000000"))
         binding.homeButton.setOnClickListener { navigateTo(HomeScreenActivity::class.java) }
         binding.passingButton.setOnClickListener { navigateTo(ProximityHistoryScreenActivity::class.java) }
-        binding.historyButton.setOnClickListener { /* 現在の画面 */ }
         binding.emotionButton.setOnClickListener { /* TODO */ }
         binding.gearButton.setOnClickListener { navigateTo(UserSettingsScreenActivity::class.java) }
     }

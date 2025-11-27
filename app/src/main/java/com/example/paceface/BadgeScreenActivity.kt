@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.BadgeItemBinding
 import com.example.paceface.databinding.BadgeScreenBinding
+import kotlinx.coroutines.launch
 
 // Data class for displaying badge information in the UI
 data class BadgeDisplayInfo(val description: String, val isAchieved: Boolean)
@@ -15,19 +17,14 @@ data class BadgeDisplayInfo(val description: String, val isAchieved: Boolean)
 class BadgeScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: BadgeScreenBinding
-
-    // This would be replaced with combined data from your Badge and UserBadge tables
-    private val badgesToDisplay = listOf(
-        BadgeDisplayInfo("すれちがい合計人数\n10人達成", true),
-        BadgeDisplayInfo("すれちがい合計人数\n50人達成", false),
-        BadgeDisplayInfo("すれちがい合計人数\n100人達成", false),
-        BadgeDisplayInfo("１日で10人とすれちがう", true)
-    )
+    private lateinit var appDatabase: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = BadgeScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        appDatabase = AppDatabase.getDatabase(this)
 
         binding.btnBack.setOnClickListener {
             finish()
@@ -58,10 +55,30 @@ class BadgeScreenActivity : AppCompatActivity() {
         }
         // ------------------ //
 
-        setupBadgeList()
+        loadAndDisplayBadges()
     }
 
-    private fun setupBadgeList() {
+    private fun loadAndDisplayBadges() {
+        // Assume you have a way to get the current user's ID
+        val currentUserId = 1 // Replace with actual user ID
+
+        lifecycleScope.launch {
+            val allBadges = appDatabase.badgeDao().getAllBadges()
+            val userBadges = appDatabase.userBadgeDao().getBadgesForUser(currentUserId)
+            val userBadgeIds = userBadges.map { it.badgeId }.toSet()
+
+            val badgesToDisplay = allBadges.map { badge ->
+                BadgeDisplayInfo(
+                    description = badge.description,
+                    isAchieved = userBadgeIds.contains(badge.badgeId)
+                )
+            }
+            setupBadgeList(badgesToDisplay)
+        }
+    }
+
+
+    private fun setupBadgeList(badgesToDisplay: List<BadgeDisplayInfo>) {
         binding.badgeContainer.removeAllViews() // Clear existing views
 
         val marginInPx = (8 * resources.displayMetrics.density).toInt()

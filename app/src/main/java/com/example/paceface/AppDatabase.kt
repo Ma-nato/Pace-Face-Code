@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
         HourlyAverageSpeed::class,
         HourlyEmotionPercentage::class
     ],
-    version = 13, // Incremented version to ensure database recreation
+    version = 16, // Incremented version to ensure database recreation
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -65,8 +65,7 @@ abstract class AppDatabase : RoomDatabase() {
             super.onOpen(db)
             INSTANCE?.let { database ->
                 CoroutineScope(Dispatchers.IO).launch {
-                    val userDao = database.userDao()
-                    if (userDao.getUserCount() == 0) {
+                    if (database.userDao().getUserCount() == 0) {
                         populateWithDummyData(database)
                     }
                 }
@@ -77,6 +76,8 @@ abstract class AppDatabase : RoomDatabase() {
             val userDao = database.userDao()
             val proximityDao = database.proximityDao()
             val emotionDao = database.emotionDao()
+            val badgeDao = database.badgeDao()
+            val userBadgeDao = database.userBadgeDao()
 
             val emotions = listOf(
                 Emotion(emotionId = 1, name = "Delighted", imageUrl = "", description = ""),
@@ -98,6 +99,24 @@ abstract class AppDatabase : RoomDatabase() {
             val now = System.currentTimeMillis()
             proximityDao.insert(Proximity(userId = 1, passedUserId = 2, timestamp = now - (1000 * 60), isConfirmed = false, badgeId = null, emotionId = 1, passedUserEmotionId = 2))
             proximityDao.insert(Proximity(userId = 1, passedUserId = 3, timestamp = now - (1000 * 60 * 120), isConfirmed = true, badgeId = null, emotionId = 3, passedUserEmotionId = 4))
+
+            // Add dummy badges
+            badgeDao.insert(Badge(badgeId = 1, name = "First Passing", description = "すれちがい合計人数\n10人達成", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 2, name = "Social Butterfly", description = "すれちがい合計人数\n50人達成", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 3, name = "Crowd Surfer", description = "すれちがい合計人数\n100人達成", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 4, name = "Busy Bee", description = "１日で10人とすれちがう", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 5, name = "Night Owl", description = "夜の時間帯（22:00～06:00）に5人とすれちがう", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 6, name = "Early Bird", description = "朝の時間帯（06:00～09:00）に5人とすれちがう", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 7, name = "Diversity Advocate", description = "5種類すべての感情のユーザーとすれちがう", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 8, name = "Top of the World", description = "最も感情レベルの高い「Delighted」のユーザーとすれちがう", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 9, name = "Mayor of the Town", description = "すれちがい合計人数\n500人達成", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 10, name = "Twin Flame", description = "同じユーザーと3回すれちがう", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 11, name = "Spreading Joy", description = "「Happy」なユーザーと5回すれちがう", imageUrl = ""))
+            badgeDao.insert(Badge(badgeId = 12, name = "Full House", description = "6種類の感情のユーザーとすれちがう", imageUrl = ""))
+
+            // Add dummy user badges
+            userBadgeDao.insert(UserBadge(userId = 1, badgeId = 1, achievedAt = now))
+            userBadgeDao.insert(UserBadge(userId = 1, badgeId = 4, achievedAt = now))
         }
     }
 }
