@@ -25,7 +25,6 @@ class ExpressionChangeCompleteScreenActivity : AppCompatActivity() {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
             setContentView(R.layout.expression_change_complete_screen)
-            
             val btnOk = findViewById<Button>(R.id.btn_ok)
 
             // OK ボタン押下時の処理
