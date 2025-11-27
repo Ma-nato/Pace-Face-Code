@@ -2,6 +2,7 @@ package com.example.paceface
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -9,7 +10,13 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.HomeScreenBinding
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.google.android.material.R as R_material
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.sqrt
@@ -17,78 +24,55 @@ import kotlin.math.sqrt
 class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var binding: HomeScreenBinding
+    private lateinit var appDatabase: AppDatabase
     private lateinit var sensorManager: SensorManager
     private var linearAccelSensor: Sensor? = null
-
-    // 速度ベクトル (m/s)
+    private var currentUserId: Int = -1
+    private val dateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
+    
     private val velocity = FloatArray(3) { 0f }
     private var lastTimestamp: Long = 0
-    private val dateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = HomeScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // SensorManagerと線形加速度センサーを初期化
+        appDatabase = AppDatabase.getDatabase(this)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         linearAccelSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
 
-        if (linearAccelSensor == null) {
-            // センサーが利用できない場合は "N/A" と表示
-            binding.tvSpeedValue.text = "N/A"
+        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        currentUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
+
+        if (currentUserId == -1) {
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+            return
         }
+        
+        binding.tvTitle.text = "今日の歩行速度"
 
         setupNavigation()
-    }
-
-    private fun setupNavigation() {
-        binding.homeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.selected_nav_item_bg))
-
-        binding.homeButton.setOnClickListener {
-            // 現在の画面なので何もしない
-        }
-
-        binding.passingButton.setOnClickListener {
-            val intent = Intent(this, ProximityHistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.historyButton.setOnClickListener {
-            val intent = Intent(this, HistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.emotionButton.setOnClickListener {
-            // TODO: EmotionScreenActivity.kt を作成し、遷移を実装する
-        }
-
-        binding.gearButton.setOnClickListener {
-            val intent = Intent(this, UserSettingsScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
+        setupChart()
     }
 
     override fun onResume() {
         super.onResume()
-        // センサーリスナーを登録
         linearAccelSensor?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
         }
+        updateChartWithTodayData()
     }
 
     override fun onPause() {
         super.onPause()
-        // バッテリー消費を防ぐため、センサーリスナーの登録を解除
         sensorManager.unregisterListener(this)
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // この実装では使用しない
-    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { }
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_LINEAR_ACCELERATION) {
@@ -97,7 +81,6 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
                 return
             }
 
-            // 経過時間を計算 (秒)
             val dt = (event.timestamp - lastTimestamp) / 1_000_000_000.0f
             lastTimestamp = event.timestamp
 
@@ -105,12 +88,10 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
             val ay = event.values[1]
             val az = event.values[2]
 
-            // 速度を更新
             velocity[0] += ax * dt
             velocity[1] += ay * dt
             velocity[2] += az * dt
 
-            // 加速度が小さい場合（ほぼ停止している場合）、速度を徐々に減衰させる
             val accelerationMagnitude = sqrt(ax * ax + ay * ay + az * az)
             if (accelerationMagnitude < 0.2f) {
                 velocity[0] *= 0.9f
@@ -118,17 +99,95 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
                 velocity[2] *= 0.9f
             }
 
-            // 速度の大きさ（m/s）を計算
             val currentSpeedMs = sqrt(velocity[0] * velocity[0] + velocity[1] * velocity[1] + velocity[2] * velocity[2])
-            // km/h に変換
             val speedKmh = currentSpeedMs * 3.6
 
-            // UIのTextViewを更新
             binding.tvSpeedValue.text = String.format("%.1f km/h", speedKmh)
-
-            // 最終更新日時を更新
-            val currentDateTime = Date(System.currentTimeMillis())
-            binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(currentDateTime)}"
+            binding.tvStatus.text = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
+            binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
         }
+    }
+
+    private fun updateChartWithTodayData() {
+        lifecycleScope.launch {
+            val today = Date()
+            val cal = Calendar.getInstance().apply { time = today }
+            val startOfDay = getStartOfDay(cal).timeInMillis
+            val endOfDay = getEndOfDay(cal).timeInMillis
+
+            val todayHistory = appDatabase.historyDao().getHistoryForUserOnDate(currentUserId, startOfDay, endOfDay)
+            updateChart(todayHistory)
+        }
+    }
+
+    private fun setupChart() {
+        binding.lineChart.apply {
+            description.isEnabled = false
+            isDragEnabled = true
+            setScaleEnabled(true)
+            setPinchZoom(true)
+            legend.isEnabled = false
+            xAxis.labelRotationAngle = -45f
+        }
+    }
+
+    private fun updateChart(history: List<History>) {
+        if (history.isEmpty()) {
+            binding.lineChart.clear()
+            binding.lineChart.invalidate()
+            return
+        }
+
+        val entries = ArrayList<Entry>()
+        history.forEach {
+            val timeCal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+            val hour = timeCal.get(Calendar.HOUR_OF_DAY).toFloat()
+            val minute = timeCal.get(Calendar.MINUTE).toFloat() / 60f
+            entries.add(Entry(hour + minute, it.walkingSpeed))
+        }
+
+        val dataSet = LineDataSet(entries, "歩行速度").apply {
+            color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
+            valueTextColor = Color.BLACK
+            setCircleColor(color)
+            circleRadius = 4f
+            lineWidth = 2f
+        }
+
+        val lineData = LineData(dataSet)
+        binding.lineChart.data = lineData
+        binding.lineChart.invalidate()
+    }
+
+    private fun getStartOfDay(calendar: Calendar): Calendar {
+        val cal = calendar.clone() as Calendar
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal
+    }
+
+    private fun getEndOfDay(calendar: Calendar): Calendar {
+        val cal = calendar.clone() as Calendar
+        cal.set(Calendar.HOUR_OF_DAY, 23)
+        cal.set(Calendar.MINUTE, 59)
+        cal.set(Calendar.SECOND, 59)
+        cal.set(Calendar.MILLISECOND, 999)
+        return cal
+    }
+
+    private fun setupNavigation() {
+        binding.homeButton.setBackgroundColor(Color.parseColor("#33000000"))
+        binding.passingButton.setOnClickListener { navigateTo(ProximityHistoryScreenActivity::class.java) }
+        binding.historyButton.setOnClickListener { navigateTo(HistoryScreenActivity::class.java) }
+        binding.emotionButton.setOnClickListener { /* TODO */ }
+        binding.gearButton.setOnClickListener { navigateTo(UserSettingsScreenActivity::class.java) }
+    }
+
+    private fun <T : AppCompatActivity> navigateTo(activityClass: Class<T>) {
+        val intent = Intent(this, activityClass)
+        startActivity(intent)
+        overridePendingTransition(0, 0)
     }
 }

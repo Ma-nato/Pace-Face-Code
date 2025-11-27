@@ -1,67 +1,69 @@
 package com.example.paceface
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.paceface.databinding.ExpressionCustomizationScreenBinding
 
 class ExpressionCustomizationScreenActivity : AppCompatActivity() {
 
-    // View Binding を使用してレイアウトファイル内のビューに安全にアクセスします
     private lateinit var binding: ExpressionCustomizationScreenBinding
-
-    // 選択された表情を保持するための変数
     private var selectedEmoji: ImageView? = null
+
+    // SharedPreferencesにデータを保存するための名前とキーを定義します
+    private val PREFS_NAME = "EmojiPrefs"
+    private val KEY_SELECTED_EMOJI_TAG = "selectedEmojiTag"
+    private val KEY_AUTO_CHANGE_ENABLED = "autoChangeEnabled"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // View Binding を初期化
         binding = ExpressionCustomizationScreenBinding.inflate(layoutInflater)
-        // binding.root はレイアウトのルート要素 (ConstraintLayout) を指します
         setContentView(binding.root)
 
-        // 表情アイコンのリストを作成
+        val sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
         val emojiImageViews = listOf(
             binding.emoji1, binding.emoji2, binding.emoji3,
             binding.emoji4, binding.emoji5, binding.emoji6
         )
 
-        // 各ImageViewに、どの絵文字かを識別するための「タグ」を設定します
-        // これにより、どのボタンが押されたかを後から簡単に識別できます。
         emojiImageViews.forEachIndexed { index, imageView ->
             imageView.tag = "表情${index + 1}"
         }
 
-        // 各表情アイコンにクリックリスナーを設定
         emojiImageViews.forEach { emoji ->
             emoji.setOnClickListener {
-                // itはクリックされたImageViewを指します
                 onEmojiSelected(it as ImageView, emojiImageViews)
             }
         }
 
-        // 「変更」ボタンがクリックされたときの処理
         binding.changeBtn.setOnClickListener {
             if (selectedEmoji != null) {
-                // タグを使って、どの表情が選択されたかを取得
-                val selectedTag = selectedEmoji?.tag?.toString() ?: "不明"
-                val message = "表情「${selectedTag}」に変更されました！"
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-
-                // TODO: ここで実際に表情データを保存する処理を実装します
-                // 例: SharedPreferences.edit().putString("selected_emoji_tag", selectedTag).apply()
-
+                val selectedTag = selectedEmoji?.tag?.toString()
+                if (selectedTag != null) {
+                    sharedPreferences.edit().putString(KEY_SELECTED_EMOJI_TAG, selectedTag).apply()
+                    val intent = Intent(this, ExpressionChangeCompleteScreenActivity::class.java)
+                    startActivity(intent)
+                }
             } else {
-                // 何も選択されていない場合
                 Toast.makeText(this, "変更する表情を選択してください", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // スイッチの状態が変更されたときの処理
+        // --- スイッチの状態変更リスナー ---
         binding.changeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            // スイッチの状態をSharedPreferencesに保存
+            sharedPreferences.edit().putBoolean(KEY_AUTO_CHANGE_ENABLED, isChecked).apply()
+            // UIの状態を更新
+            updateUiForMode(isChecked)
+
             val message = if (isChecked) {
+                // TODO: ここに速度に応じて表情を自動で変更するロジックを実装します。
+                // 速度データをどこから取得し、どの表情にどの速度を割り当てるかの仕様が必要です。
                 "自動変更がONになりました"
             } else {
                 "自動変更がOFFになりました"
@@ -69,31 +71,76 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
 
-        // 画面表示時に、最初の絵文字をデフォルトで選択状態にしておく（任意）
-        // この行が不要な場合は削除してください。
-        onEmojiSelected(binding.emoji1, emojiImageViews)
+        // --- 戻るボタンの処理 ---
+        binding.backButton.setOnClickListener {
+            val intent = Intent(this, HomeScreenActivity::class.java)
+            startActivity(intent)
+        }
+
+        // --- フッターナビゲーションの処理 ---
+        binding.homeButton.setOnClickListener {
+            val intent = Intent(this, HomeScreenActivity::class.java)
+            startActivity(intent)
+        }
+        binding.passingButton.setOnClickListener {
+            val intent = Intent(this, ProximityHistoryScreenActivity::class.java)
+            startActivity(intent)
+        }
+        binding.historyButton.setOnClickListener {
+            val intent = Intent(this, HistoryScreenActivity::class.java)
+            startActivity(intent)
+        }
+        binding.emotionButton.setBackgroundColor(ContextCompat.getColor(this, R.color.selected_nav_item_bg))
+        binding.emotionButton.setOnClickListener {
+            // 現在の画面なので何もしない
+        }
+        binding.gearButton.setOnClickListener {
+            val intent = Intent(this, UserSettingsScreenActivity::class.java)
+            startActivity(intent)
+        }
+
+        // --- 起動時の状態復元 ---
+        // 保存された表情を復元
+        val savedTag = sharedPreferences.getString(KEY_SELECTED_EMOJI_TAG, null)
+        val emojiToSelect = if (savedTag != null) {
+            emojiImageViews.find { it.tag == savedTag } ?: binding.emoji1
+        } else {
+            binding.emoji1
+        }
+        onEmojiSelected(emojiToSelect, emojiImageViews)
+
+        // 保存されたスイッチの状態を復元
+        val isAutoChangeEnabled = sharedPreferences.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
+        binding.changeSwitch.isChecked = isAutoChangeEnabled
+        updateUiForMode(isAutoChangeEnabled)
+    }
+
+    /**
+     * 自動変更モードに合わせてUIの有効/無効を切り替える
+     * @param isAutoMode trueなら自動モード、falseなら手動モード
+     */
+    private fun updateUiForMode(isAutoMode: Boolean) {
+        // 手動モードの場合にのみ、表情選択と変更ボタンを有効にする
+        val isManualMode = !isAutoMode
+        val emojiImageViews = listOf(binding.emoji1, binding.emoji2, binding.emoji3, binding.emoji4, binding.emoji5, binding.emoji6)
+
+        emojiImageViews.forEach { it.isEnabled = isManualMode }
+        binding.changeBtn.isEnabled = isManualMode
+
+        // 無効状態のときは、見た目を灰色にする
+        val alpha = if (isManualMode) 1.0f else 0.5f
+        emojiImageViews.forEach { it.alpha = alpha }
+        binding.changeBtn.alpha = alpha
     }
 
     /**
      * 表情アイコンがクリックされたときに呼び出される関数
-     * @param selectedView クリックされたImageView
-     * @param allEmojis すべての表情ImageViewのリスト
      */
     private fun onEmojiSelected(selectedView: ImageView, allEmojis: List<ImageView>) {
-        // ### 修正点：背景のリセット方法 ###
-        // すべてのアイコンの選択状態をリセットします。
         allEmojis.forEach { emoji ->
-            // `background = null` ではなく、XMLで指定した元の背景に戻します。
-            // これをしないと、選択解除されたアイコンの白い円背景が消えてしまいます。
             emoji.setBackgroundResource(R.drawable.emoji_bg)
         }
-
-        // クリックされたアイコンにだけ、選択状態の背景を設定します。
         selectedView.setBackgroundResource(R.drawable.emoji_selected_bg)
-
-        // 選択されたアイコンの参照を保持します。
         selectedEmoji = selectedView
     }
 }
-
-

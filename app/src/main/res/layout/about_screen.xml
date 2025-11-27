@@ -4,32 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6ECF8">
+    android:background="#DCE6F2">
 
-    <!-- 左上の戻るボタン -->
+    <!-- Header: Title -->
+    <TextView
+        android:id="@+id/about_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="アバウト"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- メイン内容（スクロール可能） -->
+    <!-- Header: Back Button -->
     <ImageButton
         android:id="@+id/backButton"
         android:layout_width="44dp"
         android:layout_height="43dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="28dp"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
         android:src="@drawable/back_button"
+        app:layout_constraintBottom_toBottomOf="@+id/about_title"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/about_title" />
 
+    <!-- Main Scrollable Content -->
     <ScrollView
         android:id="@+id/mainScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="16dp"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="16dp"
         app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/backButton">
+        app:layout_constraintTop_toBottomOf="@+id/about_title">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,73 +50,173 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
+            <!-- App Logo -->
+            <ImageView
+                android:id="@+id/app_logo"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:contentDescription="アプリのロゴ"
+                android:src="@drawable/ic_splash_logo" />
+
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:text="Pace Face"
                 android:textSize="32sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/subTitle"
-                android:layout_width="wrap_content"
+            <!-- App Summary Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="all stars"
-                android:textSize="20sp" />
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="8dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <TextView
-                android:id="@+id/version"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Var1.0"
-                android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="このアプリについて"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/memberLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Member"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Pace Faceは、あなたの歩行速度をリアルタイムで計測し、すれちがった他のユーザーと共有することで、日々のウォーキングをより楽しく、モチベーション高く続けるためのアプリです。" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- メンバー一覧 -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Member Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Higo Tenji"
-                android:textSize="16sp" />
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="8dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Yamauchi Syuto"
-                android:textSize="16sp" />
+                    <TextView
+                        android:id="@+id/memberLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Member - all stars -"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Kovashiki Takumi"
-                android:textSize="16sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="・ Higo Tenji"
+                        android:textSize="16sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="・ Yamauchi Syuto"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="・ Kovashiki Takumi"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="・ Maeda Manato"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Version Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Maeda Manato"
-                android:textSize="16sp" />
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="8dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="バージョン情報"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/version"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="バージョン 1.0"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Support and Legal Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="サポートと規約"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/privacyPolicyLink"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="プライバシーポリシー"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/contactLink"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="お問い合わせ"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-
     </ScrollView>
 
-    <!-- 下部アイコンバー -->
+    <!-- Bottom Navigation -->
     <LinearLayout
         android:id="@+id/bottom_nav"
         android:layout_width="0dp"
@@ -114,7 +227,6 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton

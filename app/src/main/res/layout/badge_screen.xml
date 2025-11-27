@@ -53,29 +53,7 @@
             android:orientation="vertical"
             tools:context=".BadgeScreenActivity">
 
-            <!-- Dummy Achieved Badge for layout preview -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_marginBottom="8dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <include layout="@layout/badge_item" />
-            </androidx.cardview.widget.CardView>
-
-            <!-- Dummy Unachieved Badge for layout preview -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_marginBottom="8dp"
-                app:cardBackgroundColor="#E0E0E0"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <include layout="@layout/badge_item" />
-            </androidx.cardview.widget.CardView>
+            <!-- Badge items will be programmatically added here -->
 
         </LinearLayout>
     </ScrollView>

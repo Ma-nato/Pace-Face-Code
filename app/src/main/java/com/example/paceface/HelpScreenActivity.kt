@@ -19,13 +19,10 @@ class HelpScreenActivity : AppCompatActivity() {
         binding.btnBack.setOnClickListener {
             finish() // この画面を閉じて前の画面に戻る
         }
-        // 不要な空のリスナーは削除しました
         setupNavigation() // ここでsetupNavigation()を呼び出す
     }
 
     private fun setupNavigation() {
-        // 現在の画面 (ヘルプ画面) のナビゲーションボタンを強調する（もしあれば）
-        // 例：binding.helpButton.setBackgroundColor(ContextCompat.getColor(this, R.color.selected_nav_item_bg))
 
         binding.homeButton.setOnClickListener {
             val intent = Intent(this, HomeScreenActivity::class.java)

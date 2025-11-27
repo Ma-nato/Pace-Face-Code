@@ -63,7 +63,7 @@ class LoginActivity : AppCompatActivity() {
         binding.errorMessage.visibility = View.INVISIBLE
 
         if (username.isEmpty() || password.isEmpty()) {
-            binding.errorMessage.text = "ユーザー名とパスワードを入力してください"
+            binding.errorMessage.text = getString(R.string.error_empty_username_password)
             binding.errorMessage.visibility = View.VISIBLE
             return
         }
@@ -73,7 +73,9 @@ class LoginActivity : AppCompatActivity() {
                 appDatabase.userDao().getUserByName(username)
             }
 
-            if (user != null && user.password == password) {
+            // 入力されたパスワードをハッシュ化して比較
+            val hashedPassword = User.hashPassword(password)
+            if (user != null && user.password == hashedPassword) {
                 // Login success
 
                 // --- ログインしたユーザーのIDを保存 ---
@@ -90,7 +92,7 @@ class LoginActivity : AppCompatActivity() {
                 finish()
             } else {
                 // Login failed
-                binding.errorMessage.text = "※ユーザー名またはパスワードが違います"
+                binding.errorMessage.text = getString(R.string.error_invalid_username_password)
                 binding.errorMessage.visibility = View.VISIBLE
             }
         }

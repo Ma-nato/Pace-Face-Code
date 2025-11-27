@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     android:background="#E6EEF5">
 
+    <!-- 左上の戻るボタン -->
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="44dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="28dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/back_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- 質問タイトル -->
     <TextView
         android:id="@+id/titleText"
@@ -87,7 +100,7 @@
         android:layout_width="150dp"
         android:layout_height="60dp"
         android:layout_marginTop="30dp"
-        android:background="#FF8A80"
+        app:backgroundTint="#FF8A80"
         android:text="変更"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -132,29 +145,34 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
+            android:id="@+id/home_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/home_button" />
 
         <ImageView
+            android:id="@+id/passing_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="30dp"
             android:src="@drawable/passing_button" />
 
         <ImageView
+            android:id="@+id/history_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="30dp"
             android:src="@drawable/history_button" />
 
         <ImageView
+            android:id="@+id/emotion_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="30dp"
             android:src="@drawable/emotion_button" />
 
         <ImageView
+            android:id="@+id/gear_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="30dp"

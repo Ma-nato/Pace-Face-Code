@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.UserRegistrationConfirmationScreenBinding
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
 
 class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
 
@@ -44,20 +43,14 @@ class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun hashPassword(password: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hashBytes = digest.digest(password.toByteArray())
-        return hashBytes.joinToString("") { "%02x".format(it) }
-    }
-
     private fun registerUserAndNavigate(userName: String?, email: String?, password: String?) {
         if (userName == null || email == null || password == null) {
             Toast.makeText(this, "登録情報が不足しています。前の画面に戻ってやり直してください。", Toast.LENGTH_LONG).show()
             return
         }
 
-        // パスワードをハッシュ化して保存
-        val hashedPassword = hashPassword(password)
+        // パスワードを共通の関数でハッシュ化して保存
+        val hashedPassword = User.hashPassword(password)
 
         val user = User(
             name = userName,

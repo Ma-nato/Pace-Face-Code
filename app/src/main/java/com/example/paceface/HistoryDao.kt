@@ -2,14 +2,17 @@ package com.example.paceface
 
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
 interface HistoryDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+
+    @Insert
     suspend fun insert(history: History)
 
-    @Query("SELECT * FROM History WHERE userId = :userId ORDER BY timestamp DESC")
-    suspend fun getHistoryForUser(userId: Int): List<History>
+    @Query("SELECT * FROM history WHERE userId = :userId AND timestamp >= :startOfDay AND timestamp < :endOfDay")
+    suspend fun getHistoryForUserOnDate(userId: Int, startOfDay: Long, endOfDay: Long): List<History>
+
+    @Query("DELETE FROM history WHERE userId = :userId AND timestamp >= :startOfDay AND timestamp < :endOfDay")
+    suspend fun deleteHistoryForUserOnDate(userId: Int, startOfDay: Long, endOfDay: Long)
 }
