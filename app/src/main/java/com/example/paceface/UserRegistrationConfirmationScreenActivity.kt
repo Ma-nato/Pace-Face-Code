@@ -60,21 +60,41 @@ class UserRegistrationConfirmationScreenActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                appDatabase.userDao().insert(user)
-                Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "登録が完了しました", Toast.LENGTH_SHORT).show()
+                // --- ユーザーをDBに挿入し、新しいIDを取得 ---
+                val newUserId = appDatabase.userDao().insert(user).toInt()
 
-                // 登録完了画面へ遷移し、途中の画面は消去する
-                val intent = Intent(this@UserRegistrationConfirmationScreenActivity, UserRegistrationCompleteScreenActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
+                // --- 初期速度ルールを作成 ---
+                val initialRules = listOf(
+                    SpeedRule(userId = newUserId, minSpeed = 0f, maxSpeed = 3.0f, emotionId = 5),    // Sad
+                    SpeedRule(userId = newUserId, minSpeed = 3.0f, maxSpeed = 4.5f, emotionId = 4),  // Neutral
+                    SpeedRule(userId = newUserId, minSpeed = 4.5f, maxSpeed = 5.5f, emotionId = 3),  // Happy
+                    SpeedRule(userId = newUserId, minSpeed = 5.5f, maxSpeed = 7.0f, emotionId = 2),  // Excited
+                    SpeedRule(userId = newUserId, minSpeed = 7.0f, maxSpeed = 999f, emotionId = 1) // Delighted (999は事実上の上限なし)
+                )
+
+                // --- 作成したルールをDBに挿入 ---
+                initialRules.forEach {
+                    appDatabase.speedRuleDao().insert(it)
+                }
+
+                runOnUiThread {
+                    Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "登録が完了しました", Toast.LENGTH_SHORT).show()
+
+                    // 登録完了画面へ遷移し、途中の画面は消去する
+                    val intent = Intent(this@UserRegistrationConfirmationScreenActivity, UserRegistrationCompleteScreenActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                }
 
             } catch (e: Exception) {
-                // Handle potential conflicts (e.g., email or name already exists)
-                if (e is android.database.sqlite.SQLiteConstraintException) {
-                    Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "ユーザー名またはメールアドレスが既に使用されています。", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "登録に失敗しました: ${e.message}", Toast.LENGTH_LONG).show()
+                runOnUiThread {
+                    // Handle potential conflicts (e.g., email or name already exists)
+                    if (e is android.database.sqlite.SQLiteConstraintException) {
+                        Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "ユーザー名またはメールアドレスが既に使用されています。", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@UserRegistrationConfirmationScreenActivity, "登録に失敗しました: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
