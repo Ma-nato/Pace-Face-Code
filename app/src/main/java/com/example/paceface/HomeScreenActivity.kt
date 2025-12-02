@@ -1,13 +1,15 @@
 package com.example.paceface
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
+import android.location.Location
 import android.os.Bundle
+import android.os.Looper
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -15,23 +17,33 @@ import com.example.paceface.databinding.HomeScreenBinding
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.google.android.gms.location.*
 import com.google.android.material.R as R_material
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.sqrt
 
-class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
+class HomeScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: HomeScreenBinding
     private lateinit var appDatabase: AppDatabase
-    private lateinit var sensorManager: SensorManager
-    private var linearAccelSensor: Sensor? = null
     private var currentUserId: Int = -1
     private val dateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
-    
-    private val velocity = FloatArray(3) { 0f }
-    private var lastTimestamp: Long = 0
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
+    // 権限リクエスト用のランチャー
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // 権限が許可された場合、位置情報の取得を開始
+                startLocationUpdates()
+            } else {
+                // 権限が拒否された場合、ユーザーに説明を表示
+                Toast.makeText(this, "位置情報の権限がありません。速度を計測できません。", Toast.LENGTH_LONG).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +51,7 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
         setContentView(binding.root)
 
         appDatabase = AppDatabase.getDatabase(this)
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        linearAccelSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         currentUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
@@ -52,61 +63,81 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
             finish()
             return
         }
-        
+
         binding.tvTitle.text = "今日の歩行速度"
 
         setupNavigation()
         setupChart()
+        createLocationCallback()
     }
 
     override fun onResume() {
         super.onResume()
-        linearAccelSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-        }
+        checkLocationPermissionAndStartUpdates()
         updateChartWithTodayData()
     }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(this)
+        // バッテリー節約のため、位置情報の更新を停止
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_LINEAR_ACCELERATION) {
-            if (lastTimestamp == 0L) {
-                lastTimestamp = event.timestamp
-                return
+    private fun checkLocationPermissionAndStartUpdates() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // 権限が既にある場合は、位置情報の取得を開始
+                startLocationUpdates()
             }
-
-            val dt = (event.timestamp - lastTimestamp) / 1_000_000_000.0f
-            lastTimestamp = event.timestamp
-
-            val ax = event.values[0]
-            val ay = event.values[1]
-            val az = event.values[2]
-
-            velocity[0] += ax * dt
-            velocity[1] += ay * dt
-            velocity[2] += az * dt
-
-            val accelerationMagnitude = sqrt(ax * ax + ay * ay + az * az)
-            if (accelerationMagnitude < 0.2f) {
-                velocity[0] *= 0.9f
-                velocity[1] *= 0.9f
-                velocity[2] *= 0.9f
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
+                // 権限が必要な理由を説明する（今回は省略）
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
-
-            val currentSpeedMs = sqrt(velocity[0] * velocity[0] + velocity[1] * velocity[1] + velocity[2] * velocity[2])
-            val speedKmh = currentSpeedMs * 3.6
-
-            binding.tvSpeedValue.text = String.format("%.1f km/h", speedKmh)
-            binding.tvStatus.text = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
-            binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
+            else -> {
+                // 権限をリクエスト
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
         }
     }
+
+    private fun startLocationUpdates() {
+        val locationRequest = LocationRequest.create().apply {
+            interval = 5000 // 5秒ごとに更新
+            fastestInterval = 2000 // 最速2秒ごとに更新
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        // セキュリティ例外をキャッチ
+        try {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+        } catch (e: SecurityException) {
+            Toast.makeText(this, "位置情報取得の権限がありません。", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun createLocationCallback() {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.lastLocation?.let { location ->
+                    // 速度(m/s)を取得し、km/hに変換
+                    val speedKmh = location.speed * 3.6
+
+                    binding.tvSpeedValue.text = String.format("%.1f km/h", speedKmh)
+                    binding.tvStatus.text = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
+                    binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
+                }
+            }
+        }
+    }
+    
+    // --- 以下、変更なし ---
 
     private fun updateChartWithTodayData() {
         lifecycleScope.launch {

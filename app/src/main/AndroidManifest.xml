@@ -5,6 +5,9 @@
     <!-- Bluetoothの接続状態を確認するための権限 -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
+    <!-- 正確な位置情報を取得するための権限 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

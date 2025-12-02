@@ -61,6 +61,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1") // AppCompatActivity
     implementation("com.google.android.material:material:1.11.0") // Material Components
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
 
     // Compose 関連
     implementation(libs.androidx.activity.compose)
