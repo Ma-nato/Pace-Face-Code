@@ -15,6 +15,7 @@
         android:gravity="center"
         android:text="ユーザー設定"
         android:textSize="20sp"
+        android:textColor="@color/black"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
