@@ -1,8 +1,6 @@
 package com.example.paceface
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -13,11 +11,10 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import java.util.concurrent.TimeUnit
+import androidx.core.graphics.toColorInt
 
 class HistoryScreenActivity : AppCompatActivity() {
 
@@ -32,7 +29,7 @@ class HistoryScreenActivity : AppCompatActivity() {
 
         appDatabase = AppDatabase.getDatabase(this)
 
-        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val sharedPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         currentUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
 
         if (currentUserId == -1) {
@@ -71,9 +68,9 @@ class HistoryScreenActivity : AppCompatActivity() {
             try {
                 // ダミーデータを作成
                 val dummyData = listOf(
-                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(9), walkingSpeed = 5.2f, acceleration = "", emotionId = 1),
-                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(12) + TimeUnit.MINUTES.toMillis(30), walkingSpeed = 4.8f, acceleration = "", emotionId = 1),
-                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(18) + TimeUnit.MINUTES.toMillis(45), walkingSpeed = 6.1f, acceleration = "", emotionId = 1)
+                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(9), walkingSpeed = 5.2f, acceleration = "", emotionId = 0),
+                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(12) + TimeUnit.MINUTES.toMillis(30), walkingSpeed = 4.8f, acceleration = "", emotionId = 0),
+                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(18) + TimeUnit.MINUTES.toMillis(45), walkingSpeed = 6.1f, acceleration = "", emotionId = 0)
                 )
 
                 // 既存のデータを削除し、ダミーデータを挿入
@@ -124,25 +121,25 @@ class HistoryScreenActivity : AppCompatActivity() {
     }
 
     private fun getStartOfDay(calendar: Calendar): Calendar {
-        return calendar.apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
+        val newCal = calendar.clone() as Calendar
+        newCal.set(Calendar.HOUR_OF_DAY, 0)
+        newCal.set(Calendar.MINUTE, 0)
+        newCal.set(Calendar.SECOND, 0)
+        newCal.set(Calendar.MILLISECOND, 0)
+        return newCal
     }
 
     private fun getEndOfDay(calendar: Calendar): Calendar {
-        return calendar.apply {
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 999)
-        }
+        val newCal = calendar.clone() as Calendar
+        newCal.set(Calendar.HOUR_OF_DAY, 23)
+        newCal.set(Calendar.MINUTE, 59)
+        newCal.set(Calendar.SECOND, 59)
+        newCal.set(Calendar.MILLISECOND, 999)
+        return newCal
     }
 
     private fun setupNavigation() {
-        binding.historyButton.setBackgroundColor(Color.parseColor("#33000000"))
+        binding.historyButton.setBackgroundColor("#33000000".toColorInt())
         binding.homeButton.setOnClickListener { navigateTo(HomeScreenActivity::class.java) }
         binding.passingButton.setOnClickListener { navigateTo(ProximityHistoryScreenActivity::class.java) }
         binding.emotionButton.setOnClickListener { /* TODO */ }

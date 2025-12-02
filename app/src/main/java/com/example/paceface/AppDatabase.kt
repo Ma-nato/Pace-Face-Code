@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
         HourlyAverageSpeed::class,
         HourlyEmotionPercentage::class
     ],
-    version = 16, // Incremented version to ensure database recreation
+    version = 17, // データベースのバージョンを更新
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

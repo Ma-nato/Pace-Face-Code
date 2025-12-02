@@ -29,6 +29,6 @@ data class History(
     val userId: Int,
     val timestamp: Long,
     val walkingSpeed: Float,
-    val acceleration: String,
-    val emotionId: Int
+    val acceleration: String = "",
+    val emotionId: Int = 0
 )
