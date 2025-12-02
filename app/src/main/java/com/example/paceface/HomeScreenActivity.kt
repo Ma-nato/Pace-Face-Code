@@ -1,11 +1,9 @@
 package com.example.paceface
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.widget.Toast
@@ -17,11 +15,17 @@ import com.example.paceface.databinding.HomeScreenBinding
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.material.R as R_material
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.graphics.toColorInt
 
 class HomeScreenActivity : AppCompatActivity() {
 
@@ -33,14 +37,16 @@ class HomeScreenActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
-    // 権限リクエスト用のランチャー
+    // 1分間の速度データを保持するリスト
+    private val speedReadings = mutableListOf<Float>()
+    // 最終保存時刻
+    private var lastSaveTimestamp = 0L
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // 権限が許可された場合、位置情報の取得を開始
                 startLocationUpdates()
             } else {
-                // 権限が拒否された場合、ユーザーに説明を表示
                 Toast.makeText(this, "位置情報の権限がありません。速度を計測できません。", Toast.LENGTH_LONG).show()
             }
         }
@@ -53,7 +59,7 @@ class HomeScreenActivity : AppCompatActivity() {
         appDatabase = AppDatabase.getDatabase(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val sharedPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         currentUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
 
         if (currentUserId == -1) {
@@ -69,6 +75,7 @@ class HomeScreenActivity : AppCompatActivity() {
         setupNavigation()
         setupChart()
         createLocationCallback()
+        lastSaveTimestamp = System.currentTimeMillis() // 初期化
     }
 
     override fun onResume() {
@@ -79,8 +86,9 @@ class HomeScreenActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        // バッテリー節約のため、位置情報の更新を停止
         fusedLocationClient.removeLocationUpdates(locationCallback)
+        // アプリ終了時に残っているデータを保存
+        saveAverageSpeedToDb()
     }
 
     private fun checkLocationPermissionAndStartUpdates() {
@@ -89,35 +97,30 @@ class HomeScreenActivity : AppCompatActivity() {
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED -> {
-                // 権限が既にある場合は、位置情報の取得を開始
                 startLocationUpdates()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                // 権限が必要な理由を説明する（今回は省略）
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
             else -> {
-                // 権限をリクエスト
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
     }
 
     private fun startLocationUpdates() {
-        val locationRequest = LocationRequest.create().apply {
-            interval = 5000 // 5秒ごとに更新
-            fastestInterval = 2000 // 最速2秒ごとに更新
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
+            .setWaitForAccurateLocation(false)
+            .setMinUpdateIntervalMillis(2000)
+            .build()
 
-        // セキュリティ例外をキャッチ
         try {
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 locationCallback,
                 Looper.getMainLooper()
             )
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             Toast.makeText(this, "位置情報取得の権限がありません。", Toast.LENGTH_SHORT).show()
         }
     }
@@ -126,18 +129,48 @@ class HomeScreenActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let { location ->
-                    // 速度(m/s)を取得し、km/hに変換
-                    val speedKmh = location.speed * 3.6
+                    val speedKmh = location.speed * 3.6f
 
-                    binding.tvSpeedValue.text = String.format("%.1f km/h", speedKmh)
+                    // UIのリアルタイム更新
+                    binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", speedKmh)
                     binding.tvStatus.text = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
                     binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
+
+                    if (speedKmh > 0) {
+                        speedReadings.add(speedKmh)
+                    }
+
+                    // 1分経過したら平均速度をDBに保存
+                    if (System.currentTimeMillis() - lastSaveTimestamp >= 60000) {
+                        saveAverageSpeedToDb()
+                    }
                 }
             }
         }
     }
-    
-    // --- 以下、変更なし ---
+
+    private fun saveAverageSpeedToDb() {
+        if (speedReadings.isEmpty()) {
+            lastSaveTimestamp = System.currentTimeMillis()
+            return
+        }
+
+        val averageSpeed = speedReadings.average().toFloat()
+        lifecycleScope.launch {
+            val newHistory = History(
+                userId = currentUserId,
+                timestamp = System.currentTimeMillis(),
+                walkingSpeed = averageSpeed,
+                acceleration = "", // Default value
+                emotionId = 0 // Default value, assuming 0 means no emotion or unrecorded
+            )
+            appDatabase.historyDao().insert(newHistory)
+            updateChartWithTodayData()
+        }
+
+        speedReadings.clear()
+        lastSaveTimestamp = System.currentTimeMillis()
+    }
 
     private fun updateChartWithTodayData() {
         lifecycleScope.launch {
@@ -209,7 +242,7 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        binding.homeButton.setBackgroundColor(Color.parseColor("#33000000"))
+        binding.homeButton.setBackgroundColor("#33000000".toColorInt())
         binding.passingButton.setOnClickListener { navigateTo(ProximityHistoryScreenActivity::class.java) }
         binding.historyButton.setOnClickListener { navigateTo(HistoryScreenActivity::class.java) }
         binding.emotionButton.setOnClickListener { /* TODO */ }
