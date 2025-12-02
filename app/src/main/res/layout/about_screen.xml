@@ -189,18 +189,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="サポートと規約"
+                        android:text="サポート"
                         android:textSize="18sp"
                         android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/privacyPolicyLink"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="プライバシーポリシー"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/contactLink"
