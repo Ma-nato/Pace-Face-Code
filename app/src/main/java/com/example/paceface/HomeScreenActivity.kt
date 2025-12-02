@@ -27,6 +27,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.graphics.toColorInt
 import android.widget.ImageButton // ImageButtonをインポート
+import android.view.animation.AlphaAnimation // 追加
+import android.view.animation.Animation // 追加
+import android.widget.TextView // 追加
 
 class HomeScreenActivity : AppCompatActivity() {
 
@@ -77,6 +80,28 @@ class HomeScreenActivity : AppCompatActivity() {
         setupChart()
         createLocationCallback()
         lastSaveTimestamp = System.currentTimeMillis() // 初期化
+
+        // --- ここから追加 ---
+        // カードの初期位置をオフセットして、画面外からスライドインさせる
+        binding.mainInfoCard.translationY = 200f
+        binding.chartCard.translationY = 200f
+        binding.mainInfoCard.alpha = 0f
+        binding.chartCard.alpha = 0f
+
+        binding.mainInfoCard.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay(200) // 少し遅れて開始
+            .start()
+
+        binding.chartCard.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay(400) // mainInfoCardよりさらに遅れて開始
+            .start()
+        // --- ここまで追加 ---
     }
 
     override fun onResume() {
@@ -137,9 +162,19 @@ class HomeScreenActivity : AppCompatActivity() {
                     val speedKmh = location.speed * 3.6f
 
                     // UIのリアルタイム更新
-                    binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", speedKmh)
-                    binding.tvStatus.text = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
+                    animateTextViewText(binding.tvSpeedValue, String.format(Locale.getDefault(), "%.1f km/h", speedKmh))
+                    val statusText = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
+                    animateTextViewText(binding.tvStatus, statusText)
                     binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
+
+                    // 顔アイコンの更新を追加
+                    if (speedKmh > 4.0) {
+                        // TODO: R.drawable.face_icon_fast を適切なリソースに置き換えてください
+                        // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_fast)
+                    } else {
+                        // TODO: R.drawable.face_icon_normal を適切なリソースに置き換えてください
+                        // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_normal)
+                    }
 
                     if (speedKmh > 0) {
                         speedReadings.add(speedKmh)
@@ -152,6 +187,22 @@ class HomeScreenActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun animateTextViewText(textView: TextView, newText: String) {
+        val fadeOut = AlphaAnimation(1.0f, 0.0f)
+        fadeOut.duration = 150
+        fadeOut.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationEnd(animation: Animation?) {
+                textView.text = newText
+                val fadeIn = AlphaAnimation(0.0f, 1.0f)
+                fadeIn.duration = 150
+                textView.startAnimation(fadeIn)
+            }
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
+        textView.startAnimation(fadeOut)
     }
 
     private fun saveAverageSpeedToDb() {
@@ -226,6 +277,8 @@ class HomeScreenActivity : AppCompatActivity() {
         val lineData = LineData(dataSet)
         binding.lineChart.data = lineData
         binding.lineChart.invalidate()
+        // グラフデータの更新時にアニメーションを追加
+        binding.lineChart.animateY(500) // Y軸方向に500ミリ秒でアニメーション
     }
 
     private fun getStartOfDay(calendar: Calendar): Calendar {
