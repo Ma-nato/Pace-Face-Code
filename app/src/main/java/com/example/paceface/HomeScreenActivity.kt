@@ -87,6 +87,10 @@ class HomeScreenActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    override fun onStop() {
+        super.onStop()
         // アプリ終了時に残っているデータを保存
         saveAverageSpeedToDb()
     }

@@ -16,4 +16,9 @@
     <!-- LoginActivity Error Messages -->
     <string name="error_empty_username_password">ユーザー名とパスワードを入力してください</string>
     <string name="error_invalid_username_password">※ユーザー名またはパスワードが違います</string>
+
+    <!-- Account Deletion Confirmation Screen -->
+    <string name="account_deletion_confirmation_message">アカウントを削除します\n本当によろしいでしょうか</string>
+    <string name="button_back">戻る</string>
+    <string name="button_delete">削除</string>
 </resources>
