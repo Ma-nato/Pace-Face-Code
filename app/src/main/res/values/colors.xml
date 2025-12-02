@@ -11,4 +11,7 @@
     <color name="table_header_bg">#C0C0C0</color>
 
     <color name="colorPrimary">#4A90E2</color>
+    <color name="color_footer_background">#E0E0E0</color>
+    <color name="color_account_deletion_background">#DCE6F2</color>
+    <color name="color_button_delete_background">#E24A4A</color>
 </resources>
