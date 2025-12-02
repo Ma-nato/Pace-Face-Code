@@ -16,30 +16,16 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         binding = UserSettingsScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // --- Bottom Nav Listeners ---
-        binding.gearButton.setBackgroundColor(ContextCompat.getColor(this, R.color.selected_nav_item_bg))
-
-        binding.homeButton.setOnClickListener {
-            val intent = Intent(this, HomeScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.passingButton.setOnClickListener {
-            val intent = Intent(this, ProximityHistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.historyButton.setOnClickListener {
-            val intent = Intent(this, HistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.gearButton.setOnClickListener {
-            // Current screen, do nothing
-        }
+        // NavigationUtils を使用して共通ナビゲーションをセットアップ
+        NavigationUtils.setupCommonNavigation(
+            this,
+            UserSettingsScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
 
         // --- Settings Button Listeners ---
 

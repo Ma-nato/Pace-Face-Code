@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.graphics.toColorInt
+import android.widget.ImageButton // ImageButtonをインポート
 
 class HomeScreenActivity : AppCompatActivity() {
 
@@ -246,16 +247,14 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        binding.homeButton.setBackgroundColor("#33000000".toColorInt())
-        binding.passingButton.setOnClickListener { navigateTo(ProximityHistoryScreenActivity::class.java) }
-        binding.historyButton.setOnClickListener { navigateTo(HistoryScreenActivity::class.java) }
-        binding.emotionButton.setOnClickListener { /* TODO */ }
-        binding.gearButton.setOnClickListener { navigateTo(UserSettingsScreenActivity::class.java) }
-    }
-
-    private fun <T : AppCompatActivity> navigateTo(activityClass: Class<T>) {
-        val intent = Intent(this, activityClass)
-        startActivity(intent)
-        overridePendingTransition(0, 0)
+        NavigationUtils.setupCommonNavigation(
+            this,
+            HomeScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
     }
 }

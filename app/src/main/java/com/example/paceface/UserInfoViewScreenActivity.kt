@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.paceface.databinding.UserInfoViewScreenBinding // Bindingクラスをインポート
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,10 +21,7 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
         const val EXTRA_USER_ID = "extra_user_id"
     }
 
-    private lateinit var backButton: ImageButton
-    private lateinit var etUsername: EditText
-    private lateinit var etEmail: EditText
-    private lateinit var btnEdit: Button
+    private lateinit var binding: UserInfoViewScreenBinding // Bindingクラスを使用
 
     private lateinit var db: AppDatabase
     private lateinit var userDao: UserDao
@@ -33,9 +31,9 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.user_info_view_screen)
+        binding = UserInfoViewScreenBinding.inflate(layoutInflater) // Bindingクラスを初期化
+        setContentView(binding.root)
 
-        setupViews()
         initDatabase()
         setupListeners()
 
@@ -45,13 +43,18 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
         } else {
             loadAndDisplayUserData(userId)
         }
-    }
 
-    private fun setupViews() {
-        backButton = findViewById(R.id.btn_back)
-        etUsername = findViewById(R.id.et_username)
-        etEmail = findViewById(R.id.et_email)
-        btnEdit = findViewById(R.id.btn_edit)
+        // NavigationUtils を使用して共通ナビゲーションをセットアップ
+        // このActivityはナビゲーションバーの主要な画面ではないため、どれもハイライトされない
+        NavigationUtils.setupCommonNavigation(
+            this,
+            UserInfoViewScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
     }
 
     private fun initDatabase() {
@@ -60,9 +63,9 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener { finish() }
+        binding.btnBack.setOnClickListener { finish() } // bindingを使用
 
-        btnEdit.setOnClickListener {
+        binding.btnEdit.setOnClickListener { // bindingを使用
             if (!isEditing) {
                 setEditMode(true)
             } else {
@@ -73,15 +76,15 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
 
     private fun setEditMode(isEditing: Boolean) {
         this.isEditing = isEditing
-        etUsername.isEnabled = isEditing
-        etUsername.isFocusable = isEditing
-        etUsername.isFocusableInTouchMode = isEditing
-        etEmail.isEnabled = isEditing
-        etEmail.isFocusable = isEditing
-        etEmail.isFocusableInTouchMode = isEditing
-        btnEdit.text = if (isEditing) "変更" else "編集"
+        binding.etUsername.isEnabled = isEditing // bindingを使用
+        binding.etUsername.isFocusable = isEditing // bindingを使用
+        binding.etUsername.isFocusableInTouchMode = isEditing // bindingを使用
+        binding.etEmail.isEnabled = isEditing // bindingを使用
+        binding.etEmail.isFocusable = isEditing // bindingを使用
+        binding.etEmail.isFocusableInTouchMode = isEditing // bindingを使用
+        binding.btnEdit.text = if (isEditing) "変更" else "編集" // bindingを使用
         if (isEditing) {
-            etUsername.requestFocus()
+            binding.etUsername.requestFocus() // bindingを使用
         }
     }
 
@@ -90,8 +93,8 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
             currentUser = userDao.getUserById(userId)
             withContext(Dispatchers.Main) {
                 currentUser?.let {
-                    etUsername.setText(it.name)
-                    etEmail.setText(it.email)
+                    binding.etUsername.setText(it.name) // bindingを使用
+                    binding.etEmail.setText(it.email) // bindingを使用
                 } ?: showErrorAndFinish("ユーザー情報が見つかりません")
             }
         }
@@ -108,10 +111,9 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
             .show()
     }
 
-    // ★★★ この関数を修正しました！ ★★★
     private fun saveChanges() {
-        val newUsername = etUsername.text.toString()
-        val newEmail = etEmail.text.toString()
+        val newUsername = binding.etUsername.text.toString() // bindingを使用
+        val newEmail = binding.etEmail.text.toString() // bindingを使用
 
         currentUser?.let { user ->
             val updatedUser = user.copy(name = newUsername, email = newEmail)
@@ -120,7 +122,6 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
                 userDao.update(updatedUser)
                 
                 withContext(Dispatchers.Main) {
-                    // Toastメッセージの代わりに、完了画面に遷移します
                     val intent = Intent(this@UserInfoViewScreenActivity, ExpressionChangeCompleteScreenActivity::class.java)
                     startActivity(intent)
                 }
