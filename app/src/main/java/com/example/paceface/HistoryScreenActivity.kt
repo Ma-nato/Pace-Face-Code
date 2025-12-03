@@ -1,20 +1,28 @@
 package com.example.paceface
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.HistoryScreenBinding
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.android.material.R as R_material
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class HistoryScreenActivity : AppCompatActivity() {
@@ -43,6 +51,7 @@ class HistoryScreenActivity : AppCompatActivity() {
 
         setupCalendar()
         setupNavigation()
+        setupChart() // グラフの初期設定
 
         // 初期表示として今日の日付のデータを読み込む
         updateChartForDate(Date())
@@ -53,7 +62,7 @@ class HistoryScreenActivity : AppCompatActivity() {
             val calendar = Calendar.getInstance()
             calendar.set(year, month, dayOfMonth)
             val selectedDate = calendar.time
-            
+
             // 特定の日付（2025年11月27日）が選択されたらダミーデータを挿入
             if (year == 2025 && month == Calendar.NOVEMBER && dayOfMonth == 27) {
                 insertAndShowDummyData(selectedDate)
@@ -124,12 +133,54 @@ class HistoryScreenActivity : AppCompatActivity() {
                     }
                     entries.sortBy { it.x }
 
-                    val dataSet = LineDataSet(entries, "歩行速度 (km/h)")
+                    val dataSet = LineDataSet(entries, "歩行速度").apply {
+                        color = ContextCompat.getColor(this@HistoryScreenActivity, R_material.color.design_default_color_primary)
+                        valueTextColor = Color.BLACK
+                        setCircleColor(color)
+                        circleRadius = 4f
+                        lineWidth = 2f
+                    }
                     val lineData = LineData(dataSet)
                     binding.lineChart.data = lineData
                     binding.lineChart.invalidate()
                 }
             }
+        }
+    }
+
+    private fun setupChart() {
+        binding.lineChart.apply {
+            description.isEnabled = false
+            isDragEnabled = true
+            setScaleEnabled(true)
+            setPinchZoom(true)
+            legend.isEnabled = false
+            xAxis.labelRotationAngle = -45f
+
+            // X軸のラベルをフォーマットする
+            xAxis.valueFormatter = object : ValueFormatter() {
+                private val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+                override fun getFormattedValue(value: Float): String {
+                    val hours = value.toInt()
+                    val minutes = ((value - hours) * 60).toInt()
+                    val calendar = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, hours)
+                        set(Calendar.MINUTE, minutes)
+                    }
+                    return format.format(calendar.time)
+                }
+            }
+            xAxis.setLabelCount(5, true)
+
+            // Y軸のラベルをフォーマットする
+            val leftAxis = binding.lineChart.axisLeft
+            leftAxis.valueFormatter = object : ValueFormatter() {
+                private val format = DecimalFormat("0.0", DecimalFormatSymbols(Locale.getDefault()))
+                override fun getFormattedValue(value: Float): String {
+                    return "${format.format(value)} km/h"
+                }
+            }
+            binding.lineChart.axisRight.isEnabled = false // 右側のY軸を非表示にする
         }
     }
 

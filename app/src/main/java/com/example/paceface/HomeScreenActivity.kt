@@ -222,8 +222,6 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
         } else {
             if (hasFineLocationPermission) {
                 startLocationUpdates()
-            } else {
-                requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
             }
         }
     }

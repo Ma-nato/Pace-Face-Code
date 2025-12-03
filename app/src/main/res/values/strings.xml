@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">PaceFace</string>
 
-    <string name="home_title">現在の平均歩行速度</string>
-    <string name="home_speed_placeholder">-- km/h</string>
+    <string name="home_title">現在の歩行速度:</string>
+    <string name="home_speed_placeholder">--</string>
     <string name="home_status_placeholder">速度：---</string>
     <string name="home_last_update_placeholder">最終更新日時：----/-/- --:--</string>
 

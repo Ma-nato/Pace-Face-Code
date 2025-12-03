@@ -8,6 +8,7 @@ import androidx.room.Transaction
 
 @Dao
 interface HistoryDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(history: History)
 
@@ -28,6 +29,7 @@ interface HistoryDao {
     suspend fun getAllWalkingSpeeds(userId: Int): List<Float>
 
     // --- Method for Dummy Data Deletion ---
+
     @Query("DELETE FROM History WHERE userId = :userId AND timestamp BETWEEN :startOfDay AND :endOfDay")
     suspend fun deleteHistoryForUserOnDate(userId: Int, startOfDay: Long, endOfDay: Long)
 
