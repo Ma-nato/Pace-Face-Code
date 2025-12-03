@@ -7,41 +7,47 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.paceface.databinding.PasswordChangeScreenBinding // Bindingクラスをインポート
+import com.example.paceface.R
 import kotlinx.coroutines.launch
 
 class PasswordChangeScreenActivity : AppCompatActivity() {
 
-    private lateinit var binding: PasswordChangeScreenBinding // Bindingクラスを使用
     private lateinit var db: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = PasswordChangeScreenBinding.inflate(layoutInflater) // Bindingクラスを初期化
-        setContentView(binding.root)
+        setContentView(R.layout.password_change_screen)
 
         db = AppDatabase.getDatabase(this)
 
-        // --- View 紐付けはbindingを使用 ---
+        // --- View 紐付け ---
+        val btnBack = findViewById<ImageButton>(R.id.button)
+
+        val etCurrent = findViewById<EditText>(R.id.textView6)
+        val etNew = findViewById<EditText>(R.id.textView3)
+        val etConfirm = findViewById<EditText>(R.id.textView10)
+
+        val errorCurrent = findViewById<TextView>(R.id.error_current_password)
+        val errorNew = findViewById<TextView>(R.id.error_new_password)
+        val errorConfirm = findViewById<TextView>(R.id.error_confirm_password)
+
+        val btnChange = findViewById<Button>(R.id.button2)
 
         // --- 戻るボタン ---
-        binding.button.setOnClickListener { // bindingを使用
+        btnBack.setOnClickListener {
             finish()
         }
 
         // --- 変更ボタン押したとき ---
-        binding.button2.setOnClickListener { // bindingを使用
-            // --- 入力値を取得 ---
-            val currentPw = binding.textView6.text.toString() // bindingを使用
-            val newPw = binding.textView3.text.toString() // bindingを使用
-            val confirmPw = binding.textView10.text.toString() // bindingを使用
+        btnChange.setOnClickListener {
+            val currentPw = etCurrent.text.toString()
+            val newPw = etNew.text.toString()
+            val confirmPw = etConfirm.text.toString()
 
-            // --- エラーメッセージを一旦非表示 ---
-            binding.errorCurrentPassword.visibility = View.GONE // bindingを使用
-            binding.errorNewPassword.visibility = View.GONE // bindingを使用
-            binding.errorConfirmPassword.visibility = View.GONE // bindingを使用
+            errorCurrent.visibility = View.GONE
+            errorNew.visibility = View.GONE
+            errorConfirm.visibility = View.GONE
 
-            // --- SharedPreferencesからログイン中のユーザーIDを取得 ---
             val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
             val userId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
 
@@ -51,52 +57,45 @@ class PasswordChangeScreenActivity : AppCompatActivity() {
             }
 
             lifecycleScope.launch {
-                // --- データベースからユーザー情報を非同期で取得 ---
                 val user = db.userDao().getUserById(userId)
 
-                // --- パスワード検証ロジック ---
-                val isCurrentPasswordValid = user != null && user.password == currentPw
+                if (user == null) {
+                    runOnUiThread {
+                        Toast.makeText(this@PasswordChangeScreenActivity, "ユーザーが見つかりません", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+
+                // --- ハッシュ化してパスワードを比較 ---
+                val isCurrentPasswordValid = user.password == User.hashPassword(currentPw)
                 val isNewPasswordLongEnough = newPw.length >= 8
                 val doNewPasswordsMatch = newPw == confirmPw
 
                 if (isCurrentPasswordValid && isNewPasswordLongEnough && doNewPasswordsMatch) {
-                    // --- 検証成功：DBを更新 ---
-                    val updatedUser = user!!.copy(password = newPw)
+                    // --- 検証成功：新しいパスワードをハッシュ化してDBを更新 ---
+                    val updatedUser = user.copy(password = User.hashPassword(newPw))
                     db.userDao().update(updatedUser)
 
-                    // --- UIスレッドで成功画面へ遷移 & 画面を閉じる ---
                     runOnUiThread {
                         val intent = Intent(this@PasswordChangeScreenActivity, PasswordChangeCompleteScreenActivity::class.java)
                         startActivity(intent)
-                        finish() // パスワード変更画面をスタックから削除
+                        finish()
                     }
                 } else {
                     // --- 検証失敗：UIスレッドでエラー表示 ---
                     runOnUiThread {
                         if (!isCurrentPasswordValid) {
-                            binding.errorCurrentPassword.visibility = View.VISIBLE // bindingを使用
+                            errorCurrent.visibility = View.VISIBLE
                         }
                         if (!isNewPasswordLongEnough) {
-                            binding.errorNewPassword.visibility = View.VISIBLE // bindingを使用
+                            errorNew.visibility = View.VISIBLE
                         }
                         if (!doNewPasswordsMatch) {
-                            binding.errorConfirmPassword.visibility = View.VISIBLE // bindingを使用
+                            errorConfirm.visibility = View.VISIBLE
                         }
                     }
                 }
             }
         }
-
-        // NavigationUtils を使用して共通ナビゲーションをセットアップ
-        // このActivityはナビゲーションバーの主要な画面ではないため、どれもハイライトされない
-        NavigationUtils.setupCommonNavigation(
-            this,
-            PasswordChangeScreenActivity::class.java,
-            binding.homeButton,
-            binding.passingButton,
-            binding.historyButton,
-            binding.emotionButton,
-            binding.gearButton
-        )
     }
 }
