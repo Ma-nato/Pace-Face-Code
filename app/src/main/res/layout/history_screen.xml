@@ -54,7 +54,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="前日の表情の割合 (円グラフエリア)"
+                        android:text="@string/history_emotion_pie_chart_title"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -62,7 +62,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:text="データがありません"
+                        android:text="@string/history_no_data"
                         android:textColor="@android:color/darker_gray" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
@@ -72,7 +72,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="日付の選択"
+                android:text="@string/history_date_selection"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 

@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:gravity="center"
-        android:text="ヘルプ画面"
+        android:text="@string/help_screen_title"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -29,6 +29,7 @@
         android:layout_marginTop="28dp"
         android:adjustViewBounds="true"
         android:background="@android:color/transparent"
+        android:contentDescription="@string/button_back"
         android:scaleType="fitCenter"
         android:src="@drawable/back_button"
         app:layout_constraintStart_toStartOf="parent"
@@ -69,7 +70,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="ユーザー情報について"
+                        android:text="@string/help_user_info_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/black" />
@@ -78,49 +79,49 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="・ユーザー情報の確認方法" />
+                        android:text="@string/help_user_info_check_method_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="画面右下の歯車のアイコンをタップし、「ユーザー情報」を選択すると、登録されているユーザー名やその他の情報を確認できます。" />
+                        android:text="@string/help_user_info_check_method_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・ユーザー情報の変更方法" />
+                        android:text="@string/help_user_info_change_method_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="ユーザー情報画面で、変更したい項目をタップし、新しい情報を入力して保存してください。" />
+                        android:text="@string/help_user_info_change_method_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・パスワードの変更方法" />
+                        android:text="@string/help_password_change_method_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="設定画面から「パスワードの変更」を選択し、現在のパスワードと新しいパスワードを入力して更新してください。" />
+                        android:text="@string/help_password_change_method_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・アカウントの削除方法" />
+                        android:text="@string/help_account_delete_method_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="設定画面から「アカウントの削除」を選択し、指示に従って手続きを進めてください。アカウントを削除すると、すべてのデータが失われますのでご注意ください。" />
+                        android:text="@string/help_account_delete_method_description" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -144,7 +145,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="機能の使い方"
+                        android:text="@string/help_function_usage_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/black" />
@@ -153,73 +154,73 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="・基本的な画面操作" />
+                        android:text="@string/help_basic_operation_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="アプリの主要な機能は画面下部のナビゲーションバーからアクセスできます。ホーム、すれちがい、履歴、表情、設定の各ボタンをタップして画面を切り替えてください。" />
+                        android:text="@string/help_basic_operation_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・ホーム画面の利用" />
+                        android:text="@string/help_home_screen_usage_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="ログイン後、ホーム画面には現在の歩行速度や状態が表示されます。" />
+                        android:text="@string/help_home_screen_usage_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・すれちがい機能" />
+                        android:text="@string/help_passing_function_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="すれちがいボタンをタップすると、近くのユーザーと速度情報を共有できます。" />
+                        android:text="@string/help_passing_function_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・履歴の確認" />
+                        android:text="@string/help_history_check_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="履歴ボタンから、過去の歩行データや感情の履歴を確認できます。" />
+                        android:text="@string/help_history_check_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・表情の変更" />
+                        android:text="@string/help_emotion_change_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="表情ボタンから、自分のアバターの表情をカスタマイズできます。" />
+                        android:text="@string/help_emotion_change_description" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="・各種設定" />
+                        android:text="@string/help_settings_title" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="歯車ボタンをタップすると、ユーザー情報やパスワードの変更、デバイス接続などの設定を行えます。" />
+                        android:text="@string/help_settings_description" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -242,7 +243,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="連絡先"
+                        android:text="@string/help_contact_title"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/black" />
@@ -251,13 +252,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="所在地： 〒890-0065 鹿児島県鹿児島市郡元１丁目９−５" />
+                        android:text="@string/help_contact_address" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="電話番号： 099-258-0121" />
+                        android:text="@string/help_contact_phone" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -285,6 +286,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_home_button"
             android:scaleType="fitCenter"
             android:src="@drawable/home_button" />
 
@@ -296,6 +298,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_passing_button"
             android:scaleType="fitCenter"
             android:src="@drawable/passing_button" />
 
@@ -307,6 +310,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_history_button"
             android:scaleType="fitCenter"
             android:src="@drawable/history_button" />
 
@@ -318,6 +322,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_emotion_button"
             android:scaleType="fitCenter"
             android:src="@drawable/emotion_button" />
 
@@ -329,6 +334,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/content_description_gear_button"
             android:scaleType="fitCenter"
             android:src="@drawable/gear_button" />
 
