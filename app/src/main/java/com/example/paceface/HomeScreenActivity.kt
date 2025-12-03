@@ -5,6 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
@@ -30,8 +34,11 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayDeque
+import kotlin.math.pow
+import kotlin.math.sqrt
 
-class HomeScreenActivity : AppCompatActivity() {
+class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var binding: HomeScreenBinding
     private lateinit var appDatabase: AppDatabase
@@ -43,6 +50,22 @@ class HomeScreenActivity : AppCompatActivity() {
 
     private val speedReadings = mutableListOf<Float>()
     private var lastSaveTimestamp = 0L
+
+    // 加速度センサー関連の追加
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
+
+    // 重力と線形加速度の計算用
+    private val gravity = FloatArray(3) // 重力成分を保持
+    private val linearAcceleration = FloatArray(3) // 線形加速度を保持
+    private val linearAccelerationMagnitudes = ArrayDeque<Float>() // 最近の線形加速度マグニチュードを保持
+    private val MAX_ACCEL_MAGNITUDE_QUEUE_SIZE = 20 // 最後のN個の加速度データを保持 (例: 1秒あたり20Hzで1秒分)
+
+    // センサー融合のための定数
+    private val ACCEL_MOTION_THRESHOLD = 0.5f // m/s^2 (線形加速度マグニチュードで動きを検出するしきい値)
+    private val DEFAULT_ACCEL_WALKING_SPEED_KMH = 4.0f // km/h (加速度センサーが動きを検出したがGPSが信頼できない場合のデフォルト速度)
+    private val GPS_ACCURACY_THRESHOLD_METERS = 20f // meters (GPSの精度がこれ以下なら信頼できると判断)
+    private val MIN_GPS_SPEED_FOR_RELIABILITY_KMH = 1.0f // km/h (GPS速度がこれ以上の場合に信頼できると判断)
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -67,6 +90,13 @@ class HomeScreenActivity : AppCompatActivity() {
 
         appDatabase = AppDatabase.getDatabase(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // 加速度センサーの初期化
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        if (accelerometer == null) {
+            Toast.makeText(this, "加速度センサーが利用できません。", Toast.LENGTH_LONG).show()
+        }
 
         val sharedPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         currentUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
@@ -112,16 +142,57 @@ class HomeScreenActivity : AppCompatActivity() {
         super.onResume()
         checkLocationPermissionAndStartUpdates()
         updateChartWithTodayData()
+        // センサーリスナーを登録
+        accelerometer?.also {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
     }
 
     override fun onPause() {
         super.onPause()
         fusedLocationClient.removeLocationUpdates(locationCallback)
+        // センサーリスナーの登録を解除
+        sensorManager.unregisterListener(this)
     }
 
     override fun onStop() {
         super.onStop()
         saveAverageSpeedToDb()
+    }
+
+    // --- SensorEventListener の実装 ---
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+            // ローパスフィルターで重力成分を分離
+            val alpha = 0.8f // フィルター係数 (0.8f は一般的な値)
+
+            // 重力成分の更新
+            gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
+            gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
+            gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
+
+            // 線形加速度の計算 (加速度から重力成分を引く)
+            linearAcceleration[0] = event.values[0] - gravity[0]
+            linearAcceleration[1] = event.values[1] - gravity[1]
+            linearAcceleration[2] = event.values[2] - gravity[2]
+
+            // 線形加速度のマグニチュードを計算し、キューに追加
+            val magnitude = sqrt(linearAcceleration[0].pow(2) + linearAcceleration[1].pow(2) + linearAcceleration[2].pow(2))
+            linearAccelerationMagnitudes.add(magnitude)
+            if (linearAccelerationMagnitudes.size > MAX_ACCEL_MAGNITUDE_QUEUE_SIZE) {
+                linearAccelerationMagnitudes.removeFirst()
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // センサーの精度が変更されたときに呼ばれます（必要に応じて実装）
+    }
+
+    // 最近の線形加速度マグニチュードの平均値を計算するヘルパー関数
+    private fun getAverageLinearAccelerationMagnitude(): Float {
+        if (linearAccelerationMagnitudes.isEmpty()) return 0f
+        return linearAccelerationMagnitudes.average().toFloat()
     }
 
     private fun checkLocationPermissionAndStartUpdates() {
@@ -155,9 +226,9 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun startLocationUpdates() {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 500) // 0.5秒ごとに更新
             .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(2000)
+            .setMinUpdateIntervalMillis(500) // 最小更新間隔を0.5秒に
             .build()
 
         try {
@@ -175,21 +246,43 @@ class HomeScreenActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let { location ->
-                    val speedKmh = location.speed * 3.6f
+                    val gpsSpeedKmh = location.speed * 3.6f // m/s を km/h に変換
+                    val gpsAccuracy = location.accuracy // meters
 
-                    binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", speedKmh)
-                    val statusText = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
+                    val averageLinearAccelMagnitude = getAverageLinearAccelerationMagnitude()
+
+                    var finalSpeedKmh: Float
+
+                    // GPSが信頼できるかどうかの判断
+                    val isGpsReliable = gpsAccuracy < GPS_ACCURACY_THRESHOLD_METERS && gpsSpeedKmh >= MIN_GPS_SPEED_FOR_RELIABILITY_KMH
+                    // 加速度センサーが動きを検出しているかどうかの判断
+                    val isAccelMoving = averageLinearAccelMagnitude > ACCEL_MOTION_THRESHOLD
+
+                    if (isGpsReliable) {
+                        // GPSが信頼できる場合はGPS速度を使用
+                        finalSpeedKmh = gpsSpeedKmh
+                    } else if (isAccelMoving) {
+                        // GPSが信頼できないが、加速度センサーが動きを検知している場合
+                        // 歩行とみなし、デフォルトの歩行速度を設定
+                        finalSpeedKmh = DEFAULT_ACCEL_WALKING_SPEED_KMH
+                    } else {
+                        // 両方とも動きを検知しない場合、静止と判断
+                        finalSpeedKmh = 0f
+                    }
+
+                    binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", finalSpeedKmh)
+                    val statusText = "速度: " + if (finalSpeedKmh > 4.0) "速い" else "普通"
                     binding.tvStatus.text = statusText
                     binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
 
-                    if (speedKmh > 4.0) {
+                    if (finalSpeedKmh > 4.0) {
                         // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_fast)
                     } else {
                         // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_normal)
                     }
 
-                    if (speedKmh > 0) {
-                        speedReadings.add(speedKmh)
+                    if (finalSpeedKmh > 0) {
+                        speedReadings.add(finalSpeedKmh)
                     }
 
                     if (System.currentTimeMillis() - lastSaveTimestamp >= 60000) {
