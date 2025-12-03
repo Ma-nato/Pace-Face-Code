@@ -127,6 +127,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/content_description_home_button"
             android:scaleType="fitCenter"
             android:src="@drawable/home_button" />
@@ -139,6 +140,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/content_description_passing_button"
             android:scaleType="fitCenter"
             android:src="@drawable/passing_button" />
@@ -151,6 +153,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/content_description_history_button"
             android:scaleType="fitCenter"
             android:src="@drawable/history_button" />
@@ -163,6 +166,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/content_description_emotion_button"
             android:scaleType="fitCenter"
             android:src="@drawable/emotion_button" />
@@ -175,6 +179,7 @@
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/content_description_gear_button"
             android:scaleType="fitCenter"
             android:src="@drawable/gear_button" />

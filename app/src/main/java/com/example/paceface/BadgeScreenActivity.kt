@@ -31,28 +31,16 @@ class BadgeScreenActivity : AppCompatActivity() {
         }
 
         // --- Navigation --- //
-        binding.homeButton.setOnClickListener {
-            val intent = Intent(this, HomeScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.passingButton.setOnClickListener {
-            val intent = Intent(this, ProximityHistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.historyButton.setOnClickListener { // Added this block
-            val intent = Intent(this, HistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.gearButton.setOnClickListener {
-            val intent = Intent(this, UserSettingsScreenActivity::class.java)
-            startActivity(intent)
-        }
+        // NavigationUtils を使用して共通ナビゲーションをセットアップ
+        NavigationUtils.setupCommonNavigation(
+            this,
+            BadgeScreenActivity::class.java, // このActivityはナビゲーションバーの主要な画面ではないため、どれもハイライトされない
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
         // ------------------ //
 
         loadAndDisplayBadges()

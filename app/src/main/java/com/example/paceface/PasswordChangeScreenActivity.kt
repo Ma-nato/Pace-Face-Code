@@ -7,48 +7,39 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.paceface.R
+import com.example.paceface.databinding.PasswordChangeScreenBinding // Bindingクラスをインポート
 import kotlinx.coroutines.launch
 
 class PasswordChangeScreenActivity : AppCompatActivity() {
 
+    private lateinit var binding: PasswordChangeScreenBinding // Bindingクラスを使用
     private lateinit var db: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.password_change_screen)
+        binding = PasswordChangeScreenBinding.inflate(layoutInflater) // Bindingクラスを初期化
+        setContentView(binding.root)
 
         db = AppDatabase.getDatabase(this)
 
-        // --- View 紐付け ---
-        val btnBack = findViewById<ImageButton>(R.id.button)
-
-        val etCurrent = findViewById<EditText>(R.id.textView6)
-        val etNew = findViewById<EditText>(R.id.textView3)
-        val etConfirm = findViewById<EditText>(R.id.textView10)
-
-        val errorCurrent = findViewById<TextView>(R.id.error_current_password)
-        val errorNew = findViewById<TextView>(R.id.error_new_password)
-        val errorConfirm = findViewById<TextView>(R.id.error_confirm_password)
-
-        val btnChange = findViewById<Button>(R.id.button2)
+        // --- View 紐付けはbindingを使用 ---
 
         // --- 戻るボタン ---
-        btnBack.setOnClickListener {
+        binding.button.setOnClickListener { // bindingを使用
             finish()
         }
 
         // --- 変更ボタン押したとき ---
-        btnChange.setOnClickListener {
+        binding.button2.setOnClickListener { // bindingを使用
             // --- 入力値を取得 ---
-            val currentPw = etCurrent.text.toString()
-            val newPw = etNew.text.toString()
-            val confirmPw = etConfirm.text.toString()
+            val currentPw = binding.textView6.text.toString() // bindingを使用
+            val newPw = binding.textView3.text.toString() // bindingを使用
+            val confirmPw = binding.textView10.text.toString() // bindingを使用
 
             // --- エラーメッセージを一旦非表示 ---
-            errorCurrent.visibility = View.GONE
-            errorNew.visibility = View.GONE
-            errorConfirm.visibility = View.GONE
+            binding.errorCurrentPassword.visibility = View.GONE // bindingを使用
+            binding.errorNewPassword.visibility = View.GONE // bindingを使用
+            binding.errorConfirmPassword.visibility = View.GONE // bindingを使用
 
             // --- SharedPreferencesからログイン中のユーザーIDを取得 ---
             val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
@@ -83,17 +74,29 @@ class PasswordChangeScreenActivity : AppCompatActivity() {
                     // --- 検証失敗：UIスレッドでエラー表示 ---
                     runOnUiThread {
                         if (!isCurrentPasswordValid) {
-                            errorCurrent.visibility = View.VISIBLE
+                            binding.errorCurrentPassword.visibility = View.VISIBLE // bindingを使用
                         }
                         if (!isNewPasswordLongEnough) {
-                            errorNew.visibility = View.VISIBLE
+                            binding.errorNewPassword.visibility = View.VISIBLE // bindingを使用
                         }
                         if (!doNewPasswordsMatch) {
-                            errorConfirm.visibility = View.VISIBLE
+                            binding.errorConfirmPassword.visibility = View.VISIBLE // bindingを使用
                         }
                     }
                 }
             }
         }
+
+        // NavigationUtils を使用して共通ナビゲーションをセットアップ
+        // このActivityはナビゲーションバーの主要な画面ではないため、どれもハイライトされない
+        NavigationUtils.setupCommonNavigation(
+            this,
+            PasswordChangeScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
     }
 }

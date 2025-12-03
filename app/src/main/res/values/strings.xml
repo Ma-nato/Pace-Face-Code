@@ -21,4 +21,37 @@
     <string name="account_deletion_confirmation_message">アカウントを削除します\n本当によろしいでしょうか</string>
     <string name="button_back">戻る</string>
     <string name="button_delete">削除</string>
+
+    <!-- Help Screen -->
+    <string name="help_screen_title">ヘルプ画面</string>
+    <string name="help_user_info_title">ユーザー情報について</string>
+    <string name="help_user_info_check_method_title">・ユーザー情報の確認方法</string>
+    <string name="help_user_info_check_method_description">画面右下の歯車のアイコンをタップし、「ユーザー情報」を選択すると、登録されているユーザー名やその他の情報を確認できます。</string>
+    <string name="help_user_info_change_method_title">・ユーザー情報の変更方法</string>
+    <string name="help_user_info_change_method_description">ユーザー情報画面で、変更したい項目をタップし、新しい情報を入力して保存してください。</string>
+    <string name="help_password_change_method_title">・パスワードの変更方法</string>
+    <string name="help_password_change_method_description">設定画面から「パスワードの変更」を選択し、現在のパスワードと新しいパスワードを入力して更新してください。</string>
+    <string name="help_account_delete_method_title">・アカウントの削除方法</string>
+    <string name="help_account_delete_method_description">設定画面から「アカウントの削除」を選択し、指示に従って手続きを進めてください。アカウントを削除すると、すべてのデータが失われますのでご注意ください。</string>
+    <string name="help_function_usage_title">機能の使い方</string>
+    <string name="help_basic_operation_title">・基本的な画面操作</string>
+    <string name="help_basic_operation_description">アプリの主要な機能は画面下部のナビゲーションバーからアクセスできます。ホーム、すれちがい、履歴、表情、設定の各ボタンをタップして画面を切り替えてください。</string>
+    <string name="help_home_screen_usage_title">・ホーム画面の利用</string>
+    <string name="help_home_screen_usage_description">ログイン後、ホーム画面には現在の歩行速度や状態が表示されます。</string>
+    <string name="help_passing_function_title">・すれちがい機能</string>
+    <string name="help_passing_function_description">すれちがいボタンをタップすると、近くのユーザーと速度情報を共有できます。</string>
+    <string name="help_history_check_title">・履歴の確認</string>
+    <string name="help_history_check_description">履歴ボタンから、過去の歩行データや感情の履歴を確認できます。</string>
+    <string name="help_emotion_change_title">・表情の変更</string>
+    <string name="help_emotion_change_description">表情ボタンから、自分のアバターの表情をカスタマイズできます。</string>
+    <string name="help_settings_title">・各種設定</string>
+    <string name="help_settings_description">歯車ボタンをタップすると、ユーザー情報やパスワードの変更、デバイス接続などの設定を行えます。</string>
+    <string name="help_contact_title">連絡先</string>
+    <string name="help_contact_address">所在地： 〒890-0065 鹿児島県鹿児島市郡元１丁目９−５</string>
+    <string name="help_contact_phone">電話番号： 099-258-0121</string>
+
+    <!-- History Screen -->
+    <string name="history_emotion_pie_chart_title">前日の表情の割合 (円グラフエリア)</string>
+    <string name="history_no_data">データがありません</string>
+    <string name="history_date_selection">日付の選択</string>
 </resources>

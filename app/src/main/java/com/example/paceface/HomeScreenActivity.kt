@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.widget.Toast
@@ -28,6 +29,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import androidx.core.graphics.toColorInt
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.widget.TextView
 
 class HomeScreenActivity : AppCompatActivity() {
 
@@ -39,17 +43,22 @@ class HomeScreenActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
-    // 1分間の速度データを保持するリスト
     private val speedReadings = mutableListOf<Float>()
-    // 最終保存時刻
     private var lastSaveTimestamp = 0L
 
     private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                startLocationUpdates()
-            } else {
-                Toast.makeText(this, "位置情報の権限がありません。速度を計測できません。", Toast.LENGTH_LONG).show()
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            when {
+                permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false) -> {
+                    startLocationUpdates()
+                }
+                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    Toast.makeText(this, "バックグラウンドでの位置情報アクセスが許可されなかったため、アプリがバックグラウンドにあると速度を記録できません。", Toast.LENGTH_LONG).show()
+                    startLocationUpdates()
+                }
+                else -> {
+                    Toast.makeText(this, "位置情報の権限がありません。速度を計測できません。", Toast.LENGTH_LONG).show()
+                }
             }
         }
 
@@ -80,6 +89,26 @@ class HomeScreenActivity : AppCompatActivity() {
         lastSaveTimestamp = System.currentTimeMillis() // 初期化
 
         checkAndGenerateCustomRules()
+        lastSaveTimestamp = System.currentTimeMillis()
+
+        binding.mainInfoCard.translationY = 200f
+        binding.chartCard.translationY = 200f
+        binding.mainInfoCard.alpha = 0f
+        binding.chartCard.alpha = 0f
+
+        binding.mainInfoCard.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay(200)
+            .start()
+
+        binding.chartCard.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay(400)
+            .start()
     }
 
     override fun onResume() {
@@ -95,23 +124,35 @@ class HomeScreenActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        // アプリ終了時に残っているデータを保存
         saveAverageSpeedToDb()
     }
 
     private fun checkLocationPermissionAndStartUpdates() {
-        when {
-            ContextCompat.checkSelfPermission(
+        val hasFineLocationPermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val hasBackgroundLocationPermission = ContextCompat.checkSelfPermission(
                 this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasFineLocationPermission && hasBackgroundLocationPermission) {
                 startLocationUpdates()
+            } else {
+                val permissionsToRequest = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
+                if (!hasBackgroundLocationPermission) {
+                    permissionsToRequest.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                }
+                requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
             }
-            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            if (hasFineLocationPermission) {
+                startLocationUpdates()
+            } else {
+                requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
             }
         }
     }
@@ -139,22 +180,43 @@ class HomeScreenActivity : AppCompatActivity() {
                 locationResult.lastLocation?.let { location ->
                     val speedKmh = location.speed * 3.6f
 
-                    // UIのリアルタイム更新
                     binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", speedKmh)
-                    binding.tvStatus.text = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
+                    val statusText = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
+                    binding.tvStatus.text = statusText
                     binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
+
+                    if (speedKmh > 4.0) {
+                        // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_fast)
+                    } else {
+                        // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_normal)
+                    }
 
                     if (speedKmh > 0) {
                         speedReadings.add(speedKmh)
                     }
 
-                    // 1分経過したら平均速度をDBに保存
                     if (System.currentTimeMillis() - lastSaveTimestamp >= 60000) {
                         saveAverageSpeedToDb()
                     }
                 }
             }
         }
+    }
+
+    private fun animateTextViewText(textView: TextView, newText: String) {
+        val fadeOut = AlphaAnimation(1.0f, 0.0f)
+        fadeOut.duration = 150
+        fadeOut.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationEnd(animation: Animation?) {
+                textView.text = newText
+                val fadeIn = AlphaAnimation(0.0f, 1.0f)
+                fadeIn.duration = 150
+                textView.startAnimation(fadeIn)
+            }
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
+        textView.startAnimation(fadeOut)
     }
 
     private fun saveAverageSpeedToDb() {
@@ -169,8 +231,8 @@ class HomeScreenActivity : AppCompatActivity() {
                 userId = currentUserId,
                 timestamp = System.currentTimeMillis(),
                 walkingSpeed = averageSpeed,
-                acceleration = "", // Default value
-                emotionId = 0 // Default value, assuming 0 means no emotion or unrecorded
+                acceleration = "",
+                emotionId = 0
             )
             appDatabase.historyDao().insert(newHistory)
             updateChartWithTodayData()
@@ -229,6 +291,7 @@ class HomeScreenActivity : AppCompatActivity() {
         val lineData = LineData(dataSet)
         binding.lineChart.data = lineData
         binding.lineChart.invalidate()
+        binding.lineChart.animateY(500)
     }
 
     private fun getStartOfDay(calendar: Calendar): Calendar {
@@ -250,17 +313,15 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        binding.homeButton.setBackgroundColor("#33000000".toColorInt())
-        binding.passingButton.setOnClickListener { navigateTo(ProximityHistoryScreenActivity::class.java) }
-        binding.historyButton.setOnClickListener { navigateTo(HistoryScreenActivity::class.java) }
-        binding.emotionButton.setOnClickListener { /* TODO */ }
-        binding.gearButton.setOnClickListener { navigateTo(UserSettingsScreenActivity::class.java) }
-    }
-
-    private fun <T : AppCompatActivity> navigateTo(activityClass: Class<T>) {
-        val intent = Intent(this, activityClass)
-        startActivity(intent)
-        overridePendingTransition(0, 0)
+        NavigationUtils.setupCommonNavigation(
+            this,
+            HomeScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
     }
 
     // --- Custom Rule Generation ---

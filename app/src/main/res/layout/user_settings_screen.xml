@@ -24,6 +24,7 @@
 
     <!-- 設定項目リスト -->
     <LinearLayout
+        android:id="@+id/settingsListLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"

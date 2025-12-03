@@ -28,7 +28,15 @@ class AboutScreenActivity : AppCompatActivity() {
         }
         
         // 下部ナビゲーションのセットアップ
-        setupNavigation()
+        NavigationUtils.setupCommonNavigation(
+            this,
+            AboutScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
     }
 
     private fun sendContactEmail() {
@@ -46,37 +54,6 @@ class AboutScreenActivity : AppCompatActivity() {
             startActivity(intent)
         } else {
             Toast.makeText(this, "メールアプリが見つかりません。", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun setupNavigation() {
-
-        binding.homeButton.setOnClickListener {
-            val intent = Intent(this, HomeScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.passingButton.setOnClickListener {
-            val intent = Intent(this, ProximityHistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.historyButton.setOnClickListener {
-            val intent = Intent(this, HistoryScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-        }
-
-        binding.emotionButton.setOnClickListener {
-            // TODO: EmotionScreenActivity.kt を作成し、遷移を実装する
-        }
-
-        binding.gearButton.setOnClickListener {
-            val intent = Intent(this, UserSettingsScreenActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
         }
     }
 }

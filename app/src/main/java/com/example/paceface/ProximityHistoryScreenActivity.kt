@@ -20,12 +20,34 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
         binding = ProximityHistoryScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // アニメーションの適用 (RecyclerViewのみ)
+        binding.rvProximityHistory.translationY = 200f
+        binding.rvProximityHistory.alpha = 0f
+
+        binding.rvProximityHistory.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay(200) // 少し遅れて開始
+            .start()
+
         appDatabase = AppDatabase.getDatabase(this)
 
-        binding.passingButton.setBackgroundColor(ContextCompat.getColor(this, R.color.selected_nav_item_bg))
+        // NavigationUtils を使用して共通ナビゲーションをセットアップ
+        // 既存の `binding.passingButton.setBackgroundColor(...)` と `setupButtons()` 内のナビゲーションロジックを置き換えます
+        NavigationUtils.setupCommonNavigation(
+            this,
+            ProximityHistoryScreenActivity::class.java, // 現在のActivityのClassを指定
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
 
         setupRecyclerView()
-        setupButtons()
+        // setupButtons() は NavigationUtils で置き換えられるため、ナビゲーション以外のボタンのみを処理する関数を呼び出す
+        setupOtherButtons()
         loadProximityHistory()
     }
 
@@ -35,38 +57,10 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
         binding.rvProximityHistory.adapter = adapter
     }
 
-    private fun setupButtons() {
+    // ナビゲーション以外のボタンを設定するための新しい関数
+    private fun setupOtherButtons() {
         binding.btnBadgeList.setOnClickListener {
             val intent = Intent(this, BadgeScreenActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.homeButton.setOnClickListener {
-            val intent = Intent(this, HomeScreenActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-            startActivity(intent)
-        }
-
-        binding.passingButton.setOnClickListener {
-            // Already on this screen, no action needed.
-        }
-
-        binding.historyButton.setOnClickListener {
-            val intent = Intent(this, HistoryScreenActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-            startActivity(intent)
-        }
-
-        // EmotionScreenActivity is not created yet, so this is commented out.
-//        binding.emotionButton.setOnClickListener {
-//            val intent = Intent(this, EmotionScreenActivity::class.java)
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-//            startActivity(intent)
-//        }
-
-        binding.gearButton.setOnClickListener {
-            val intent = Intent(this, UserSettingsScreenActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
             startActivity(intent)
         }
     }

@@ -139,11 +139,15 @@ class HistoryScreenActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        binding.historyButton.setBackgroundColor("#33000000".toColorInt())
-        binding.homeButton.setOnClickListener { navigateTo(HomeScreenActivity::class.java) }
-        binding.passingButton.setOnClickListener { navigateTo(ProximityHistoryScreenActivity::class.java) }
-        binding.emotionButton.setOnClickListener { /* TODO */ }
-        binding.gearButton.setOnClickListener { navigateTo(UserSettingsScreenActivity::class.java) }
+        NavigationUtils.setupCommonNavigation(
+            this,
+            HistoryScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
     }
 
     private fun <T : AppCompatActivity> navigateTo(activityClass: Class<T>) {
