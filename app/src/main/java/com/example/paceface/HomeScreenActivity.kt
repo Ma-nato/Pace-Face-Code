@@ -28,9 +28,12 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.material.R as R_material
+import com.github.mikephil.charting.formatter.ValueFormatter // ValueFormatterをインポート
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols // DecimalFormatSymbolsをインポート
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -226,9 +229,9 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun startLocationUpdates() {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 500) // 0.5秒ごとに更新
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000) // 3秒ごとに更新
             .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(500) // 最小更新間隔を0.5秒に
+            .setMinUpdateIntervalMillis(3000) // 最小更新間隔を3秒に
             .build()
 
         try {
@@ -271,15 +274,7 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
                     }
 
                     binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", finalSpeedKmh)
-                    val statusText = "速度: " + if (finalSpeedKmh > 4.0) "速い" else "普通"
-                    binding.tvStatus.text = statusText
                     binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
-
-                    if (finalSpeedKmh > 4.0) {
-                        // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_fast)
-                    } else {
-                        // binding.ivFaceIcon.setImageResource(R.drawable.face_icon_normal)
-                    }
 
                     if (finalSpeedKmh > 0) {
                         speedReadings.add(finalSpeedKmh)
@@ -351,6 +346,32 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
             setPinchZoom(true)
             legend.isEnabled = false
             xAxis.labelRotationAngle = -45f
+
+            // X軸のラベルをフォーマットする
+            xAxis.valueFormatter = object : ValueFormatter() {
+                private val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+                override fun getFormattedValue(value: Float): String {
+                    val calendar = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, value.toInt())
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    return format.format(calendar.time)
+                }
+            }
+            // X軸のラベル数を調整（例: 5つのラベルを表示）
+            xAxis.setLabelCount(5, true)
+
+            // Y軸のラベルをフォーマットする
+            val leftAxis = binding.lineChart.axisLeft
+            leftAxis.valueFormatter = object : ValueFormatter() {
+                private val format = DecimalFormat("0.0", DecimalFormatSymbols(Locale.getDefault()))
+                override fun getFormattedValue(value: Float): String {
+                    return "${format.format(value)} km/h"
+                }
+            }
+            binding.lineChart.axisRight.isEnabled = false // 右側のY軸を非表示にする
         }
     }
 
