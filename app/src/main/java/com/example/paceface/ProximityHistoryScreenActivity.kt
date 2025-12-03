@@ -20,6 +20,17 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
         binding = ProximityHistoryScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // アニメーションの適用 (RecyclerViewのみ)
+        binding.rvProximityHistory.translationY = 200f
+        binding.rvProximityHistory.alpha = 0f
+
+        binding.rvProximityHistory.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay(200) // 少し遅れて開始
+            .start()
+
         appDatabase = AppDatabase.getDatabase(this)
 
         // NavigationUtils を使用して共通ナビゲーションをセットアップ

@@ -162,9 +162,11 @@ class HomeScreenActivity : AppCompatActivity() {
                     val speedKmh = location.speed * 3.6f
 
                     // UIのリアルタイム更新
-                    animateTextViewText(binding.tvSpeedValue, String.format(Locale.getDefault(), "%.1f km/h", speedKmh))
+                    // animateTextViewText(binding.tvSpeedValue, String.format(Locale.getDefault(), "%.1f km/h", speedKmh))
+                    binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", speedKmh)
                     val statusText = "速度: " + if (speedKmh > 4.0) "速い" else "普通"
-                    animateTextViewText(binding.tvStatus, statusText)
+                    // animateTextViewText(binding.tvStatus, statusText)
+                    binding.tvStatus.text = statusText
                     binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
 
                     // 顔アイコンの更新を追加

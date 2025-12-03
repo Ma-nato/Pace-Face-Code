@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil // 追加
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -26,8 +27,11 @@ class ProximityHistoryAdapter(private var history: List<ProximityHistoryItem>) :
     override fun getItemCount(): Int = history.size
 
     fun updateData(newHistory: List<ProximityHistoryItem>) {
-        history = newHistory
-        notifyDataSetChanged()
+        val diffCallback = ProximityHistoryDiffCallback(this.history, newHistory)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        this.history = newHistory
+        diffResult.dispatchUpdatesTo(this)
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -50,7 +54,29 @@ class ProximityHistoryAdapter(private var history: List<ProximityHistoryItem>) :
         }
 
         private fun getEmotionResource(emotionId: Int): Int {
+            // TODO: 適切な感情アイコンのリソースを返すように修正してください
             return R.drawable.emotion_button
         }
+    }
+}
+
+// DiffUtil.Callback の実装
+class ProximityHistoryDiffCallback(private val oldList: List<ProximityHistoryItem>, private val newList: List<ProximityHistoryItem>) : DiffUtil.Callback() {
+
+    override fun getOldListSize(): Int = oldList.size
+
+    override fun getNewListSize(): Int = newList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        // ここでは便宜的に timestamp をユニークIDとしていますが、
+        // 実際のアプリでは各アイテムが持つユニークなIDを使用するべきです。
+        // 例えば、データベースから取得したエンティティにIDがある場合、それを比較します。
+        return oldList[oldItemPosition].timestamp == newList[newItemPosition].timestamp
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        // アイテムの内容が同じかどうかを比較します。
+        // すべてのプロパティを比較するか、表示に影響するプロパティのみを比較します。
+        return oldList[oldItemPosition] == newList[newItemPosition]
     }
 }

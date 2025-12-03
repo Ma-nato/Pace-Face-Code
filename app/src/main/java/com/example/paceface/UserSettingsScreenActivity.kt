@@ -16,6 +16,17 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         binding = UserSettingsScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // アニメーションの適用
+        binding.settingsListLayout.translationY = 200f
+        binding.settingsListLayout.alpha = 0f
+
+        binding.settingsListLayout.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(500)
+            .setStartDelay(200) // 少し遅れて開始
+            .start()
+
         // NavigationUtils を使用して共通ナビゲーションをセットアップ
         NavigationUtils.setupCommonNavigation(
             this,
