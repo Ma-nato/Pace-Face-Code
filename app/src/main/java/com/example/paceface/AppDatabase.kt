@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
         HourlyAverageSpeed::class,
         HourlyEmotionPercentage::class
     ],
-    version = 17, // データベースのバージョンを更新
+    version = 18, // データベースのバージョンを更新
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -80,6 +80,7 @@ abstract class AppDatabase : RoomDatabase() {
             val userBadgeDao = database.userBadgeDao()
 
             val emotions = listOf(
+                Emotion(emotionId = 0, name = "Unknown", imageUrl = "", description = "Default emotion for unclassified speeds"),
                 Emotion(emotionId = 1, name = "Delighted", imageUrl = "", description = ""),
                 Emotion(emotionId = 2, name = "Excited", imageUrl = "", description = ""),
                 Emotion(emotionId = 3, name = "Happy", imageUrl = "", description = ""),

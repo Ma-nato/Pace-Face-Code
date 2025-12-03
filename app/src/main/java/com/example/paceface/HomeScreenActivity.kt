@@ -208,46 +208,32 @@ class HomeScreenActivity : AppCompatActivity() {
 
         val averageSpeed = speedReadings.average().toFloat()
         lifecycleScope.launch {
-            val newHistory = History(
-                userId = currentUserId,
-                timestamp = System.currentTimeMillis(),
-                walkingSpeed = averageSpeed,
-                acceleration = "",
-                emotionId = 0
-            )
-            withContext(Dispatchers.IO) {
-                appDatabase.historyDao().insert(newHistory)
-            }
+            try {
+                val newHistory = History(
+                    userId = currentUserId,
+                    timestamp = System.currentTimeMillis(),
+                    walkingSpeed = averageSpeed,
+                    acceleration = "",
+                    emotionId = 0
+                )
+                withContext(Dispatchers.IO) {
+                    appDatabase.historyDao().insert(newHistory)
+                }
 
-            withContext(Dispatchers.Main) {
-                addEntryToChart(newHistory)
+                withContext(Dispatchers.Main) {
+                    updateChartWithTodayData()
+                    Toast.makeText(this@HomeScreenActivity, "速度データを保存しました。", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@HomeScreenActivity, "データの保存中にエラーが発生しました: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                    e.printStackTrace() // Log the exception for debugging
+                }
             }
         }
 
         speedReadings.clear()
         lastSaveTimestamp = System.currentTimeMillis()
-    }
-
-    private fun addEntryToChart(history: History) {
-        val lineData = binding.lineChart.data
-
-        if (lineData == null) {
-            updateChartWithTodayData()
-            return
-        }
-
-        val timeCal = Calendar.getInstance().apply { timeInMillis = history.timestamp }
-        val hour = timeCal.get(Calendar.HOUR_OF_DAY).toFloat()
-        val minute = timeCal.get(Calendar.MINUTE).toFloat() / 60f
-        val newEntry = Entry(hour + minute, history.walkingSpeed)
-
-        lineData.addEntry(newEntry, 0)
-
-        lineData.notifyDataChanged()
-        binding.lineChart.notifyDataSetChanged()
-        binding.lineChart.invalidate()
-
-        binding.lineChart.moveViewToX(lineData.entryCount.toFloat())
     }
 
     private fun updateChartWithTodayData() {
@@ -276,39 +262,36 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun updateChart(history: List<History>) {
-        if (history.isEmpty()) {
-            binding.lineChart.clear()
-            binding.lineChart.invalidate()
-            return
-        }
-
         val entries = ArrayList<Entry>()
-        history.forEach {
-            val timeCal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-            val hour = timeCal.get(Calendar.HOUR_OF_DAY).toFloat()
-            val minute = timeCal.get(Calendar.MINUTE).toFloat() / 60f
-            entries.add(Entry(hour + minute, it.walkingSpeed))
-        }
 
-        if (binding.lineChart.data != null && binding.lineChart.data.dataSetCount > 0) {
-            val dataSet = binding.lineChart.data.getDataSetByIndex(0) as LineDataSet
-            dataSet.values = entries
-            binding.lineChart.data.notifyDataChanged()
-            binding.lineChart.notifyDataSetChanged()
-        } else {
-            val dataSet = LineDataSet(entries, "歩行速度").apply {
-                color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
-                valueTextColor = Color.BLACK
-                setCircleColor(color)
-                circleRadius = 4f
-                lineWidth = 2f
-            }
-            val lineData = LineData(dataSet)
-            binding.lineChart.data = lineData
+        // Group history by hour and calculate average speed for each hour
+        val hourlyData = history.groupBy {
+            val timeCal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+            timeCal.get(Calendar.HOUR_OF_DAY)
+        }.map { (hour, hourlyHistory) ->
+            val averageSpeed = hourlyHistory.map { it.walkingSpeed }.average().toFloat()
+            // Using the hour as the x-value for the chart
+            Entry(hour.toFloat(), averageSpeed)
+        }.sortedBy { it.x } // Sort by hour
+
+        entries.addAll(hourlyData)
+
+        val dataSet = LineDataSet(entries, "歩行速度").apply {
+            color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
+            valueTextColor = Color.BLACK
+            setCircleColor(color)
+            circleRadius = 4f
+            lineWidth = 2f
         }
+        val lineData = LineData(dataSet)
+        binding.lineChart.data = lineData
 
         binding.lineChart.invalidate()
-        binding.lineChart.animateY(500)
+
+        // Only animate if there's new data.
+        if (entries.isNotEmpty()) {
+            binding.lineChart.animateY(500)
+        }
     }
 
     private fun getStartOfDay(calendar: Calendar): Calendar {
@@ -373,13 +356,14 @@ class HomeScreenActivity : AppCompatActivity() {
         val p20 = speeds[(speeds.size * 0.20).toInt()]
         val p40 = speeds[(speeds.size * 0.40).toInt()]
         val p60 = speeds[(speeds.size * 0.60).toInt()]
-        val p80 = speeds[(speeds.size * 0.80).toInt()]
+        val p80 = speeds[minOf((speeds.size * 0.80).toInt(), speeds.lastIndex)]
 
         val newRules = listOf(
             SpeedRule(userId = currentUserId, minSpeed = 0f, maxSpeed = p20, emotionId = 5),      // Sad
             SpeedRule(userId = currentUserId, minSpeed = p20, maxSpeed = p40, emotionId = 4),    // Neutral
             SpeedRule(userId = currentUserId, minSpeed = p40, maxSpeed = p60, emotionId = 3),    // Happy
             SpeedRule(userId = currentUserId, minSpeed = p60, maxSpeed = p80, emotionId = 2),    // Excited
+            SpeedRule(userId = currentUserId, minSpeed = p80, maxSpeed = Float.MAX_VALUE, emotionId = 1) // Surprise
         )
 
         appDatabase.speedRuleDao().insertAll(newRules)
