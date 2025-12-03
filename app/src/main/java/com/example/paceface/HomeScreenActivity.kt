@@ -24,14 +24,12 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.material.R as R_material
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import androidx.core.graphics.toColorInt
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.widget.TextView
 
 class HomeScreenActivity : AppCompatActivity() {
 
@@ -86,10 +84,9 @@ class HomeScreenActivity : AppCompatActivity() {
         setupNavigation()
         setupChart()
         createLocationCallback()
-        lastSaveTimestamp = System.currentTimeMillis() // 初期化
+        lastSaveTimestamp = System.currentTimeMillis()
 
         checkAndGenerateCustomRules()
-        lastSaveTimestamp = System.currentTimeMillis()
 
         binding.mainInfoCard.translationY = 200f
         binding.chartCard.translationY = 200f
@@ -203,22 +200,6 @@ class HomeScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun animateTextViewText(textView: TextView, newText: String) {
-        val fadeOut = AlphaAnimation(1.0f, 0.0f)
-        fadeOut.duration = 150
-        fadeOut.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation?) {}
-            override fun onAnimationEnd(animation: Animation?) {
-                textView.text = newText
-                val fadeIn = AlphaAnimation(0.0f, 1.0f)
-                fadeIn.duration = 150
-                textView.startAnimation(fadeIn)
-            }
-            override fun onAnimationRepeat(animation: Animation?) {}
-        })
-        textView.startAnimation(fadeOut)
-    }
-
     private fun saveAverageSpeedToDb() {
         if (speedReadings.isEmpty()) {
             lastSaveTimestamp = System.currentTimeMillis()
@@ -234,12 +215,39 @@ class HomeScreenActivity : AppCompatActivity() {
                 acceleration = "",
                 emotionId = 0
             )
-            appDatabase.historyDao().insert(newHistory)
-            updateChartWithTodayData()
+            withContext(Dispatchers.IO) {
+                appDatabase.historyDao().insert(newHistory)
+            }
+
+            withContext(Dispatchers.Main) {
+                addEntryToChart(newHistory)
+            }
         }
 
         speedReadings.clear()
         lastSaveTimestamp = System.currentTimeMillis()
+    }
+
+    private fun addEntryToChart(history: History) {
+        val lineData = binding.lineChart.data
+
+        if (lineData == null) {
+            updateChartWithTodayData()
+            return
+        }
+
+        val timeCal = Calendar.getInstance().apply { timeInMillis = history.timestamp }
+        val hour = timeCal.get(Calendar.HOUR_OF_DAY).toFloat()
+        val minute = timeCal.get(Calendar.MINUTE).toFloat() / 60f
+        val newEntry = Entry(hour + minute, history.walkingSpeed)
+
+        lineData.addEntry(newEntry, 0)
+
+        lineData.notifyDataChanged()
+        binding.lineChart.notifyDataSetChanged()
+        binding.lineChart.invalidate()
+
+        binding.lineChart.moveViewToX(lineData.entryCount.toFloat())
     }
 
     private fun updateChartWithTodayData() {
@@ -249,7 +257,9 @@ class HomeScreenActivity : AppCompatActivity() {
             val startOfDay = getStartOfDay(cal).timeInMillis
             val endOfDay = getEndOfDay(cal).timeInMillis
 
-            val todayHistory = appDatabase.historyDao().getHistoryForUserOnDate(currentUserId, startOfDay, endOfDay)
+            val todayHistory = withContext(Dispatchers.IO) {
+                appDatabase.historyDao().getHistoryForUserOnDate(currentUserId, startOfDay, endOfDay)
+            }
             updateChart(todayHistory)
         }
     }
@@ -280,16 +290,23 @@ class HomeScreenActivity : AppCompatActivity() {
             entries.add(Entry(hour + minute, it.walkingSpeed))
         }
 
-        val dataSet = LineDataSet(entries, "歩行速度").apply {
-            color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
-            valueTextColor = Color.BLACK
-            setCircleColor(color)
-            circleRadius = 4f
-            lineWidth = 2f
+        if (binding.lineChart.data != null && binding.lineChart.data.dataSetCount > 0) {
+            val dataSet = binding.lineChart.data.getDataSetByIndex(0) as LineDataSet
+            dataSet.values = entries
+            binding.lineChart.data.notifyDataChanged()
+            binding.lineChart.notifyDataSetChanged()
+        } else {
+            val dataSet = LineDataSet(entries, "歩行速度").apply {
+                color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
+                valueTextColor = Color.BLACK
+                setCircleColor(color)
+                circleRadius = 4f
+                lineWidth = 2f
+            }
+            val lineData = LineData(dataSet)
+            binding.lineChart.data = lineData
         }
 
-        val lineData = LineData(dataSet)
-        binding.lineChart.data = lineData
         binding.lineChart.invalidate()
         binding.lineChart.animateY(500)
     }
@@ -324,7 +341,6 @@ class HomeScreenActivity : AppCompatActivity() {
         )
     }
 
-    // --- Custom Rule Generation ---
     private fun checkAndGenerateCustomRules() {
         val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         val areRulesGenerated = sharedPrefs.getBoolean("CUSTOM_RULES_GENERATED_$currentUserId", false)
@@ -333,7 +349,7 @@ class HomeScreenActivity : AppCompatActivity() {
             return // Already generated
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             val firstTimestamp = appDatabase.historyDao().getFirstTimestamp(currentUserId)
             val lastTimestamp = appDatabase.historyDao().getLastTimestamp(currentUserId)
 
@@ -354,7 +370,6 @@ class HomeScreenActivity : AppCompatActivity() {
         val speeds = appDatabase.historyDao().getAllWalkingSpeeds(currentUserId).sorted()
         if (speeds.size < 10) return // Need a reasonable amount of data
 
-        // Calculate percentile boundaries
         val p20 = speeds[(speeds.size * 0.20).toInt()]
         val p40 = speeds[(speeds.size * 0.40).toInt()]
         val p60 = speeds[(speeds.size * 0.60).toInt()]
@@ -365,22 +380,14 @@ class HomeScreenActivity : AppCompatActivity() {
             SpeedRule(userId = currentUserId, minSpeed = p20, maxSpeed = p40, emotionId = 4),    // Neutral
             SpeedRule(userId = currentUserId, minSpeed = p40, maxSpeed = p60, emotionId = 3),    // Happy
             SpeedRule(userId = currentUserId, minSpeed = p60, maxSpeed = p80, emotionId = 2),    // Excited
-            SpeedRule(userId = currentUserId, minSpeed = p80, maxSpeed = 999f, emotionId = 1)   // Delighted
         )
 
-        // Delete old rules and insert new ones
-        appDatabase.speedRuleDao().deleteRulesForUser(currentUserId)
-        newRules.forEach { appDatabase.speedRuleDao().insert(it) }
+        appDatabase.speedRuleDao().insertAll(newRules)
 
-        // Mark as generated for this user
-        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-        with(sharedPrefs.edit()) {
-            putBoolean("CUSTOM_RULES_GENERATED_$currentUserId", true)
-            apply()
-        }
-
-        runOnUiThread {
-            Toast.makeText(this@HomeScreenActivity, "あなた専用の速度ルールが作成されました！", Toast.LENGTH_LONG).show()
+        withContext(Dispatchers.Main) {
+            val sharedPrefsEditor = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE).edit()
+            sharedPrefsEditor.putBoolean("CUSTOM_RULES_GENERATED_$currentUserId", true)
+            sharedPrefsEditor.apply()
         }
     }
 }

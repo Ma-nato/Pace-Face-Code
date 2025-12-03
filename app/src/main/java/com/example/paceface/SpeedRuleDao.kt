@@ -10,6 +10,9 @@ interface SpeedRuleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(speedRule: SpeedRule)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(speedRules: List<SpeedRule>)
+
     @Query("SELECT * FROM SpeedRule WHERE userId = :userId")
     suspend fun getSpeedRulesForUser(userId: Int): List<SpeedRule>
 
