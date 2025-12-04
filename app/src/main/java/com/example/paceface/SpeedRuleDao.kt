@@ -18,4 +18,7 @@ interface SpeedRuleDao {
 
     @Query("DELETE FROM SpeedRule WHERE userId = :userId")
     suspend fun deleteRulesForUser(userId: Int)
+
+    @Query("SELECT * FROM SpeedRule WHERE userId = :userId AND :speed >= minSpeed AND :speed < maxSpeed ORDER BY minSpeed DESC LIMIT 1")
+    suspend fun getSpeedRuleForSpeed(userId: Int, speed: Float): SpeedRule?
 }

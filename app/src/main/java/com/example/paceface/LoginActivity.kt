@@ -14,11 +14,13 @@ import com.example.paceface.databinding.LoginScreenBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: LoginScreenBinding
     private lateinit var appDatabase: AppDatabase
+    private lateinit var tokenManager: TokenManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         appDatabase = AppDatabase.getDatabase(this)
+        tokenManager = TokenManager(this)
 
         // パスワード表示/非表示のトグルを設定
         setupPasswordToggle(binding.inputPassword, binding.btnEye)
@@ -78,12 +81,10 @@ class LoginActivity : AppCompatActivity() {
             if (user != null && user.password == hashedPassword) {
                 // Login success
 
-                // --- ログインしたユーザーのIDを保存 ---
-                val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-                with(sharedPrefs.edit()) {
-                    putInt("LOGGED_IN_USER_ID", user.userId)
-                    apply()
-                }
+                // --- Generate and save dummy tokens ---
+                val accessToken = UUID.randomUUID().toString()
+                val refreshToken = UUID.randomUUID().toString()
+                tokenManager.saveTokens(AuthToken(accessToken, refreshToken))
 
                 // Navigate to HomeScreen and clear task
                 val intent = Intent(this@LoginActivity, HomeScreenActivity::class.java)

@@ -72,23 +72,23 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
             updateUiForMode(isChecked)
 
             val message = if (isChecked) {
-                "自動変更がONになりました"
+                "表情が歩行速度に合わせて自動で変わるようになりました。"
             } else {
-                "自動変更がOFFになりました"
+                "表情を選択したデザインに固定しました。"
             }
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
 
-        binding.backButton.setOnClickListener {
-            val intent = Intent(this, HomeScreenActivity::class.java)
-            startActivity(intent)
-        }
-
         // --- フッターナビゲーションの処理 ---
-        binding.homeButton.setOnClickListener { startActivity(Intent(this, HomeScreenActivity::class.java)) }
-        binding.passingButton.setOnClickListener { startActivity(Intent(this, ProximityHistoryScreenActivity::class.java)) }
-        binding.historyButton.setOnClickListener { startActivity(Intent(this, HistoryScreenActivity::class.java)) }
-        binding.gearButton.setOnClickListener { startActivity(Intent(this, UserSettingsScreenActivity::class.java)) }
+        NavigationUtils.setupCommonNavigation(
+            this,
+            ExpressionCustomizationScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
 
         // --- 起動時の状態復元 ---
         val savedTag = sharedPreferences.getString(KEY_SELECTED_EMOJI_TAG, "1") // デフォルトは"1"

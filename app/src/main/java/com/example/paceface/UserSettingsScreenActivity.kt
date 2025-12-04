@@ -4,17 +4,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.example.paceface.databinding.UserSettingsScreenBinding
 
 class UserSettingsScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: UserSettingsScreenBinding
+    private lateinit var tokenManager: TokenManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = UserSettingsScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        tokenManager = TokenManager(this)
 
         // アニメーションの適用
         binding.settingsListLayout.translationY = 200f
@@ -70,10 +72,12 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         }
 
         binding.btnLogout.setOnClickListener {
-            // ログアウト後はログイン画面に遷移し、戻れないように設定
+            tokenManager.clearTokens()
+            // ログアウト後は選択画面に遷移し、戻れないように設定
             val intent = Intent(this, SelectionScreenActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+            finish()
         }
 
         binding.btnDeleteAccount.setOnClickListener {
