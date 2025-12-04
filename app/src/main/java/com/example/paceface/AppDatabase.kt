@@ -51,9 +51,9 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "paceface_database"
                 )
-                .fallbackToDestructiveMigration()
-                .addCallback(AppDatabaseCallback())
-                .build()
+                    .fallbackToDestructiveMigration()
+                    .addCallback(AppDatabaseCallback()) // こちらのコールバックに処理を一本化
+                    .build()
                 INSTANCE = instance
                 instance
             }
@@ -65,6 +65,7 @@ abstract class AppDatabase : RoomDatabase() {
             super.onOpen(db)
             INSTANCE?.let { database ->
                 CoroutineScope(Dispatchers.IO).launch {
+                    // ユーザーが一人もいなければ（＝初回起動時）、ダミーデータを投入する
                     if (database.userDao().getUserCount() == 0) {
                         populateWithDummyData(database)
                     }
@@ -79,15 +80,14 @@ abstract class AppDatabase : RoomDatabase() {
             val badgeDao = database.badgeDao()
             val userBadgeDao = database.userBadgeDao()
 
+            // 表情の初期データを挿入
             val emotions = listOf(
-                Emotion(emotionId = 0, name = "Unknown", imageUrl = "", description = "Default emotion for unclassified speeds"),
-                Emotion(emotionId = 1, name = "Delighted", imageUrl = "", description = ""),
-                Emotion(emotionId = 2, name = "Excited", imageUrl = "", description = ""),
-                Emotion(emotionId = 3, name = "Happy", imageUrl = "", description = ""),
-                Emotion(emotionId = 4, name = "Neutral", imageUrl = "", description = ""),
-                Emotion(emotionId = 5, name = "Sad", imageUrl = "", description = ""),
-                Emotion(emotionId = 6, name = "Angry", imageUrl = "", description = ""),
-                Emotion(emotionId = 7, name = "Off", imageUrl = "", description = "")
+                Emotion(1, "通常", "normal_expression", "平常心を保っている状態"),
+                Emotion(2, "困惑", "troubled_expression", "どうしていいか分からない状態"),
+                Emotion(3, "焦り", "impatient_expression", "急いでいて落ち着かない状態"),
+                Emotion(4, "笑顔", "smile_expression", "楽しくて嬉しい状態"),
+                Emotion(5, "悲しみ", "sad_expression", "悲しくて元気がない状態"),
+                Emotion(6, "怒り", "angry_expression", "何かに腹を立てている状態")
             )
             emotionDao.insertAll(emotions)
 
