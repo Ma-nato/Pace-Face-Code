@@ -97,29 +97,30 @@
         app:layout_constraintTop_toBottomOf="@id/emojiGrid" />
 
     <!-- スイッチ -->
-    <LinearLayout
-        android:id="@+id/switchContainer"
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/changeSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
+        android:text="表情の自動変更"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/changeBtn">
+        app:layout_constraintTop_toBottomOf="@id/changeBtn" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="変更 ON/OFF" />
-
-        <Switch
-            android:id="@+id/changeSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/switchDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="8dp"
+        android:text="ONの場合、歩行速度に合わせて表情が変化します。
+OFFの場合、上で選択した表情に固定されます。"
+        android:gravity="center_horizontal"
+        app:layout_constraintTop_toBottomOf="@id/changeSwitch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
         android:id="@+id/bottom_nav"
