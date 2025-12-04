@@ -3,7 +3,6 @@ package com.example.paceface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -12,18 +11,21 @@ import com.example.paceface.databinding.HistoryScreenBinding
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.R as R_material
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 class HistoryScreenActivity : AppCompatActivity() {
 
@@ -51,10 +53,10 @@ class HistoryScreenActivity : AppCompatActivity() {
 
         setupCalendar()
         setupNavigation()
-        setupChart() // グラフの初期設定
+        setupCharts() // Setup for both charts
 
-        // 初期表示として今日の日付のデータを読み込む
-        updateChartForDate(Date())
+        // Initial load for today's data
+        updateChartsForDate(Date())
     }
 
     private fun setupCalendar() {
@@ -62,93 +64,97 @@ class HistoryScreenActivity : AppCompatActivity() {
             val calendar = Calendar.getInstance()
             calendar.set(year, month, dayOfMonth)
             val selectedDate = calendar.time
-
-            // 特定の日付（2025年11月27日）が選択されたらダミーデータを挿入
-            if (year == 2025 && month == Calendar.NOVEMBER && dayOfMonth == 27) {
-                insertAndShowDummyData(selectedDate)
-            } else {
-                updateChartForDate(selectedDate)
-            }
+            updateChartsForDate(selectedDate)
         }
     }
 
-    private fun insertAndShowDummyData(date: Date) {
-        lifecycleScope.launch {
-            try {
-                val cal = Calendar.getInstance().apply { time = date }
-                val startOfDay = getStartOfDay(cal).timeInMillis
-                val endOfDay = getEndOfDay(cal).timeInMillis
-
-                // ダミーデータを作成
-                val dummyData = listOf(
-                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(9), walkingSpeed = 5.2f, acceleration = "", emotionId = 0),
-                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(12) + TimeUnit.MINUTES.toMillis(30), walkingSpeed = 4.8f, acceleration = "", emotionId = 0),
-                    History(userId = currentUserId, timestamp = startOfDay + TimeUnit.HOURS.toMillis(18) + TimeUnit.MINUTES.toMillis(45), walkingSpeed = 6.1f, acceleration = "", emotionId = 0)
-                )
-
-                // データベース操作をIOスレッドで実行
-                withContext(Dispatchers.IO) {
-                    appDatabase.historyDao().replaceDataForDate(currentUserId, startOfDay, endOfDay, dummyData)
-                }
-
-                // UI更新をメインスレッドで実行
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@HistoryScreenActivity, "2025/11/27のダミーデータを挿入しました", Toast.LENGTH_SHORT).show()
-                    updateChartForDate(date)
-                }
-
-            } catch (e: Exception) {
-                Log.e("HistoryScreen", "Dummy data insertion failed", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@HistoryScreenActivity, "ダミーデータの挿入に失敗しました", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    private fun updateChartForDate(date: Date) {
+    private fun updateChartsForDate(date: Date) {
         lifecycleScope.launch {
             val cal = Calendar.getInstance().apply { time = date }
             val startOfDay = getStartOfDay(cal).timeInMillis
             val endOfDay = getEndOfDay(cal).timeInMillis
 
-            // データベースからの読み込みをIOスレッドで実行
             val historyData = withContext(Dispatchers.IO) {
                 appDatabase.historyDao().getHistoryForUserOnDate(currentUserId, startOfDay, endOfDay)
             }
 
-            // UIの更新をメインスレッドで実行
             withContext(Dispatchers.Main) {
                 if (historyData.isEmpty()) {
                     binding.lineChart.clear()
                     binding.lineChart.invalidate()
+                    binding.pieChart.clear()
+                    binding.pieChart.invalidate()
                     Toast.makeText(this@HistoryScreenActivity, "この日のデータはありません", Toast.LENGTH_SHORT).show()
                 } else {
-                    // Group history by hour and calculate average speed for each hour
-                    val hourlyData = historyData.groupBy {
-                        val timeCal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-                        timeCal.get(Calendar.HOUR_OF_DAY)
-                    }.map { (hour, hourlyHistory) ->
-                        val averageSpeed = hourlyHistory.map { it.walkingSpeed }.average().toFloat()
-                        Entry(hour.toFloat(), averageSpeed)
-                    }.sortedBy { it.x } // Sort by hour
-
-                    val dataSet = LineDataSet(ArrayList(hourlyData), "歩行速度").apply {
-                        color = ContextCompat.getColor(this@HistoryScreenActivity, R_material.color.design_default_color_primary)
-                        valueTextColor = Color.BLACK
-                        setCircleColor(color)
-                        circleRadius = 4f
-                        lineWidth = 2f
-                    }
-                    val lineData = LineData(dataSet)
-                    binding.lineChart.data = lineData
-                    binding.lineChart.invalidate()
+                    updateLineChart(historyData)
+                    updatePieChart(historyData)
                 }
             }
         }
     }
 
-    private fun setupChart() {
+    private fun updateLineChart(historyData: List<History>) {
+        val hourlyData = historyData.groupBy {
+            val timeCal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+            timeCal.get(Calendar.HOUR_OF_DAY)
+        }.map { (hour, hourlyHistory) ->
+            val averageSpeed = hourlyHistory.map { it.walkingSpeed }.average().toFloat()
+            Entry(hour.toFloat(), averageSpeed)
+        }.sortedBy { it.x }
+
+        val dataSet = LineDataSet(ArrayList(hourlyData), "歩行速度").apply {
+            color = ContextCompat.getColor(this@HistoryScreenActivity, R_material.color.design_default_color_primary)
+            valueTextColor = Color.BLACK
+            setCircleColor(color)
+            circleRadius = 4f
+            lineWidth = 2f
+        }
+        binding.lineChart.data = LineData(dataSet)
+        binding.lineChart.invalidate()
+    }
+
+    private fun updatePieChart(historyData: List<History>) {
+        val emotionCounts = historyData.groupingBy { it.emotionId }.eachCount()
+            .filterKeys { it in 1..5 }
+
+        if (emotionCounts.isEmpty()) {
+            binding.pieChart.clear()
+            binding.pieChart.invalidate()
+            return
+        }
+
+        val pieEntries = emotionCounts.map { (emotionId, count) ->
+            PieEntry(count.toFloat(), getEmotionLabel(emotionId))
+        }
+
+        val dataSet = PieDataSet(pieEntries, "").apply {
+            colors = ColorTemplate.MATERIAL_COLORS.toList()
+            setDrawValues(true)
+        }
+
+        val pieData = PieData(dataSet).apply {
+            setValueFormatter(PercentFormatter(binding.pieChart))
+            setValueTextSize(12f)
+            setValueTextColor(Color.BLACK)
+        }
+
+        binding.pieChart.data = pieData
+        binding.pieChart.invalidate()
+    }
+
+    private fun getEmotionLabel(emotionId: Int): String {
+        return when (emotionId) {
+            1 -> "驚き"
+            2 -> "興奮"
+            3 -> "嬉しい"
+            4 -> "普通"
+            5 -> "悲しい"
+            else -> "不明"
+        }
+    }
+
+    private fun setupCharts() {
+        // Line Chart Setup
         binding.lineChart.apply {
             description.isEnabled = false
             isDragEnabled = true
@@ -157,7 +163,6 @@ class HistoryScreenActivity : AppCompatActivity() {
             legend.isEnabled = false
             xAxis.labelRotationAngle = -45f
 
-            // X軸のラベルをフォーマットする
             xAxis.valueFormatter = object : ValueFormatter() {
                 private val format = DecimalFormat("00時", DecimalFormatSymbols(Locale.getDefault()))
                 override fun getFormattedValue(value: Float): String {
@@ -166,15 +171,28 @@ class HistoryScreenActivity : AppCompatActivity() {
             }
             xAxis.setLabelCount(5, true)
 
-            // Y軸のラベルをフォーマットする
-            val leftAxis = binding.lineChart.axisLeft
+            val leftAxis = axisLeft
             leftAxis.valueFormatter = object : ValueFormatter() {
                 private val format = DecimalFormat("0.0", DecimalFormatSymbols(Locale.getDefault()))
                 override fun getFormattedValue(value: Float): String {
                     return "${format.format(value)} km/h"
                 }
             }
-            binding.lineChart.axisRight.isEnabled = false // 右側のY軸を非表示にする
+            axisRight.isEnabled = false
+        }
+
+        // Pie Chart Setup
+        binding.pieChart.apply {
+            description.isEnabled = false
+            isDrawHoleEnabled = true
+            setDrawEntryLabels(true)
+            setEntryLabelColor(Color.BLACK)
+            holeRadius = 50f
+            transparentCircleRadius = 55f
+            setUsePercentValues(true)
+            legend.isEnabled = true
+            centerText = "表情の割合"
+            setCenterTextSize(16f)
         }
     }
 
