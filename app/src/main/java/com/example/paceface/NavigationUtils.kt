@@ -81,11 +81,9 @@ object NavigationUtils {
 
         emotionButton.setOnClickListener {
             updateButtonHighlight(emotionButton)
-            /* TODO: 感情画面への遷移のロジックをここに追加 */
-            // 例:
-            // if (currentActivityClass != EmotionScreenActivity::class.java) {
-            //     navigateTo(activity, EmotionScreenActivity::class.java)
-            // }
+             if (currentActivityClass != ExpressionCustomizationScreenActivity::class.java) {
+                 navigateTo(activity, ExpressionCustomizationScreenActivity::class.java)
+             }
         }
 
         gearButton.setOnClickListener {

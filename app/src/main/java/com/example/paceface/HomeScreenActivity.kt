@@ -112,7 +112,7 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
             return
         }
 
-        binding.tvTitle.text = "今日の歩行速度"
+        binding.tvTitle.text = "現在の歩行速度"
 
         setupNavigation()
         setupChart()
@@ -222,6 +222,8 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
         } else {
             if (hasFineLocationPermission) {
                 startLocationUpdates()
+            } else {
+                requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
             }
         }
     }
@@ -274,6 +276,9 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
                     binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f km/h", finalSpeedKmh)
                     binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
 
+                    // 表情アイコンの更新
+                    updateFaceIcon(finalSpeedKmh)
+
                     if (finalSpeedKmh > 0) {
                         speedReadings.add(finalSpeedKmh)
                     }
@@ -283,6 +288,24 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
                     }
                 }
             }
+        }
+    }
+
+    private fun updateFaceIcon(speed: Float) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            val speedRule = withContext(Dispatchers.IO) {
+                appDatabase.speedRuleDao().getSpeedRuleForSpeed(currentUserId, speed)
+            }
+
+            val faceIconResId = when (speedRule?.emotionId) {
+                1 -> R.drawable.impatient_expression
+                2 -> R.drawable.angry_expression
+                3 -> R.drawable.smile_expression
+                4 -> R.drawable.normal_expression
+                5 -> R.drawable.sad_expression
+                else -> R.drawable.normal_expression // デフォルト
+            }
+            binding.ivFaceIcon.setImageResource(faceIconResId)
         }
     }
 
