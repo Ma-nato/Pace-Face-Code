@@ -1,90 +1,55 @@
 package com.example.paceface
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.paceface.databinding.HomeScreenBinding
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.R as R_material
-import com.github.mikephil.charting.formatter.ValueFormatter // ValueFormatterをインポート
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols // DecimalFormatSymbolsをインポート
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayDeque
-import kotlin.math.pow
-import kotlin.math.sqrt
 
-class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
+class HomeScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: HomeScreenBinding
     private lateinit var appDatabase: AppDatabase
     private var currentUserId: Int = -1
     private val dateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
+    private var chartUpdateJob: Job? = null
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
-
-    private val speedReadings = mutableListOf<Float>()
-    private var lastSavedHour: Int = -1
-
-    // 加速度センサー関連の追加
-    private lateinit var sensorManager: SensorManager
-    private var accelerometer: Sensor? = null
-
-    // 重力と線形加速度の計算用
-    private val gravity = FloatArray(3) // 重力成分を保持
-    private val linearAcceleration = FloatArray(3) // 線形加速度を保持
-    private val linearAccelerationMagnitudes = ArrayDeque<Float>() // 最近の線形加速度マグニチュードを保持
-    private val MAX_ACCEL_MAGNITUDE_QUEUE_SIZE = 20 // 最後のN個の加速度データを保持 (例: 1秒あたり20Hzで1秒分)
-
-    // センサー融合のための定数
-    private val ACCEL_MOTION_THRESHOLD = 0.5f // m/s^2 (線形加速度マグニチュードで動きを検出するしきい値)
-    private val DEFAULT_ACCEL_WALKING_SPEED_KMH = 4.0f // km/h (加速度センサーが動きを検出したがGPSが信頼できない場合のデフォルト速度)
-    private val GPS_ACCURACY_THRESHOLD_METERS = 20f // meters (GPSの精度がこれ以下なら信頼できると判断)
-    private val MIN_GPS_SPEED_FOR_RELIABILITY_KMH = 1.0f // km/h (GPS速度がこれ以上の場合に信頼できると判断)
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            when {
-                permissions.getOrDefault(Manifest.permission.ACCESS_BACKGROUND_LOCATION, false) -> {
-                    startLocationUpdates()
-                }
-                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    Toast.makeText(this, "バックグラウンドでの位置情報アクセスが許可されなかったため、アプリがバックグラウンドにあると速度を記録できません。", Toast.LENGTH_LONG).show()
-                    startLocationUpdates()
-                }
-                else -> {
-                    Toast.makeText(this, "位置情報の権限がありません。速度を計測できません。", Toast.LENGTH_LONG).show()
-                }
+    private val speedUpdateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == LocationTrackingService.BROADCAST_SPEED_UPDATE) {
+                val speed = intent.getFloatExtra(LocationTrackingService.EXTRA_SPEED, 0f)
+                updateSpeedUI(speed)
             }
         }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        handlePermissionsResult(permissions)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,15 +57,6 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
         setContentView(binding.root)
 
         appDatabase = AppDatabase.getDatabase(this)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        // 加速度センサーの初期化
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        if (accelerometer == null) {
-            Toast.makeText(this, "加速度センサーが利用できません。", Toast.LENGTH_LONG).show()
-        }
-
         val sharedPrefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         currentUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
 
@@ -113,250 +69,143 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
         }
 
         binding.tvTitle.text = "現在の歩行速度"
-
         setupNavigation()
         setupChart()
-        createLocationCallback()
-        lastSavedHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-
         checkAndGenerateCustomRules()
-
-        binding.mainInfoCard.translationY = 200f
-        binding.chartCard.translationY = 200f
-        binding.mainInfoCard.alpha = 0f
-        binding.chartCard.alpha = 0f
-
-        binding.mainInfoCard.animate()
-            .translationY(0f)
-            .alpha(1f)
-            .setDuration(500)
-            .setStartDelay(200)
-            .start()
-
-        binding.chartCard.animate()
-            .translationY(0f)
-            .alpha(1f)
-            .setDuration(500)
-            .setStartDelay(400)
-            .start()
     }
 
     override fun onResume() {
         super.onResume()
-        checkLocationPermissionAndStartUpdates()
-        updateChartWithTodayData()
-        // センサーリスナーを登録
-        accelerometer?.also {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-        }
+        checkPermissionsAndStartService()
+        startChartUpdateLoop()
+        LocalBroadcastManager.getInstance(this).registerReceiver(speedUpdateReceiver, IntentFilter(LocationTrackingService.BROADCAST_SPEED_UPDATE))
     }
 
     override fun onPause() {
         super.onPause()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-        // センサーリスナーの登録を解除
-        sensorManager.unregisterListener(this)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(speedUpdateReceiver)
+        chartUpdateJob?.cancel()
     }
 
-    override fun onStop() {
-        super.onStop()
-        saveAverageSpeedToDb()
-    }
-
-    // --- SensorEventListener の実装 ---
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            // ローパスフィルターで重力成分を分離
-            val alpha = 0.8f // フィルター係数 (0.8f は一般的な値)
-
-            // 重力成分の更新
-            gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
-            gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
-            gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
-
-            // 線形加速度の計算 (加速度から重力成分を引く)
-            linearAcceleration[0] = event.values[0] - gravity[0]
-            linearAcceleration[1] = event.values[1] - gravity[1]
-            linearAcceleration[2] = event.values[2] - gravity[2]
-
-            // 線形加速度のマグニチュードを計算し、キューに追加
-            val magnitude = sqrt(linearAcceleration[0].pow(2) + linearAcceleration[1].pow(2) + linearAcceleration[2].pow(2))
-            linearAccelerationMagnitudes.add(magnitude)
-            if (linearAccelerationMagnitudes.size > MAX_ACCEL_MAGNITUDE_QUEUE_SIZE) {
-                linearAccelerationMagnitudes.removeFirst()
-            }
+    override fun onDestroy() {
+        super.onDestroy()
+        // Stop the service if the app is destroyed
+        val stopIntent = Intent(this, LocationTrackingService::class.java).apply {
+            action = LocationTrackingService.ACTION_STOP
         }
+        startService(stopIntent)
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // センサーの精度が変更されたときに呼ばれます（必要に応じて実装）
-    }
-
-    // 最近の線形加速度マグニチュードの平均値を計算するヘルパー関数
-    private fun getAverageLinearAccelerationMagnitude(): Float {
-        if (linearAccelerationMagnitudes.isEmpty()) return 0f
-        return linearAccelerationMagnitudes.average().toFloat()
-    }
-
-    private fun checkLocationPermissionAndStartUpdates() {
-        val hasFineLocationPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun checkPermissionsAndStartService() {
+        val requiredPermissions = mutableListOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+        )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val hasBackgroundLocationPermission = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+            requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requiredPermissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
-            if (hasFineLocationPermission && hasBackgroundLocationPermission) {
-                startLocationUpdates()
+        val permissionsToRequest = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsToRequest.isEmpty()) {
+            startLocationService()
+        } else {
+            requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
+
+    private fun handlePermissionsResult(permissions: Map<String, Boolean>) {
+        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+        if (!fineLocationGranted) {
+            Toast.makeText(this, "位置情報の権限がありません。", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // On Android 10 (Q) and higher, check for background permission separately.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                startLocationService()
             } else {
-                val permissionsToRequest = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-                if (!hasBackgroundLocationPermission) {
-                    permissionsToRequest.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                }
-                requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
+                // This Toast is important to guide the user.
+                Toast.makeText(this, "バックグラウンドでの位置情報アクセスを「常に許可」に設定してください。", Toast.LENGTH_LONG).show()
+                // Optionally, you could guide them to settings here.
             }
         } else {
-            if (hasFineLocationPermission) {
-                startLocationUpdates()
-            } else {
-                requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+            // For older versions, fine location is enough.
+            startLocationService()
+        }
+    }
+
+    private fun startLocationService() {
+        val startIntent = Intent(this, LocationTrackingService::class.java).apply {
+            action = LocationTrackingService.ACTION_START
+            putExtra(LocationTrackingService.EXTRA_USER_ID, currentUserId)
+        }
+        startService(startIntent)
+    }
+
+    private fun startChartUpdateLoop() {
+        chartUpdateJob?.cancel()
+        chartUpdateJob = lifecycleScope.launch {
+            while (isActive) {
+                updateChartWithDataWindow()
+                val now = Calendar.getInstance()
+                val seconds = now.get(Calendar.SECOND)
+                val delayMillis = (60 - seconds) * 1000L
+                delay(delayMillis)
             }
         }
     }
 
-    private fun startLocationUpdates() {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000) // 1秒ごとに更新
-            .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(1000) // 最小更新間隔を1秒に
-            .build()
-
-        try {
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
-            )
-        } catch (_: SecurityException) {
-            Toast.makeText(this, "位置情報取得の権限がありません。", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun createLocationCallback() {
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                locationResult.lastLocation?.let { location ->
-                    val gpsSpeedKmh = location.speed * 3.6f // m/s を km/h に変換
-                    val gpsAccuracy = location.accuracy // meters
-
-                    val averageLinearAccelMagnitude = getAverageLinearAccelerationMagnitude()
-
-                    var finalSpeedKmh: Float
-
-                    // GPSが信頼できるかどうかの判断
-                    val isGpsReliable = gpsAccuracy < GPS_ACCURACY_THRESHOLD_METERS && gpsSpeedKmh >= MIN_GPS_SPEED_FOR_RELIABILITY_KMH
-                    // 加速度センサーが動きを検出しているかどうかの判断
-                    val isAccelMoving = averageLinearAccelMagnitude > ACCEL_MOTION_THRESHOLD
-
-                    if (isGpsReliable) {
-                        // GPSが信頼できる場合はGPS速度を使用
-                        finalSpeedKmh = gpsSpeedKmh
-                    } else if (isAccelMoving) {
-                        // GPSが信頼できないが、加速度センサーが動きを検知している場合
-                        // 歩行とみなし、デフォルトの歩行速度を設定
-                        finalSpeedKmh = DEFAULT_ACCEL_WALKING_SPEED_KMH
-                    } else {
-                        // 両方とも動きを検知しない場合、静止と判断
-                        finalSpeedKmh = 0f
-                    }
-
-                    binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f", finalSpeedKmh)
-                    binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(Date())}"
-
-                    // 表情アイコンの更新
-                    updateFaceIcon(finalSpeedKmh)
-
-                    if (finalSpeedKmh > 0) {
-                        speedReadings.add(finalSpeedKmh)
-                    }
-
-                    // 1時間ごとにデータを保存するロジック
-                    val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-                    if (currentHour != lastSavedHour) {
-                        saveAverageSpeedToDb()
-                        lastSavedHour = currentHour
-                    }
-                }
-            }
-        }
+    private fun updateSpeedUI(speed: Float) {
+        binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f", speed)
+        updateFaceIcon(speed)
     }
 
     private fun updateFaceIcon(speed: Float) {
-        lifecycleScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch {
             val speedRule = withContext(Dispatchers.IO) {
                 appDatabase.speedRuleDao().getSpeedRuleForSpeed(currentUserId, speed)
             }
-
             val faceIconResId = when (speedRule?.emotionId) {
-                1 -> R.drawable.impatient_expression // Surprise
-                2 -> R.drawable.smile_expression    // Excited
-                3 -> R.drawable.smile_expression    // Happy
-                4 -> R.drawable.normal_expression   // Neutral
-                5 -> R.drawable.sad_expression      // Sad
-                else -> R.drawable.normal_expression // デフォルト
+                1 -> R.drawable.impatient_expression
+                2 -> R.drawable.smile_expression
+                3 -> R.drawable.smile_expression
+                4 -> R.drawable.normal_expression
+                5 -> R.drawable.sad_expression
+                else -> R.drawable.normal_expression
             }
             binding.ivFaceIcon.setImageResource(faceIconResId)
         }
     }
 
-    private fun saveAverageSpeedToDb() {
-        if (speedReadings.isEmpty()) {
-            return
-        }
-
-        val averageSpeed = speedReadings.average().toFloat()
+    private fun updateChartWithDataWindow() {
         lifecycleScope.launch {
-            try {
-                val newHistory = History(
-                    userId = currentUserId,
-                    timestamp = System.currentTimeMillis(),
-                    walkingSpeed = averageSpeed,
-                    acceleration = "",
-                    emotionId = 0
-                )
-                withContext(Dispatchers.IO) {
-                    appDatabase.historyDao().insert(newHistory)
-                }
+            val now = Calendar.getInstance()
+            val windowStart = (now.clone() as Calendar).apply { add(Calendar.MINUTE, -10) }.timeInMillis
+            val windowEnd = (now.clone() as Calendar).apply { add(Calendar.MINUTE, 10) }.timeInMillis
 
-                withContext(Dispatchers.Main) {
-                    updateChartWithTodayData()
-                    Toast.makeText(this@HomeScreenActivity, "1時間分の速度データを保存しました。", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@HomeScreenActivity, "データの保存中にエラーが発生しました: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                    e.printStackTrace() // Log the exception for debugging
-                }
+            val historyInWindow = withContext(Dispatchers.IO) {
+                appDatabase.historyDao().getHistoryForUserOnDate(currentUserId, windowStart, windowEnd)
             }
-        }
 
-        speedReadings.clear()
-    }
+            withContext(Dispatchers.Main) {
+                binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(now.time)}"
+                updateChart(historyInWindow)
 
-    private fun updateChartWithTodayData() {
-        lifecycleScope.launch {
-            val today = Date()
-            val cal = Calendar.getInstance().apply { time = today }
-            val startOfDay = getStartOfDay(cal).timeInMillis
-            val endOfDay = getEndOfDay(cal).timeInMillis
-
-            val todayHistory = withContext(Dispatchers.IO) {
-                appDatabase.historyDao().getHistoryForUserOnDate(currentUserId, startOfDay, endOfDay)
+                val currentMinuteOfDay = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+                val minX = (currentMinuteOfDay - 10).toFloat()
+                val maxX = (currentMinuteOfDay + 10).toFloat()
+                binding.lineChart.xAxis.axisMinimum = minX
+                binding.lineChart.xAxis.axisMaximum = maxX
+                binding.lineChart.invalidate()
             }
-            updateChart(todayHistory)
         }
     }
 
@@ -369,23 +218,20 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
             legend.isEnabled = false
             xAxis.labelRotationAngle = -45f
 
-            // X軸のラベルをフォーマットする
             xAxis.valueFormatter = object : ValueFormatter() {
                 private val format = SimpleDateFormat("HH:mm", Locale.getDefault())
                 override fun getFormattedValue(value: Float): String {
+                    val totalMinutes = value.toInt()
+                    val hours = (totalMinutes / 60) % 24
+                    val minutes = totalMinutes % 60
                     val calendar = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, value.toInt())
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
+                        set(Calendar.HOUR_OF_DAY, hours)
+                        set(Calendar.MINUTE, minutes)
                     }
                     return format.format(calendar.time)
                 }
             }
-            // X軸のラベル数を調整（例: 5つのラベルを表示）
-            xAxis.setLabelCount(5, true)
 
-            // Y軸のラベルをフォーマットする
             val leftAxis = binding.lineChart.axisLeft
             leftAxis.valueFormatter = object : ValueFormatter() {
                 private val format = DecimalFormat("0.0", DecimalFormatSymbols(Locale.getDefault()))
@@ -393,26 +239,18 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
                     return "${format.format(value)} km/h"
                 }
             }
-            binding.lineChart.axisRight.isEnabled = false // 右側のY軸を非表示にする
+            binding.lineChart.axisRight.isEnabled = false
         }
     }
 
     private fun updateChart(history: List<History>) {
-        val entries = ArrayList<Entry>()
-
-        // Group history by hour and calculate average speed for each hour
-        val hourlyData = history.groupBy {
+        val entries = history.map {
             val timeCal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-            timeCal.get(Calendar.HOUR_OF_DAY)
-        }.map { (hour, hourlyHistory) ->
-            val averageSpeed = hourlyHistory.map { it.walkingSpeed }.average().toFloat()
-            // Using the hour as the x-value for the chart
-            Entry(hour.toFloat(), averageSpeed)
-        }.sortedBy { it.x } // Sort by hour
+            val minuteOfDay = timeCal.get(Calendar.HOUR_OF_DAY) * 60 + timeCal.get(Calendar.MINUTE)
+            Entry(minuteOfDay.toFloat(), it.walkingSpeed)
+        }.sortedBy { it.x }
 
-        entries.addAll(hourlyData)
-
-        val dataSet = LineDataSet(entries, "歩行速度").apply {
+        val dataSet = LineDataSet(ArrayList(entries), "歩行速度").apply {
             color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
             valueTextColor = Color.BLACK
             setCircleColor(color)
@@ -421,31 +259,7 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
         }
         val lineData = LineData(dataSet)
         binding.lineChart.data = lineData
-
         binding.lineChart.invalidate()
-
-        // Only animate if there's new data.
-        if (entries.isNotEmpty()) {
-            binding.lineChart.animateY(500)
-        }
-    }
-
-    private fun getStartOfDay(calendar: Calendar): Calendar {
-        val cal = calendar.clone() as Calendar
-        cal.set(Calendar.HOUR_OF_DAY, 0)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        cal.set(Calendar.MILLISECOND, 0)
-        return cal
-    }
-
-    private fun getEndOfDay(calendar: Calendar): Calendar {
-        val cal = calendar.clone() as Calendar
-        cal.set(Calendar.HOUR_OF_DAY, 23)
-        cal.set(Calendar.MINUTE, 59)
-        cal.set(Calendar.SECOND, 59)
-        cal.set(Calendar.MILLISECOND, 999)
-        return cal
     }
 
     private fun setupNavigation() {
@@ -464,17 +278,13 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
         val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         val areRulesGenerated = sharedPrefs.getBoolean("CUSTOM_RULES_GENERATED_$currentUserId", false)
 
-        if (areRulesGenerated) {
-            return // Already generated
-        }
+        if (areRulesGenerated) return
 
         lifecycleScope.launch(Dispatchers.IO) {
             val firstTimestamp = appDatabase.historyDao().getFirstTimestamp(currentUserId)
             val lastTimestamp = appDatabase.historyDao().getLastTimestamp(currentUserId)
 
-            if (firstTimestamp == null || lastTimestamp == null) {
-                return@launch // Not enough data
-            }
+            if (firstTimestamp == null || lastTimestamp == null) return@launch
 
             val diffInMillis = lastTimestamp - firstTimestamp
             val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis)
@@ -487,7 +297,7 @@ class HomeScreenActivity : AppCompatActivity(), SensorEventListener {
 
     private suspend fun generateAndSaveCustomRules() {
         val speeds = appDatabase.historyDao().getAllWalkingSpeeds(currentUserId).sorted()
-        if (speeds.size < 10) return // Need a reasonable amount of data
+        if (speeds.size < 10) return
 
         val p20 = speeds[(speeds.size * 0.20).toInt()]
         val p40 = speeds[(speeds.size * 0.40).toInt()]

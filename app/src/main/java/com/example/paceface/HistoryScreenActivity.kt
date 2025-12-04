@@ -124,16 +124,16 @@ class HistoryScreenActivity : AppCompatActivity() {
                     binding.lineChart.invalidate()
                     Toast.makeText(this@HistoryScreenActivity, "この日のデータはありません", Toast.LENGTH_SHORT).show()
                 } else {
-                    val entries = ArrayList<Entry>()
-                    historyData.forEach {
+                    // Group history by hour and calculate average speed for each hour
+                    val hourlyData = historyData.groupBy {
                         val timeCal = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-                        val hour = timeCal.get(Calendar.HOUR_OF_DAY).toFloat()
-                        val minute = timeCal.get(Calendar.MINUTE).toFloat() / 60f
-                        entries.add(Entry(hour + minute, it.walkingSpeed))
-                    }
-                    entries.sortBy { it.x }
+                        timeCal.get(Calendar.HOUR_OF_DAY)
+                    }.map { (hour, hourlyHistory) ->
+                        val averageSpeed = hourlyHistory.map { it.walkingSpeed }.average().toFloat()
+                        Entry(hour.toFloat(), averageSpeed)
+                    }.sortedBy { it.x } // Sort by hour
 
-                    val dataSet = LineDataSet(entries, "歩行速度").apply {
+                    val dataSet = LineDataSet(ArrayList(hourlyData), "歩行速度").apply {
                         color = ContextCompat.getColor(this@HistoryScreenActivity, R_material.color.design_default_color_primary)
                         valueTextColor = Color.BLACK
                         setCircleColor(color)
@@ -159,15 +159,9 @@ class HistoryScreenActivity : AppCompatActivity() {
 
             // X軸のラベルをフォーマットする
             xAxis.valueFormatter = object : ValueFormatter() {
-                private val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+                private val format = DecimalFormat("00時", DecimalFormatSymbols(Locale.getDefault()))
                 override fun getFormattedValue(value: Float): String {
-                    val hours = value.toInt()
-                    val minutes = ((value - hours) * 60).toInt()
-                    val calendar = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, hours)
-                        set(Calendar.MINUTE, minutes)
-                    }
-                    return format.format(calendar.time)
+                    return format.format(value)
                 }
             }
             xAxis.setLabelCount(5, true)
