@@ -49,8 +49,7 @@ object NavigationUtils {
             HomeScreenActivity::class.java -> updateButtonHighlight(homeButton)
             ProximityHistoryScreenActivity::class.java -> updateButtonHighlight(passingButton)
             HistoryScreenActivity::class.java -> updateButtonHighlight(historyButton)
-            // TODO: 感情画面に対応するActivityがあれば、ここにそのActivityのClassとemotionButtonを追加してください
-            // EmotionScreenActivity::class.java -> updateButtonHighlight(emotionButton)
+            ExpressionCustomizationScreenActivity::class.java -> updateButtonHighlight(emotionButton)
             UserSettingsScreenActivity::class.java -> updateButtonHighlight(gearButton)
             else -> {
                 // どのナビゲーションボタンにも対応しないActivityの場合のデフォルト処理

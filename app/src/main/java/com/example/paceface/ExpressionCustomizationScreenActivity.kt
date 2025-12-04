@@ -79,16 +79,16 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
 
-        binding.backButton.setOnClickListener {
-            val intent = Intent(this, HomeScreenActivity::class.java)
-            startActivity(intent)
-        }
-
         // --- フッターナビゲーションの処理 ---
-        binding.homeButton.setOnClickListener { startActivity(Intent(this, HomeScreenActivity::class.java)) }
-        binding.passingButton.setOnClickListener { startActivity(Intent(this, ProximityHistoryScreenActivity::class.java)) }
-        binding.historyButton.setOnClickListener { startActivity(Intent(this, HistoryScreenActivity::class.java)) }
-        binding.gearButton.setOnClickListener { startActivity(Intent(this, UserSettingsScreenActivity::class.java)) }
+        NavigationUtils.setupCommonNavigation(
+            this,
+            ExpressionCustomizationScreenActivity::class.java,
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton,
+            binding.gearButton
+        )
 
         // --- 起動時の状態復元 ---
         val savedTag = sharedPreferences.getString(KEY_SELECTED_EMOJI_TAG, "1") // デフォルトは"1"
