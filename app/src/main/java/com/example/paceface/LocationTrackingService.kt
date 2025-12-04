@@ -53,7 +53,16 @@ class LocationTrackingService : Service() {
                 }
             }
             ACTION_STOP -> {
-                stopSelf()
+                fusedLocationClient.removeLocationUpdates(locationCallback)
+                serviceScope.launch {
+                    saveMinuteAverageSpeedToDb()
+                    withContext(Dispatchers.Main) {
+                        val stopIntent = Intent(BROADCAST_SPEED_UPDATE)
+                        stopIntent.putExtra(EXTRA_SPEED, 0.0f)
+                        LocalBroadcastManager.getInstance(this@LocationTrackingService).sendBroadcast(stopIntent)
+                        stopSelf()
+                    }
+                }
             }
         }
         return START_STICKY
@@ -143,7 +152,6 @@ class LocationTrackingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
         serviceScope.cancel()
     }
 

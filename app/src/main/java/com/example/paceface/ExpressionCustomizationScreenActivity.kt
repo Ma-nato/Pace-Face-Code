@@ -72,9 +72,9 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
             updateUiForMode(isChecked)
 
             val message = if (isChecked) {
-                "自動変更がONになりました"
+                "表情が歩行速度に合わせて自動で変わるようになりました。"
             } else {
-                "自動変更がOFFになりました"
+                "表情を選択したデザインに固定しました。"
             }
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
