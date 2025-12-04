@@ -250,6 +250,18 @@ class HomeScreenActivity : AppCompatActivity() {
             Entry(minuteOfDay.toFloat(), it.walkingSpeed)
         }.sortedBy { it.x }
 
+        val yAxis = binding.lineChart.axisLeft
+        if (history.isNotEmpty()) {
+            val minSpeed = history.minOf { it.walkingSpeed }
+            val maxSpeed = history.maxOf { it.walkingSpeed }
+            val padding = (maxSpeed - minSpeed) * 0.2f + 0.5f
+            yAxis.axisMinimum = (minSpeed - padding).coerceAtLeast(0f)
+            yAxis.axisMaximum = maxSpeed + padding
+        } else {
+            yAxis.axisMinimum = 0f
+            yAxis.axisMaximum = 5f
+        }
+
         val dataSet = LineDataSet(ArrayList(entries), "歩行速度").apply {
             color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
             valueTextColor = Color.BLACK
