@@ -1,8 +1,12 @@
 package com.example.paceface
 
+import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.Index
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
+import androidx.room.Query
 import java.security.MessageDigest
 
 @Entity(
@@ -26,4 +30,22 @@ data class User(
             return hashBytes.joinToString("") { "%02x".format(it) }
         }
     }
+}
+
+@Dao
+interface SpeedRuleDao {
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    suspend fun insert(speedRule: SpeedRule)
+
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    suspend fun insertAll(speedRules: List<SpeedRule>)
+
+    @Query("SELECT * FROM SpeedRule WHERE userId = :userId")
+    suspend fun getSpeedRulesForUser(userId: Int): List<SpeedRule>
+
+    @Query("DELETE FROM SpeedRule WHERE userId = :userId")
+    suspend fun deleteRulesForUser(userId: Int)
+
+    @Query("SELECT * FROM SpeedRule WHERE userId = :userId AND :speed >= minSpeed AND :speed < maxSpeed ORDER BY minSpeed DESC LIMIT 1")
+    suspend fun getSpeedRuleForSpeed(userId: Int, speed: Float): SpeedRule?
 }

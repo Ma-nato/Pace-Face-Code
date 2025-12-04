@@ -72,12 +72,8 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         }
 
         binding.btnLogout.setOnClickListener {
-            tokenManager.clearTokens()
-            // ログアウト後は選択画面に遷移し、戻れないように設定
-            val intent = Intent(this, SelectionScreenActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val intent = Intent(this, LogoutConfirmationScreenActivity::class.java)
             startActivity(intent)
-            finish()
         }
 
         binding.btnDeleteAccount.setOnClickListener {

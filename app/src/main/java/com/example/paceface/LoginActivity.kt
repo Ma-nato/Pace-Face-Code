@@ -81,6 +81,13 @@ class LoginActivity : AppCompatActivity() {
             if (user != null && user.password == hashedPassword) {
                 // Login success
 
+                // Save logged-in user ID
+                val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                with(sharedPrefs.edit()) {
+                    putInt("LOGGED_IN_USER_ID", user.userId)
+                    apply()
+                }
+
                 // --- Generate and save dummy tokens ---
                 val accessToken = UUID.randomUUID().toString()
                 val refreshToken = UUID.randomUUID().toString()
