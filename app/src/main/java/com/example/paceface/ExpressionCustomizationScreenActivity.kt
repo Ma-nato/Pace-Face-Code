@@ -57,9 +57,7 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
                     // DBに表情の変更履歴を保存
                     saveHistoryToDatabase(selectedTag.toInt())
 
-                    val intent = Intent(this, ExpressionChangeCompleteScreenActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    }
+                    val intent = Intent(this, ExpressionChangeCompleteScreenActivity::class.java)
                     startActivity(intent)
                 }
             } else {
@@ -68,27 +66,26 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
         }
 
         binding.changeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            // スイッチの状態をSharedPreferencesに保存
             sharedPreferences.edit().putBoolean(KEY_AUTO_CHANGE_ENABLED, isChecked).apply()
+            // UIの状態を更新
             updateUiForMode(isChecked)
 
             val message = if (isChecked) {
-                "表情が歩行速度に合わせて自動で変わるようになりました。"
+                "自動変更がONになりました"
             } else {
-                "表情を選択したデザインに固定しました。"
+                "自動変更がOFFになりました"
             }
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
 
+
+
         // --- フッターナビゲーションの処理 ---
-        NavigationUtils.setupCommonNavigation(
-            this,
-            ExpressionCustomizationScreenActivity::class.java,
-            binding.homeButton,
-            binding.passingButton,
-            binding.historyButton,
-            binding.emotionButton,
-            binding.gearButton
-        )
+        binding.homeButton.setOnClickListener { startActivity(Intent(this, HomeScreenActivity::class.java)) }
+        binding.passingButton.setOnClickListener { startActivity(Intent(this, ProximityHistoryScreenActivity::class.java)) }
+        binding.historyButton.setOnClickListener { startActivity(Intent(this, HistoryScreenActivity::class.java)) }
+        binding.gearButton.setOnClickListener { startActivity(Intent(this, UserSettingsScreenActivity::class.java)) }
 
         // --- 起動時の状態復元 ---
         val savedTag = sharedPreferences.getString(KEY_SELECTED_EMOJI_TAG, "1") // デフォルトは"1"
