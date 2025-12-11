@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "161253697478",
+    "project_id": "pace-face-18862",
+    "storage_bucket": "pace-face-18862.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:161253697478:android:8bafc494e28adb0b69b4c7",
+        "android_client_info": {
+          "package_name": "com.example.paceface"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "161253697478-258jc30111usmn1fqi2n9q3cfoju11am.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.paceface",
+            "certificate_hash": "9b5907a62b783c5f2f2d182a36e00ddb0df56bdf"
+          }
+        },
+        {
+          "client_id": "161253697478-c0g10poamnaod4tjuknaa5aimg7huq85.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpgFuoGdrK6nWNkrBKp_CxDLPvnirRNtE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "161253697478-c0g10poamnaod4tjuknaa5aimg7huq85.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- インターネット接続を許可 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Bluetoothの接続状態を確認するための権限 -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
@@ -98,10 +101,23 @@
             android:exported="true" />
         <activity
             android:name=".SelectionScreenActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".LogoutConfirmationScreenActivity"
             android:exported="false" />
+        <activity
+            android:name=".EmailVerificationScreenActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DeepLinkActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="pace-face-app.firebaseapp.com" android:scheme="https"/>
+            </intent-filter>
+        </activity>
 
     </application>
 

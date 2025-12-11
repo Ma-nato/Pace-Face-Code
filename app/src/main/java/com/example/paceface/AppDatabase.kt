@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
         HourlyAverageSpeed::class,
         HourlyEmotionPercentage::class
     ],
-    version = 18, // データベースのバージョンを更新
+    version = 19, // データベースのバージョンを更新
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
