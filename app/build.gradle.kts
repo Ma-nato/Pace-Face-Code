@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.kapt")
+    alias(libs.plugins.googleGmsServices) // google.gms.services -> googleGmsServices に修正
 }
 
 android {
@@ -54,6 +55,11 @@ dependencies {
     kapt("androidx.room:room-compiler:$room_version")
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-analytics")
 
     // 基本ライブラリ
     implementation("androidx.core:core-ktx:1.12.0")

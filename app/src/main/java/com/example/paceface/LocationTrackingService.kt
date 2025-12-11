@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
@@ -92,17 +93,38 @@ class LocationTrackingService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let { location ->
-                    val speedKmh = location.speed * 3.6f
-                    synchronized(speedReadings) {
-                        speedReadings.add(speedKmh)
+                    val speedKmh = getWalkingSpeed(location)
+                    if (speedKmh >= 0) {
+                        synchronized(speedReadings) {
+                            speedReadings.add(speedKmh)
+                        }
+                        // Broadcast the speed to the UI
+                        val intent = Intent(BROADCAST_SPEED_UPDATE)
+                        intent.putExtra(EXTRA_SPEED, speedKmh)
+                        LocalBroadcastManager.getInstance(this@LocationTrackingService).sendBroadcast(intent)
                     }
-                    // Broadcast the speed to the UI
-                    val intent = Intent(BROADCAST_SPEED_UPDATE)
-                    intent.putExtra(EXTRA_SPEED, speedKmh)
-                    LocalBroadcastManager.getInstance(this@LocationTrackingService).sendBroadcast(intent)
                 }
             }
         }
+    }
+
+    private fun getWalkingSpeed(location: Location): Float {
+        // Android標準の速度情報 (location.speed) が利用できるかチェック
+        if (location.hasSpeed()) {
+            val speedKmh = location.speed * 3.6f
+
+            // 異常値を除外（歩行速度として妥当な0〜15km/hの範囲に限定）
+            if (speedKmh in 0f..15f) {
+                // 静止状態に近い微小な値は0.0fとして扱う
+                if (speedKmh < 0.5f) {
+                    return 0.0f
+                }
+                return speedKmh
+            }
+        }
+
+        // 速度が取得できない、または範囲外の場合は無効な値として-1fを返す
+        return -1f
     }
 
     private fun startMinuteTickLoop() {

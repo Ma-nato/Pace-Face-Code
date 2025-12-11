@@ -30,6 +30,16 @@ class LoginActivity : AppCompatActivity() {
         appDatabase = AppDatabase.getDatabase(this)
         tokenManager = TokenManager(this)
 
+        // デバッグおよび状態の不整合を解消するため、古い認証情報を強制的にクリアする
+        // 1. トークンをクリア
+        tokenManager.clearTokens()
+        // 2. ログイン中のユーザーIDをクリア
+        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        with(sharedPrefs.edit()) {
+            remove("LOGGED_IN_USER_ID")
+            apply()
+        }
+
         // パスワード表示/非表示のトグルを設定
         setupPasswordToggle(binding.inputPassword, binding.btnEye)
 

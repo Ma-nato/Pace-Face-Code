@@ -1,5 +1,6 @@
 package com.example.paceface
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -11,14 +12,20 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.UserRegistrationScreenBinding
+import com.google.firebase.auth.ActionCodeSettings
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class UserRegistrationScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: UserRegistrationScreenBinding
     private lateinit var appDatabase: AppDatabase
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +33,13 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         appDatabase = AppDatabase.getDatabase(this)
+        auth = Firebase.auth
 
         setupPasswordVisibilityToggles()
 
         binding.btnRegister.setOnClickListener {
             if (validateInputs()) {
-                checkDuplicatesAndProceed()
+                checkDuplicatesAndRegister()
             }
         }
     }
@@ -42,21 +50,17 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
     }
 
     private fun setupPasswordToggle(editText: EditText, eyeButton: ImageButton) {
-        // 初期状態：パスワードは非表示、アイコンはグレー
         editText.transformationMethod = PasswordTransformationMethod.getInstance()
         eyeButton.setColorFilter(Color.GRAY)
 
         eyeButton.setOnClickListener {
             if (editText.transformationMethod == null) {
-                // 現在パスワードが表示されている場合 -> 非表示に
                 editText.transformationMethod = PasswordTransformationMethod.getInstance()
                 eyeButton.setColorFilter(Color.GRAY)
             } else {
-                // 現在パスワードが非表示の場合 -> 表示に
                 editText.transformationMethod = null
                 eyeButton.clearColorFilter()
             }
-            // カーソルを末尾に移動
             editText.setSelection(editText.text.length)
         }
     }
@@ -96,44 +100,69 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
         return isValid
     }
 
-    private fun checkDuplicatesAndProceed() {
+    private fun checkDuplicatesAndRegister() {
         val name = binding.etUsername.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString()
 
-        lifecycleScope.launch(Dispatchers.IO) { // Use IO dispatcher for DB operations
-            try {
-                val userByName = appDatabase.userDao().getUserByName(name)
-                if (userByName != null) {
-                    withContext(Dispatchers.Main) { // Switch to Main for UI update
-                        binding.tvUserNameError.text = "※このユーザー名は既に使用されています"
-                        binding.tvUserNameError.visibility = View.VISIBLE
-                    }
-                    return@launch
-                }
-
-                val userByEmail = appDatabase.userDao().getUserByEmail(email)
-                if (userByEmail != null) {
-                    withContext(Dispatchers.Main) { // Switch to Main for UI update
-                        binding.tvEmailError.text = "※このメールアドレスは既に使用されています"
-                        binding.tvEmailError.visibility = View.VISIBLE
-                    }
-                    return@launch
-                }
-
-                // No duplicates, proceed to confirmation screen on Main thread
+        lifecycleScope.launch(Dispatchers.IO) {
+            val userByName = appDatabase.userDao().getUserByName(name)
+            if (userByName != null) {
                 withContext(Dispatchers.Main) {
-                    val password = binding.etPassword.text.toString()
-                    val intent = Intent(this@UserRegistrationScreenActivity, UserRegistrationConfirmationScreenActivity::class.java).apply {
-                        putExtra("USER_NAME", name)
+                    binding.tvUserNameError.text = "※このユーザー名は既に使用されています"
+                    binding.tvUserNameError.visibility = View.VISIBLE
+                }
+                return@launch
+            }
+
+            val userByEmail = appDatabase.userDao().getUserByEmail(email)
+            if (userByEmail != null) {
+                withContext(Dispatchers.Main) {
+                    binding.tvEmailError.text = "※このメールアドレスは既に使用されています"
+                    binding.tvEmailError.visibility = View.VISIBLE
+                }
+                return@launch
+            }
+
+            withContext(Dispatchers.Main) {
+                try {
+                    val result = auth.createUserWithEmailAndPassword(email, password).await()
+                    val user = result.user
+
+                    // ActionCodeSettings for email verification link
+                    val actionCodeSettings = ActionCodeSettings.newBuilder()
+                        .setUrl("https://pace-face-18862.firebaseapp.com") // あなたのプロジェクトのドメインに修正
+                        // Replace with your domain
+                        .setHandleCodeInApp(true)
+                        .setAndroidPackageName(
+                            "com.example.paceface",
+                            true, /* installIfNotAvailable */
+                            null /* minimumVersion */)
+                        .build()
+
+                    user?.sendEmailVerification(actionCodeSettings)?.await()
+
+                    // Save email for verification link
+                    val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                    with(sharedPrefs.edit()) {
+                        putString("EMAIL_FOR_VERIFICATION", email)
+                        apply()
+                    }
+
+                    // Insert user in background
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val newUser = User(email = email, name = name, password = User.hashPassword(password))
+                        appDatabase.userDao().insert(newUser)
+                    }
+
+                    val intent = Intent(this@UserRegistrationScreenActivity, EmailVerificationScreenActivity::class.java).apply {
                         putExtra("USER_EMAIL", email)
-                        putExtra("USER_PASSWORD", password)
                     }
                     startActivity(intent)
-                }
+                    finish()
 
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) { // Switch to Main for Toast
-                    Toast.makeText(this@UserRegistrationScreenActivity, "データベース確認中にエラーが発生しました。", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(this@UserRegistrationScreenActivity, "登録に失敗しました: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }

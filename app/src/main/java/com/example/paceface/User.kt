@@ -21,7 +21,8 @@ data class User(
     val userId: Int = 0,
     val email: String,
     val name: String,
-    val password: String // Hashed password
+    val password: String, // Hashed password
+    val isEmailVerified: Boolean = false
 ) {
     companion object {
         fun hashPassword(password: String): String {
