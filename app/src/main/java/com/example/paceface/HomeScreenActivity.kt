@@ -1,18 +1,13 @@
 //HomeScreenActivity.kt
 package com.example.paceface
 
-import android.Manifest
-import android.content.*
-import android.content.pm.PackageManager
+import android.content.Context
+import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.paceface.databinding.HomeScreenBinding
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -23,16 +18,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.concurrent.TimeUnit
+import java.util.Calendar
 
 class HomeScreenActivity : AppCompatActivity() {
 
@@ -44,18 +32,10 @@ class HomeScreenActivity : AppCompatActivity() {
     private val dateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
     private var chartUpdateJob: Job? = null
 
-    private val speedUpdateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == LocationTrackingService.BROADCAST_SPEED_UPDATE) {
-                val speed = intent.getFloatExtra(LocationTrackingService.EXTRA_SPEED, 0f)
-                updateSpeedUI(speed)
-            }
-        }
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        handlePermissionsResult(permissions)
-    }
+    // SharedPreferencesから表情設定を読み込むためのキー
+    private val EMOJI_PREFS_NAME = "EmojiPrefs"
+    private val KEY_SELECTED_EMOJI_TAG = "selectedEmojiTag"
+    private val KEY_AUTO_CHANGE_ENABLED = "autoChangeEnabled"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,7 +83,8 @@ class HomeScreenActivity : AppCompatActivity() {
         binding.tvTitle.text = "現在の歩行速度"
         setupNavigation()
         setupChart()
-        checkAndGenerateCustomRules()
+        loadTodayHistory()
+        setupFooterNavigation()
     }
 
     private fun redirectToLogin() {
@@ -164,13 +145,9 @@ class HomeScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun handlePermissionsResult(permissions: Map<String, Boolean>) {
-        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
-
-        if (!fineLocationGranted) {
-            Toast.makeText(this, "位置情報の権限がありません。", Toast.LENGTH_LONG).show()
-            return
-        }
+    private fun loadAndApplyEmotionSetting() {
+        val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
+        val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -248,39 +225,18 @@ class HomeScreenActivity : AppCompatActivity() {
                 binding.lineChart.invalidate()
             }
         }
+        binding.ivFaceIcon.setImageResource(drawableId)
     }
 
     private fun setupChart() {
         binding.lineChart.apply {
             description.isEnabled = false
+            setNoDataText("今日の履歴はありません")
             isDragEnabled = true
             setScaleEnabled(true)
             setPinchZoom(true)
             legend.isEnabled = false
-            xAxis.labelRotationAngle = -45f
-
-            xAxis.valueFormatter = object : ValueFormatter() {
-                private val format = SimpleDateFormat("HH:mm", Locale.getDefault())
-                override fun getFormattedValue(value: Float): String {
-                    val totalMinutes = value.toInt()
-                    val hours = (totalMinutes / 60) % 24
-                    val minutes = totalMinutes % 60
-                    val calendar = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, hours)
-                        set(Calendar.MINUTE, minutes)
-                    }
-                    return format.format(calendar.time)
-                }
-            }
-
-            val leftAxis = binding.lineChart.axisLeft
-            leftAxis.valueFormatter = object : ValueFormatter() {
-                private val format = DecimalFormat("0.0", DecimalFormatSymbols(Locale.getDefault()))
-                override fun getFormattedValue(value: Float): String {
-                    return "${format.format(value)} km/h"
-                }
-            }
-            binding.lineChart.axisRight.isEnabled = false
+            xAxis.isEnabled = false
         }
     }
 
@@ -332,18 +288,34 @@ class HomeScreenActivity : AppCompatActivity() {
         val areRulesGenerated = sharedPrefs.getBoolean("CUSTOM_RULES_GENERATED_$localUserId", false)
 
         if (areRulesGenerated) return
+    private fun getDayBounds(timestamp: Long): Pair<Long, Long> {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val startOfDay = calendar.timeInMillis
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+        val endOfDay = calendar.timeInMillis
+        return Pair(startOfDay, endOfDay)
+    }
 
+    private fun loadTodayHistory() {
         lifecycleScope.launch(Dispatchers.IO) {
             val firstTimestamp = appDatabase.historyDao().getFirstTimestamp(localUserId)
             val lastTimestamp = appDatabase.historyDao().getLastTimestamp(localUserId)
 
             if (firstTimestamp == null || lastTimestamp == null) return@launch
 
-            val diffInMillis = lastTimestamp - firstTimestamp
-            val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis)
-
-            if (diffInDays >= 7) {
-                generateAndSaveCustomRules()
+            withContext(Dispatchers.Main) {
+                if (historyList.isEmpty()) {
+                    binding.lineChart.clear()
+                    binding.lineChart.invalidate()
+                } else {
+                    updateChart(historyList)
+                }
             }
         }
     }
@@ -371,6 +343,24 @@ class HomeScreenActivity : AppCompatActivity() {
             val sharedPrefsEditor = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE).edit()
             sharedPrefsEditor.putBoolean("CUSTOM_RULES_GENERATED_$localUserId", true)
             sharedPrefsEditor.apply()
+    private fun updateChart(historyList: List<History>) {
+        val entries = ArrayList<Entry>()
+        historyList.forEach {
+            val timeOffset = (it.timestamp % (24 * 60 * 60 * 1000)).toFloat()
+            entries.add(Entry(timeOffset, it.emotionId.toFloat()))
+        }
+
+        if (entries.isNotEmpty()) {
+            val dataSet = LineDataSet(entries, "今日の表情の変化").apply {
+                color = Color.MAGENTA
+                valueTextColor = Color.BLACK
+                setCircleColor(Color.MAGENTA)
+                circleRadius = 4f
+                lineWidth = 2f
+            }
+            val lineData = LineData(dataSet)
+            binding.lineChart.data = lineData
+            binding.lineChart.invalidate()
         }
     }
 }
