@@ -151,14 +151,16 @@ class EmailVerificationScreenActivity : AppCompatActivity() {
     }
 
     private fun navigateToHomeScreen() {
-        val intent = Intent(this, MainActivity::class.java)
+        // 変更: 認証成功後はMainActivityではなくDeviceConnectionGuideScreenActivityへ遷移する
+        val intent = Intent(this, DeviceConnectionGuideScreenActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
     }
 
     private fun navigateToLoginScreen() {
-        val intent = Intent(this, UserRegistrationScreenActivity::class.java)
+        // 変更: ログイン画面ではなく、デバイス接続ガイド画面へ遷移する
+        val intent = Intent(this, DeviceConnectionGuideScreenActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()

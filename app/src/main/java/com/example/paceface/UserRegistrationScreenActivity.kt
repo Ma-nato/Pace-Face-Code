@@ -46,6 +46,13 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        binding.btnRegister.setOnClickListener { // btnRegister は登録ボタンのIDと仮定
+            if (validateInputs()) {
+                // 入力値の検証に成功した場合のみ、アカウント作成とメール送信の処理を実行
+                createAccountAndSendVerificationEmail()
+            }
+        }
     }
 
     private fun setupPasswordVisibilityToggles() {
