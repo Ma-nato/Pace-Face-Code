@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import android.util.Log
+import android.database.sqlite.SQLiteConstraintException // 追加
 
 class LoginActivity : AppCompatActivity() {
 
@@ -40,6 +41,7 @@ class LoginActivity : AppCompatActivity() {
         auth = Firebase.auth
         appDatabase = AppDatabase.getDatabase(this)
 
+        // 以前のログイン情報をクリア（DBは消さない）
         tokenManager.clearTokens()
         val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         with(sharedPrefs.edit()) {
@@ -58,6 +60,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupPasswordToggle(editText: EditText, eyeButton: ImageButton) {
+        // (変更なしのため省略)
         editText.transformationMethod = PasswordTransformationMethod.getInstance()
         eyeButton.setColorFilter(Color.GRAY)
 
@@ -82,14 +85,12 @@ class LoginActivity : AppCompatActivity() {
         if (username.isEmpty()) {
             binding.errorMessage.text = "※ユーザー名を入力してください"
             binding.errorMessage.visibility = View.VISIBLE
-            Log.d("LoginActivity", "Username empty.")
             return
         }
 
         if (password.isEmpty()) {
             binding.errorMessage.text = "※パスワードを入力してください"
             binding.errorMessage.visibility = View.VISIBLE
-            Log.d("LoginActivity", "Password empty.")
             return
         }
 
@@ -99,6 +100,7 @@ class LoginActivity : AppCompatActivity() {
             try {
                 Log.d("LoginActivity", "Attempting to find email for username: $username")
 
+                // 1. Firestoreでユーザー名を検索してEmailを取得
                 val querySnapshot = db.collection("users")
                     .whereEqualTo("name", username)
                     .limit(1)
@@ -106,7 +108,6 @@ class LoginActivity : AppCompatActivity() {
                     .await()
 
                 if (querySnapshot.isEmpty) {
-                    Log.d("LoginActivity", "Username '$username' not found in Firestore (searching by 'name' field).")
                     withContext(Dispatchers.Main) {
                         binding.errorMessage.text = "※ユーザー名またはパスワードが正しくありません"
                         binding.errorMessage.visibility = View.VISIBLE
@@ -119,36 +120,66 @@ class LoginActivity : AppCompatActivity() {
                 val isEmailVerifiedFirestore = userDocument.getBoolean("isEmailVerified") ?: false
 
                 if (email == null) {
-                    Log.e("LoginActivity", "Email not found for username '$username' in Firestore document: ${userDocument.id}")
                     withContext(Dispatchers.Main) {
-                        binding.errorMessage.text = "※ユーザー情報に不備があります。管理者にお問い合わせください。"
+                        binding.errorMessage.text = "※ユーザー情報に不備があります。"
                         binding.errorMessage.visibility = View.VISIBLE
                     }
                     return@launch
                 }
 
-                Log.d("LoginActivity", "Found email '$email' for username '$username'. Attempting Firebase sign-in.")
-
+                // 2. Firebase Auth でログイン
                 val authResult = auth.signInWithEmailAndPassword(email, password).await()
                 val firebaseUser = authResult.user
 
                 if (firebaseUser != null) {
-                    Log.i("LoginActivity", "Firebase sign-in successful for user: ${firebaseUser.uid}")
+                    Log.i("LoginActivity", "Firebase sign-in successful: ${firebaseUser.uid}")
 
-                    val newLocalUser = User(
-                        firebaseUid = firebaseUser.uid,
-                        name = username,
-                        email = email,
-                        password = User.hashPassword(password),
-                        isEmailVerified = isEmailVerifiedFirestore
-                    )
-                    val savedUserId = appDatabase.userDao().insert(newLocalUser).toInt() // ★挿入されたuserIdを取得★
-                    Log.d("LoginActivity", "Local user info saved/updated for Firebase UID: ${firebaseUser.uid}, localUserId: $savedUserId")
+                    // ★★★ ここから修正: ローカルDBの整合性をチェック ★★★
 
+                    // まず、この端末に既にこのFirebase UIDを持つユーザーがいるか確認する
+                    val existingLocalUser = appDatabase.userDao().getUserByFirebaseUid(firebaseUser.uid)
+
+                    val savedUserId: Int
+
+                    if (existingLocalUser != null) {
+                        // 【ケースA: 既存端末】既にローカルにデータがある場合
+                        // 既存の userId を維持したまま、情報を最新に更新する
+                        Log.d("LoginActivity", "Local user found. Updating existing record.")
+                        savedUserId = existingLocalUser.userId
+
+                        val updatedUser = existingLocalUser.copy(
+                            name = username,
+                            email = email,
+                            password = User.hashPassword(password),
+                            isEmailVerified = isEmailVerifiedFirestore
+                        )
+                        appDatabase.userDao().update(updatedUser)
+                    } else {
+                        // 【ケースB: 新規端末】ローカルにデータがない場合
+                        // 新しくインサートする。データ（履歴）は空の状態からスタート。
+                        Log.d("LoginActivity", "No local user found. Creating new record.")
+
+                        val newLocalUser = User(
+                            firebaseUid = firebaseUser.uid,
+                            name = username,
+                            email = email,
+                            password = User.hashPassword(password),
+                            isEmailVerified = isEmailVerifiedFirestore
+                        )
+
+                        // ※注意: もし同じ端末に「同名の別人」がローカルに存在する場合、nameのUNIQUE制約でエラーになる可能性があります
+                        // その場合は別のアカウントであることをユーザーに伝えるなどのハンドリングが必要ですが、
+                        // ここでは一般的なログイン処理として実装します。
+                        savedUserId = appDatabase.userDao().insert(newLocalUser).toInt()
+                    }
+
+                    Log.d("LoginActivity", "User setup complete. localUserId: $savedUserId")
+
+                    // SharedPreferencesに保存
                     val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
                     with(sharedPrefs.edit()) {
                         putString("LOGGED_IN_FIREBASE_UID", firebaseUser.uid)
-                        putInt("LOGGED_IN_USER_ID", savedUserId) // ★localUserIdも保存★
+                        putInt("LOGGED_IN_USER_ID", savedUserId)
                         apply()
                     }
 
@@ -159,23 +190,27 @@ class LoginActivity : AppCompatActivity() {
                         finish()
                     }
                 } else {
-                    Log.w("LoginActivity", "Firebase sign-in failed: User object is null.")
                     withContext(Dispatchers.Main) {
-                        binding.errorMessage.text = "※ユーザー名またはパスワードが正しくありません"
+                        binding.errorMessage.text = "認証に失敗しました"
                         binding.errorMessage.visibility = View.VISIBLE
                     }
+                }
+            } catch (e: SQLiteConstraintException) {
+                // ローカルDBの制約違反（例：既に同じ名前のユーザーが端末内に存在するがFirebaseUIDが違う場合など）
+                Log.e("LoginActivity", "Database Error: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    binding.errorMessage.text = "端末内に同じ名前の別ユーザーが存在するためログインできません。"
+                    binding.errorMessage.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
                 Log.e("LoginActivity", "Login error: ${e.message}", e)
                 withContext(Dispatchers.Main) {
-                    binding.errorMessage.text = "ログインに失敗しました: ${e.localizedMessage ?: "不明なエラー"}"
+                    binding.errorMessage.text = "ログイン失敗: ${e.localizedMessage}"
                     binding.errorMessage.visibility = View.VISIBLE
-                    Snackbar.make(binding.root, "ログインに失敗しました: ${e.localizedMessage ?: "不明なエラー"}", Snackbar.LENGTH_LONG).show()
                 }
             } finally {
                 withContext(Dispatchers.Main) {
                     binding.btnLogin.isEnabled = true
-                    Log.d("LoginActivity", "Login process finished. Button re-enabled.")
                 }
             }
         }

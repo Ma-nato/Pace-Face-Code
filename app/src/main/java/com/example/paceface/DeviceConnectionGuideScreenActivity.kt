@@ -1,3 +1,4 @@
+//DeviceConnectionGuideScreenActivity.kt
 package com.example.paceface
 
 import android.Manifest

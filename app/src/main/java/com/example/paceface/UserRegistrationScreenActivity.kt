@@ -39,15 +39,12 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
 
         setupPasswordVisibilityToggles()
 
-        binding.btnRegister.setOnClickListener {
-            Log.d("UserRegistration", "--- '同意して登録する' ボタンがクリックされました ---")
-            if (validateInputs()) {
-                Log.d("UserRegistration", "入力値の検証が成功しました。登録処理を開始します。")
-                createAccountAndSendVerificationEmail()
-            } else {
-                Log.d("UserRegistration", "入力値の検証が失敗しました。登録処理は開始されません。")
-                binding.btnRegister.isEnabled = true
-            }
+        binding.btnBack.setOnClickListener {
+            // 遷移先を SelectionScreenActivity に変更
+            val intent = Intent(this, SelectionScreenActivity::class.java)
+            // 戻る操作なので、現在のActivityを終了する
+            startActivity(intent)
+            finish()
         }
     }
 

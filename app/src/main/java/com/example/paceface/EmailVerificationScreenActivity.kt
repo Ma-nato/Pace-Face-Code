@@ -1,4 +1,4 @@
-// EmailVerificationScreenActivity.kt
+//EmailVerificationScreenActivity.kt
 package com.example.paceface
 
 import android.content.Context

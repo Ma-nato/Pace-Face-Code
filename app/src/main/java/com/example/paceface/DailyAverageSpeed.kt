@@ -1,3 +1,4 @@
+//DailyAverageSpeed.kt
 package com.example.paceface
 
 import androidx.room.Entity
