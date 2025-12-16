@@ -58,8 +58,7 @@ class DeviceConnectionGuideScreenActivity : AppCompatActivity() {
         // 接続済みのデバイスを確認
         bluetoothAdapter?.bondedDevices?.forEach { device ->
             // デバイス名が "raspberrypi" だったらホーム画面へ遷移
-            //if (device.name == "raspberrypi") {
-            if (true) { // TODO: "raspberrypi"という名前のデバイスでのみ遷移するように、テスト後にこの条件を元に戻してください
+            if (device.name == "raspberrypi") { // 条件を元に戻しました
                 val intent = Intent(this, HomeScreenActivity::class.java)
                 startActivity(intent)
                 finish() // この画面は閉じる

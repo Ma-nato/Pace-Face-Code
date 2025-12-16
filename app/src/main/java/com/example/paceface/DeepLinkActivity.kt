@@ -47,23 +47,23 @@ class DeepLinkActivity : AppCompatActivity() {
                             }
                         }
                     }
-                    // Redirect to login
-                    val loginIntent = Intent(this@DeepLinkActivity, LoginActivity::class.java)
-                    loginIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(loginIntent)
+                    // Redirect to Device Connection Guide Screen (変更)
+                    val nextIntent = Intent(this@DeepLinkActivity, DeviceConnectionGuideScreenActivity::class.java)
+                    nextIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(nextIntent)
                     finish()
                 }
             } else {
                 // Handle case where email is not available
                 Toast.makeText(this, "認証エラーが発生しました。", Toast.LENGTH_LONG).show()
-                val loginIntent = Intent(this, LoginActivity::class.java)
-                startActivity(loginIntent)
+                val nextIntent = Intent(this, DeviceConnectionGuideScreenActivity::class.java)
+                startActivity(nextIntent)
                 finish()
             }
         } else {
-            // Fallback to login for other intents
-            val loginIntent = Intent(this, LoginActivity::class.java)
-            startActivity(loginIntent)
+            // Fallback to Device Connection Guide for other intents (変更)
+            val nextIntent = Intent(this, DeviceConnectionGuideScreenActivity::class.java)
+            startActivity(nextIntent)
             finish()
         }
     }
