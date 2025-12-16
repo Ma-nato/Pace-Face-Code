@@ -1,3 +1,4 @@
+//LocationTrackingService.kt
 package com.example.paceface
 
 import android.app.NotificationChannel
@@ -129,11 +130,21 @@ class LocationTrackingService : Service() {
 
     private fun startMinuteTickLoop() {
         serviceScope.launch {
+            // サービス起動後、最初の「次の分の始まり」まで待つ
+            val now = Calendar.getInstance()
+            val seconds = now.get(Calendar.SECOND)
+            val initialDelayMillis = (60 - seconds) * 1000L
+
+            // 最初のディレイ
+            delay(initialDelayMillis)
+
+            // 次の分の始まりで最初の保存を実行
+            saveMinuteAverageSpeedToDb()
+
+            // 以降、60秒（1分）ごとに保存処理を実行するループ
             while (isActive) {
-                val now = Calendar.getInstance()
-                val seconds = now.get(Calendar.SECOND)
-                val delayMillis = (60 - seconds) * 1000L
-                delay(delayMillis)
+                // 実行タイミングがズレないように、固定で60秒待機する
+                delay(60000L)
                 saveMinuteAverageSpeedToDb()
             }
         }

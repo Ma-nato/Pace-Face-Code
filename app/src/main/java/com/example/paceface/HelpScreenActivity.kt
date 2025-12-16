@@ -1,3 +1,4 @@
+//HelpScreenActivity.kt
 package com.example.paceface
 
 import android.content.Intent

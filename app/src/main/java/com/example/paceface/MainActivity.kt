@@ -97,6 +97,9 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, activityClass)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        if (activityClass == SelectionScreenActivity::class.java) {
+            overridePendingTransition(0, 0)
+        }
         finish()
     }
 

@@ -1,3 +1,4 @@
+//AuthToken.kt
 package com.example.paceface
 
 data class AuthToken(

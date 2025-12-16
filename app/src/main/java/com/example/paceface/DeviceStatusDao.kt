@@ -1,3 +1,4 @@
+//DeviceStatusDao.kt
 package com.example.paceface
 
 import androidx.room.Dao

@@ -1,3 +1,4 @@
+//ProximityHistoryAdapter.kt
 package com.example.paceface
 
 import android.view.LayoutInflater

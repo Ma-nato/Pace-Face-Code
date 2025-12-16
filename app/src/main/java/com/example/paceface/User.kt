@@ -18,6 +18,7 @@ import java.security.MessageDigest
         Index(value = ["firebaseUid"], unique = true) // ★★★ firebaseUidもuniqueに設定 ★★★
     ]
 )
+
 data class User(
     @PrimaryKey(autoGenerate = true)
     val userId: Int = 0,

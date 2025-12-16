@@ -1,3 +1,4 @@
+//HomeScreenActivity.kt
 package com.example.paceface
 
 import android.Manifest
@@ -90,24 +91,34 @@ class HomeScreenActivity : AppCompatActivity() {
     private suspend fun validateUserAndSetupScreen() {
         val firebaseUser = auth.currentUser
         if (firebaseUser == null) {
-            // 未ログインならログイン画面へ
             redirectToLogin()
             return
         }
 
-        // Firebase UID からローカル DB のユーザーを取得
-        val localUser = withContext(Dispatchers.IO) {
-            appDatabase.userDao().getUserByFirebaseUid(firebaseUser.uid)
-        }
+        // 基本的には LoginActivity で設定された SharedPreferences の ID を信頼して使う
+        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val prefUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
 
-        if (localUser == null) {
-            Toast.makeText(this@HomeScreenActivity, "ユーザー情報の取得に失敗しました。", Toast.LENGTH_LONG).show()
-            auth.signOut()
-            redirectToLogin()
-            return
+        if (prefUserId != -1) {
+            localUserId = prefUserId
+        } else {
+            // 万が一 Prefs が消えていた場合のフォールバック
+            val localUser = withContext(Dispatchers.IO) {
+                appDatabase.userDao().getUserByFirebaseUid(firebaseUser.uid)
+            }
+            if (localUser != null) {
+                localUserId = localUser.userId
+                // Prefsを復旧
+                with(sharedPrefs.edit()) {
+                    putInt("LOGGED_IN_USER_ID", localUserId)
+                    apply()
+                }
+            } else {
+                // ここに来るのは異常系だが、念のためログイン画面へ戻す
+                redirectToLogin()
+                return
+            }
         }
-
-        localUserId = localUser.userId
 
         // UI の初期化
         setupUI()
@@ -119,27 +130,28 @@ class HomeScreenActivity : AppCompatActivity() {
         setupChart()
         loadTodayHistory()
         setupFooterNavigationIfExists()
+
+        // ここに移動
+        checkPermissionsAndStartService()
+        startChartUpdateLoop()
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(speedUpdateReceiver, IntentFilter(LocationTrackingService.BROADCAST_SPEED_UPDATE))
+
+        // 表情設定の反映（表示系の更新）
+        loadAndApplyEmotionSetting()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // onResume から localUserId != -1 のチェックと関連処理を削除する (setupUI() に移動したため)
+        // ただし、表情設定の反映はonResumeの度に必要なので残す
+        loadAndApplyEmotionSetting()
+    }
     private fun redirectToLogin() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // 検証済みの localUserId がある場合のみ各種処理を開始する
-        if (localUserId != -1) {
-            checkPermissionsAndStartService()
-            startChartUpdateLoop()
-            LocalBroadcastManager.getInstance(this)
-                .registerReceiver(speedUpdateReceiver, IntentFilter(LocationTrackingService.BROADCAST_SPEED_UPDATE))
-        }
-
-        // 表情設定の反映（表示系の更新）
-        loadAndApplyEmotionSetting()
     }
 
     override fun onPause() {
@@ -209,6 +221,15 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun updateFaceIconBasedOnSpeed(speed: Float) {
+        // 自動変更設定を確認する処理
+        val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
+        val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
+
+        // 自動変更がOFFの場合、速度によるアイコン更新を行わずに終了する
+        if (!isAutoChangeEnabled) {
+            return
+        }
+
         lifecycleScope.launch {
             val speedRule = withContext(Dispatchers.IO) {
                 appDatabase.speedRuleDao().getSpeedRuleForSpeed(localUserId, speed)
@@ -256,12 +277,51 @@ class HomeScreenActivity : AppCompatActivity() {
     private fun setupChart() {
         binding.lineChart.apply {
             description.isEnabled = false
-            setNoDataText("今日の履歴はありません")
+            setNoDataText("データ待機中...")
+
+            // タッチ操作の設定
             isDragEnabled = true
             setScaleEnabled(true)
             setPinchZoom(true)
+
+            // 凡例は隠す（1つのデータしかないので不要）
             legend.isEnabled = false
-            xAxis.isEnabled = false
+
+            // --- X軸（時間）の設定 ---
+            xAxis.apply {
+                isEnabled = true
+                position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
+                setDrawGridLines(false) // X軸のグリッドはうるさくなるのでOFF
+                textColor = Color.DKGRAY
+                textSize = 10f
+                granularity = 1f // 1分ごとにデータを区切る
+
+                // 数字（分）を「HH:mm」形式に変換するフォーマッターを設定
+                valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
+                    override fun getAxisLabel(value: Float, axis: com.github.mikephil.charting.components.AxisBase?): String {
+                        val totalMinutes = value.toInt()
+                        val hour = totalMinutes / 60
+                        val minute = totalMinutes % 60
+                        // 24時間を超える場合の補正（念のため）
+                        val normalizedHour = hour % 24
+                        return String.format(Locale.getDefault(), "%02d:%02d", normalizedHour, minute)
+                    }
+                }
+            }
+
+            // --- Y軸（速度）の設定 ---
+            axisRight.isEnabled = false // 右側の軸は消す
+            axisLeft.apply {
+                isEnabled = true
+                textColor = Color.DKGRAY
+                setDrawGridLines(true) // 横のグリッド線を表示
+                gridColor = Color.LTGRAY
+                enableGridDashedLine(10f, 10f, 0f) // グリッドを点線にする
+                axisMinimum = 0f // 常に0からスタートさせる
+            }
+
+            // 余白の調整
+            setExtraOffsets(10f, 10f, 10f, 10f)
         }
     }
 
@@ -272,27 +332,48 @@ class HomeScreenActivity : AppCompatActivity() {
             Entry(minuteOfDay.toFloat(), it.walkingSpeed)
         }.sortedBy { it.x }
 
+        // Y軸の自動調整（最大値に少し余裕を持たせる）
         val yAxis = binding.lineChart.axisLeft
         if (history.isNotEmpty()) {
-            val minSpeed = history.minOf { it.walkingSpeed }
             val maxSpeed = history.maxOf { it.walkingSpeed }
-            val padding = (maxSpeed - minSpeed) * 0.2f + 0.5f
-            yAxis.axisMinimum = (minSpeed - padding).coerceAtLeast(0f)
-            yAxis.axisMaximum = maxSpeed + padding
+            // 最大値の1.2倍くらいを上限にして、グラフが天井に張り付かないようにする
+            yAxis.axisMaximum = (maxSpeed * 1.2f).coerceAtLeast(5f)
         } else {
-            yAxis.axisMinimum = 0f
             yAxis.axisMaximum = 5f
         }
 
+        val primaryColor = ContextCompat.getColor(this, R_material.color.design_default_color_primary)
+
         val dataSet = LineDataSet(ArrayList(entries), "歩行速度").apply {
-            color = ContextCompat.getColor(this@HomeScreenActivity, R_material.color.design_default_color_primary)
-            valueTextColor = Color.BLACK
-            setCircleColor(color)
-            circleRadius = 4f
-            lineWidth = 2f
+            // --- 線のデザイン ---
+            color = primaryColor
+            lineWidth = 3f // 線を少し太く
+            mode = LineDataSet.Mode.CUBIC_BEZIER // ★カクカクではなく滑らかな曲線にする
+
+            // --- 点のデザイン ---
+            setDrawCircles(true)
+            setCircleColor(primaryColor)
+            circleRadius = 3f
+            setDrawCircleHole(false)
+
+            // --- 塗りつぶしのデザイン ---
+            setDrawFilled(true)
+            fillColor = primaryColor
+            fillAlpha = 50 // 透明度（0-255）
+
+            // --- 値のテキスト表示 ---
+            setDrawValues(false) // ★グラフ上の数字をごちゃごちゃさせないためにOFFにする（タップで確認させる想定）
+            // もし数字を出したい場合は true にして以下を設定
+            // valueTextColor = Color.BLACK
+            // valueTextSize = 10f
         }
+
         val lineData = LineData(dataSet)
         binding.lineChart.data = lineData
+
+        // アニメーションを入れると更新感が出ます（お好みで）
+        binding.lineChart.animateY(500)
+
         binding.lineChart.invalidate()
     }
 

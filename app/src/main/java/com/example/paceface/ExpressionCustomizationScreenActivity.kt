@@ -1,3 +1,4 @@
+//ExpressionCustomizationScreenActivity.kt
 package com.example.paceface
 
 import android.content.Context
@@ -10,6 +11,17 @@ import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.ExpressionCustomizationScreenBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+// ★★★ 外部クラスのインポート（仮定。実際のクラス名に合わせてください） ★★★
+// NavigationUtils クラスはプロジェクト内にあると仮定します。
+// 各ナビゲーション先のActivityもインポートします。
+import com.example.paceface.HomeScreenActivity
+import com.example.paceface.HistoryScreenActivity
+import com.example.paceface.ProximityHistoryScreenActivity // PassingButtonの遷移先
+import com.example.paceface.UserSettingsScreenActivity // GearButtonの遷移先
+// ExpressionChangeCompleteScreenActivity も必要
+import com.example.paceface.ExpressionChangeCompleteScreenActivity
+// ★★★
 
 class ExpressionCustomizationScreenActivity : AppCompatActivity() {
 
@@ -58,6 +70,8 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
                     saveHistoryToDatabase(selectedTag.toInt())
 
                     val intent = Intent(this, ExpressionChangeCompleteScreenActivity::class.java)
+                    // アニメーションを統一するため、遷移先にアニメーションを禁止するフラグを設定するのが一般的ですが、
+                    // ここでは完了画面への一時的な遷移のため、このままとします。
                     startActivity(intent)
                 }
             } else {
@@ -79,14 +93,7 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
 
-
-
-        // --- フッターナビゲーションの処理 ---
-        binding.homeButton.setOnClickListener { startActivity(Intent(this, HomeScreenActivity::class.java)) }
-        binding.passingButton.setOnClickListener { startActivity(Intent(this, ProximityHistoryScreenActivity::class.java)) }
-        binding.historyButton.setOnClickListener { startActivity(Intent(this, HistoryScreenActivity::class.java)) }
-        binding.gearButton.setOnClickListener { startActivity(Intent(this, UserSettingsScreenActivity::class.java)) }
-
+        setupNavigation() //追加したセットアップ関数を呼び出す
         // --- 起動時の状態復元 ---
         val savedTag = sharedPreferences.getString(KEY_SELECTED_EMOJI_TAG, "1") // デフォルトは"1"
         val emojiToSelect = emojiImageViews.find { it.tag == savedTag } ?: binding.emoji1
@@ -136,9 +143,22 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
 
     private fun onEmojiSelected(selectedView: ImageView, allEmojis: List<ImageView>) {
         allEmojis.forEach { emoji ->
+            // R.drawable.emoji_bg と R.drawable.emoji_selected_bg はプロジェクト内に存在すると仮定
             emoji.setBackgroundResource(R.drawable.emoji_bg)
         }
         selectedView.setBackgroundResource(R.drawable.emoji_selected_bg)
         selectedEmoji = selectedView
+    }
+    private fun setupNavigation() {
+        // NavigationUtils クラスはプロジェクト内にあり、アニメーション抑制のロジックを持つと仮定
+        NavigationUtils.setupCommonNavigation(
+            this,
+            ExpressionCustomizationScreenActivity::class.java, // 現在のアクティビティ
+            binding.homeButton,
+            binding.passingButton,
+            binding.historyButton,
+            binding.emotionButton, // 自分自身のボタン
+            binding.gearButton
+        )
     }
 }

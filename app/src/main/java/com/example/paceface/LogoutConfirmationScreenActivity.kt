@@ -1,3 +1,4 @@
+//LogoutConfirmationScreenActivity.kt
 package com.example.paceface
 
 import android.content.Context
@@ -5,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class LogoutConfirmationScreenActivity : AppCompatActivity() {
 
@@ -20,9 +22,13 @@ class LogoutConfirmationScreenActivity : AppCompatActivity() {
         }
 
         logoutButton.setOnClickListener {
+            // Firebaseからサインアウト
+            FirebaseAuth.getInstance().signOut()
+
             val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
             with(sharedPrefs.edit()) {
                 remove("LOGGED_IN_USER_ID")
+                remove("LOGGED_IN_FIREBASE_UID") // Firebase UIDも削除
                 apply()
             }
 
