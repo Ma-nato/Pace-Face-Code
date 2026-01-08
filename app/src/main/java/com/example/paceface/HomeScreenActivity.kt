@@ -1,4 +1,3 @@
-//HomeScreenActivity.kt
 package com.example.paceface
 
 import android.Manifest
@@ -25,9 +24,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -38,23 +34,17 @@ class HomeScreenActivity : AppCompatActivity() {
 
     private lateinit var binding: HomeScreenBinding
     private lateinit var appDatabase: AppDatabase
+    private lateinit var viewModel: HomeViewModel
 
-    // Firebase + Room の連携で使うローカル DB の Int 型ユーザーID
     private lateinit var auth: FirebaseAuth
     private var localUserId: Int = -1
 
-    // チャート更新ジョブ
-    private var chartUpdateJob: Job? = null
-
-    // 日付フォーマッタ
     private val dateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
 
-    // SharedPreferences 用キー（表情設定）
     private val EMOJI_PREFS_NAME = "EmojiPrefs"
     private val KEY_SELECTED_EMOJI_TAG = "selectedEmojiTag"
     private val KEY_AUTO_CHANGE_ENABLED = "autoChangeEnabled"
 
-    // 権限要求ランチャー
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val allGranted = permissions.entries.all { it.value == true }
@@ -65,12 +55,11 @@ class HomeScreenActivity : AppCompatActivity() {
             }
         }
 
-    // 速度更新を受け取るレシーバー
     private val speedUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null) return
             val speed = intent.getFloatExtra(LocationTrackingService.EXTRA_SPEED, 0f)
-            updateSpeedUI(speed)
+            viewModel.updateSpeed(speed)
         }
     }
 
@@ -82,9 +71,34 @@ class HomeScreenActivity : AppCompatActivity() {
         appDatabase = AppDatabase.getDatabase(this)
         auth = Firebase.auth
 
-        // Firebase ユーザー検証と UI セットアップをライフサイクルスコープで実行
         lifecycleScope.launch {
             validateUserAndSetupScreen()
+        }
+    }
+
+    private fun setupViewModel() {
+        viewModel = HomeViewModel(appDatabase.historyDao(), localUserId)
+
+        lifecycleScope.launch {
+            viewModel.currentSpeed.collect { speed ->
+                updateSpeedUI(speed)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.historyData.collect { history ->
+                if (history.isEmpty()) {
+                    binding.lineChart.clear()
+                    binding.lineChart.invalidate()
+                } else {
+                    updateChart(history)
+                    val now = Calendar.getInstance()
+                    val currentMinuteOfDay = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+                    binding.lineChart.xAxis.axisMinimum = (currentMinuteOfDay - 10).toFloat()
+                    binding.lineChart.xAxis.axisMaximum = (currentMinuteOfDay + 10).toFloat()
+                    binding.lineChart.invalidate()
+                }
+            }
         }
     }
 
@@ -95,32 +109,27 @@ class HomeScreenActivity : AppCompatActivity() {
             return
         }
 
-        // 基本的には LoginActivity で設定された SharedPreferences の ID を信頼して使う
         val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         val prefUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1)
 
         if (prefUserId != -1) {
             localUserId = prefUserId
         } else {
-            // 万が一 Prefs が消えていた場合のフォールバック
             val localUser = withContext(Dispatchers.IO) {
                 appDatabase.userDao().getUserByFirebaseUid(firebaseUser.uid)
             }
             if (localUser != null) {
                 localUserId = localUser.userId
-                // Prefsを復旧
                 with(sharedPrefs.edit()) {
                     putInt("LOGGED_IN_USER_ID", localUserId)
                     apply()
                 }
             } else {
-                // ここに来るのは異常系だが、念のためログイン画面へ戻す
                 redirectToLogin()
                 return
             }
         }
 
-        // UI の初期化
         setupUI()
     }
 
@@ -128,25 +137,20 @@ class HomeScreenActivity : AppCompatActivity() {
         binding.tvTitle.text = "現在の歩行速度"
         setupNavigation()
         setupChart()
-        loadTodayHistory()
-        setupFooterNavigationIfExists()
+        setupViewModel()
 
-        // ここに移動
         checkPermissionsAndStartService()
-        startChartUpdateLoop()
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(speedUpdateReceiver, IntentFilter(LocationTrackingService.BROADCAST_SPEED_UPDATE))
 
-        // 表情設定の反映（表示系の更新）
         loadAndApplyEmotionSetting()
     }
 
     override fun onResume() {
         super.onResume()
-        // onResume から localUserId != -1 のチェックと関連処理を削除する (setupUI() に移動したため)
-        // ただし、表情設定の反映はonResumeの度に必要なので残す
         loadAndApplyEmotionSetting()
     }
+
     private fun redirectToLogin() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -158,13 +162,11 @@ class HomeScreenActivity : AppCompatActivity() {
         super.onPause()
         if (localUserId != -1) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(speedUpdateReceiver)
-            chartUpdateJob?.cancel()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // サービス停止 intent を送信
         val stopIntent = Intent(this, LocationTrackingService::class.java).apply {
             action = LocationTrackingService.ACTION_STOP
         }
@@ -172,10 +174,7 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun checkPermissionsAndStartService() {
-        val requiredPermissions = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        )
-
+        val requiredPermissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             requiredPermissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         }
@@ -202,33 +201,16 @@ class HomeScreenActivity : AppCompatActivity() {
         startService(startIntent)
     }
 
-    private fun startChartUpdateLoop() {
-        chartUpdateJob?.cancel()
-        chartUpdateJob = lifecycleScope.launch {
-            while (isActive) {
-                updateChartWithDataWindow()
-                val now = Calendar.getInstance()
-                val seconds = now.get(Calendar.SECOND)
-                val delayMillis = (60 - seconds) * 1000L
-                delay(delayMillis)
-            }
-        }
-    }
-
     private fun updateSpeedUI(speed: Float) {
         binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f", speed)
         updateFaceIconBasedOnSpeed(speed)
     }
 
     private fun updateFaceIconBasedOnSpeed(speed: Float) {
-        // 自動変更設定を確認する処理
         val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
         val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
 
-        // 自動変更がOFFの場合、速度によるアイコン更新を行わずに終了する
-        if (!isAutoChangeEnabled) {
-            return
-        }
+        if (!isAutoChangeEnabled) return
 
         lifecycleScope.launch {
             val speedRule = withContext(Dispatchers.IO) {
@@ -246,81 +228,41 @@ class HomeScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateChartWithDataWindow() {
-        lifecycleScope.launch {
-            val now = Calendar.getInstance()
-            val windowStart = (now.clone() as Calendar).apply { add(Calendar.MINUTE, -10) }.timeInMillis
-            val windowEnd = (now.clone() as Calendar).apply { add(Calendar.MINUTE, 10) }.timeInMillis
-
-            val historyInWindow = withContext(Dispatchers.IO) {
-                appDatabase.historyDao().getHistoryForUserOnDate(localUserId, windowStart, windowEnd)
-            }
-
-            withContext(Dispatchers.Main) {
-                binding.tvLastUpdate.text = "最終更新日時: ${dateFormatter.format(now.time)}"
-                if (historyInWindow.isEmpty()) {
-                    binding.lineChart.clear()
-                    binding.lineChart.invalidate()
-                } else {
-                    updateChart(historyInWindow)
-                    val currentMinuteOfDay = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-                    val minX = (currentMinuteOfDay - 10).toFloat()
-                    val maxX = (currentMinuteOfDay + 10).toFloat()
-                    binding.lineChart.xAxis.axisMinimum = minX
-                    binding.lineChart.xAxis.axisMaximum = maxX
-                    binding.lineChart.invalidate()
-                }
-            }
-        }
-    }
-
     private fun setupChart() {
         binding.lineChart.apply {
             description.isEnabled = false
             setNoDataText("データ待機中...")
-
-            // タッチ操作の設定
             isDragEnabled = true
             setScaleEnabled(true)
             setPinchZoom(true)
-
-            // 凡例は隠す（1つのデータしかないので不要）
             legend.isEnabled = false
 
-            // --- X軸（時間）の設定 ---
             xAxis.apply {
                 isEnabled = true
                 position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
-                setDrawGridLines(false) // X軸のグリッドはうるさくなるのでOFF
+                setDrawGridLines(false)
                 textColor = Color.DKGRAY
                 textSize = 10f
-                granularity = 1f // 1分ごとにデータを区切る
-
-                // 数字（分）を「HH:mm」形式に変換するフォーマッターを設定
+                granularity = 1f
                 valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                     override fun getAxisLabel(value: Float, axis: com.github.mikephil.charting.components.AxisBase?): String {
                         val totalMinutes = value.toInt()
-                        val hour = totalMinutes / 60
+                        val hour = (totalMinutes / 60) % 24
                         val minute = totalMinutes % 60
-                        // 24時間を超える場合の補正（念のため）
-                        val normalizedHour = hour % 24
-                        return String.format(Locale.getDefault(), "%02d:%02d", normalizedHour, minute)
+                        return String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
                     }
                 }
             }
 
-            // --- Y軸（速度）の設定 ---
-            axisRight.isEnabled = false // 右側の軸は消す
+            axisRight.isEnabled = false
             axisLeft.apply {
                 isEnabled = true
                 textColor = Color.DKGRAY
-                setDrawGridLines(true) // 横のグリッド線を表示
+                setDrawGridLines(true)
                 gridColor = Color.LTGRAY
-                enableGridDashedLine(10f, 10f, 0f) // グリッドを点線にする
-                axisMinimum = 0f // 常に0からスタートさせる
+                enableGridDashedLine(10f, 10f, 0f)
+                axisMinimum = 0f
             }
-
-            // 余白の調整
             setExtraOffsets(10f, 10f, 10f, 10f)
         }
     }
@@ -332,11 +274,9 @@ class HomeScreenActivity : AppCompatActivity() {
             Entry(minuteOfDay.toFloat(), it.walkingSpeed)
         }.sortedBy { it.x }
 
-        // Y軸の自動調整（最大値に少し余裕を持たせる）
         val yAxis = binding.lineChart.axisLeft
         if (history.isNotEmpty()) {
             val maxSpeed = history.maxOf { it.walkingSpeed }
-            // 最大値の1.2倍くらいを上限にして、グラフが天井に張り付かないようにする
             yAxis.axisMaximum = (maxSpeed * 1.2f).coerceAtLeast(5f)
         } else {
             yAxis.axisMaximum = 5f
@@ -345,35 +285,21 @@ class HomeScreenActivity : AppCompatActivity() {
         val primaryColor = ContextCompat.getColor(this, R_material.color.design_default_color_primary)
 
         val dataSet = LineDataSet(ArrayList(entries), "歩行速度").apply {
-            // --- 線のデザイン ---
             color = primaryColor
-            lineWidth = 3f // 線を少し太く
-            mode = LineDataSet.Mode.CUBIC_BEZIER // ★カクカクではなく滑らかな曲線にする
-
-            // --- 点のデザイン ---
+            lineWidth = 3f
+            mode = LineDataSet.Mode.CUBIC_BEZIER
             setDrawCircles(true)
             setCircleColor(primaryColor)
             circleRadius = 3f
             setDrawCircleHole(false)
-
-            // --- 塗りつぶしのデザイン ---
             setDrawFilled(true)
             fillColor = primaryColor
-            fillAlpha = 50 // 透明度（0-255）
-
-            // --- 値のテキスト表示 ---
-            setDrawValues(false) // ★グラフ上の数字をごちゃごちゃさせないためにOFFにする（タップで確認させる想定）
-            // もし数字を出したい場合は true にして以下を設定
-            // valueTextColor = Color.BLACK
-            // valueTextSize = 10f
+            fillAlpha = 50
+            setDrawValues(false)
         }
 
-        val lineData = LineData(dataSet)
-        binding.lineChart.data = lineData
-
-        // アニメーションを入れると更新感が出ます（お好みで）
+        binding.lineChart.data = LineData(dataSet)
         binding.lineChart.animateY(500)
-
         binding.lineChart.invalidate()
     }
 
@@ -389,22 +315,12 @@ class HomeScreenActivity : AppCompatActivity() {
         )
     }
 
-    // プロジェクト側に footer のセットアップ関数があれば呼ぶ（元 master にあった名前に合わせる）
-    private fun setupFooterNavigationIfExists() {
-        try {
-            setupNavigation()
-        } catch (e: Exception) {
-            // 無ければ無視
-        }
-    }
-
     private fun loadAndApplyEmotionSetting() {
         val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
         val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
 
         if (isAutoChangeEnabled) {
             binding.tvStatus.text = "自動変更ON"
-            // 自動変更は速度受信時に updateFaceIconBasedOnSpeed が呼ばれるため、ここでは特にしない
         } else {
             val savedTag = emojiPrefs.getString(KEY_SELECTED_EMOJI_TAG, "1") ?: "1"
             applyManualFaceIcon(savedTag)
@@ -423,73 +339,5 @@ class HomeScreenActivity : AppCompatActivity() {
             else -> R.drawable.normal_expression
         }
         binding.ivFaceIcon.setImageResource(drawableId)
-    }
-
-    private fun getDayBounds(timestamp: Long): Pair<Long, Long> {
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = timestamp
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val startOfDay = calendar.timeInMillis
-        calendar.add(Calendar.DAY_OF_MONTH, 1)
-        val endOfDay = calendar.timeInMillis
-        return Pair(startOfDay, endOfDay)
-    }
-
-    private fun loadTodayHistory() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val (startOfDay, endOfDay) = getDayBounds(System.currentTimeMillis())
-            val historyList = appDatabase.historyDao().getHistoryForUserOnDate(localUserId, startOfDay, endOfDay)
-
-            withContext(Dispatchers.Main) {
-                if (historyList.isEmpty()) {
-                    binding.lineChart.clear()
-                    binding.lineChart.invalidate()
-                } else {
-                    updateChart(historyList)
-                }
-            }
-        }
-    }
-
-    // カスタムルールの自動生成チェック（最初のみ生成）
-    private fun checkAndGenerateCustomRules() {
-        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-        val areRulesGenerated = sharedPrefs.getBoolean("CUSTOM_RULES_GENERATED_$localUserId", false)
-
-        if (areRulesGenerated) return
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            generateAndSaveCustomRulesIfPossible()
-        }
-    }
-
-    private suspend fun generateAndSaveCustomRulesIfPossible() {
-        val speeds = appDatabase.historyDao().getAllWalkingSpeeds(localUserId).sorted()
-        if (speeds.size < 10) return
-
-        val p20 = speeds[(speeds.size * 0.20).toInt()]
-        val p40 = speeds[(speeds.size * 0.40).toInt()]
-        val p60 = speeds[(speeds.size * 0.60).toInt()]
-        val p80 = speeds[minOf((speeds.size * 0.80).toInt(), speeds.lastIndex)]
-
-        val newRules = listOf(
-            SpeedRule(userId = localUserId, minSpeed = 0f, maxSpeed = p20, emotionId = 5),
-            SpeedRule(userId = localUserId, minSpeed = p20, maxSpeed = p40, emotionId = 4),
-            SpeedRule(userId = localUserId, minSpeed = p40, maxSpeed = p60, emotionId = 3),
-            SpeedRule(userId = localUserId, minSpeed = p60, maxSpeed = p80, emotionId = 2),
-            SpeedRule(userId = localUserId, minSpeed = p80, maxSpeed = Float.MAX_VALUE, emotionId = 1)
-        )
-
-        appDatabase.speedRuleDao().insertAll(newRules)
-
-        withContext(Dispatchers.Main) {
-            val sharedPrefsEditor = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE).edit()
-            sharedPrefsEditor.putBoolean("CUSTOM_RULES_GENERATED_$localUserId", true)
-            sharedPrefsEditor.apply()
-        }
     }
 }
