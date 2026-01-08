@@ -77,7 +77,16 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        viewModel = HomeViewModel(appDatabase.historyDao(), localUserId)
+        viewModel = HomeViewModel(appDatabase.historyDao(), appDatabase.speedRuleDao(), localUserId)
+
+        lifecycleScope.launch {
+            viewModel.ruleUpdatedEvent.collect { message ->
+                message?.let {
+                    Toast.makeText(this@HomeScreenActivity, it, Toast.LENGTH_LONG).show()
+                    viewModel.clearUpdateEvent()
+                }
+            }
+        }
 
         lifecycleScope.launch {
             viewModel.currentSpeed.collect { speed ->
@@ -100,6 +109,7 @@ class HomeScreenActivity : AppCompatActivity() {
                 }
             }
         }
+
     }
 
     private suspend fun validateUserAndSetupScreen() {
