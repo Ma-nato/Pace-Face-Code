@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--expression_customization_screen.xml-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCE6F2">
-
-    <!-- 左上の戻るボタン -->
+    android:background="#DCE6F2"> <!-- 元の背景色を維持 -->
 
     <!-- 質問タイトル -->
     <TextView
@@ -16,113 +13,144 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:text="どの表情に変更しますか？"
-        android:textSize="18sp"
+        android:textColor="#2D3748"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 表情グリッド -->
-    <GridLayout
-        android:id="@+id/emojiGrid"
-        android:background="#FFFFFF"
-        android:layout_width="wrap_content"
+    <!-- 表情選択カード -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/emojiCard"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:columnCount="3"
-        android:rowCount="2"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleText">
 
-        <!-- 6つの表情アイコン -->
-        <ImageView
-            android:id="@+id/emoji1"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="#FFFFFF"
-            android:padding="8dp"
-            android:src="@drawable/normal_expression" />
+        <GridLayout
+            android:id="@+id/emojiGrid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="12dp"
+            android:columnCount="3"
+            android:rowCount="2">
 
-        <ImageView
-            android:id="@+id/emoji2"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="#FFFFFF"
-            android:padding="8dp"
-            android:src="@drawable/troubled_expression" />
+            <ImageView
+                android:id="@+id/emoji1"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_margin="4dp"
+                android:padding="8dp"
+                android:src="@drawable/normal_expression" />
 
-        <ImageView
-            android:id="@+id/emoji3"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="#FFFFFF"
-            android:padding="8dp"
-            android:src="@drawable/impatient_expression" />
+            <ImageView
+                android:id="@+id/emoji2"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_margin="4dp"
+                android:padding="8dp"
+                android:src="@drawable/troubled_expression" />
 
-        <ImageView
-            android:id="@+id/emoji4"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="#FFFFFF"
-            android:padding="8dp"
-            android:src="@drawable/smile_expression" />
+            <ImageView
+                android:id="@+id/emoji3"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_margin="4dp"
+                android:padding="8dp"
+                android:src="@drawable/impatient_expression" />
 
-        <ImageView
-            android:id="@+id/emoji5"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="#FFFFFF"
-            android:padding="8dp"
-            android:src="@drawable/sad_expression" />
+            <ImageView
+                android:id="@+id/emoji4"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_margin="4dp"
+                android:padding="8dp"
+                android:src="@drawable/smile_expression" />
 
-        <ImageView
-            android:id="@+id/emoji6"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="#FFFFFF"
-            android:padding="8dp"
-            android:src="@drawable/angry_expression" />
-    </GridLayout>
+            <ImageView
+                android:id="@+id/emoji5"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_margin="4dp"
+                android:padding="8dp"
+                android:src="@drawable/sad_expression" />
+
+            <ImageView
+                android:id="@+id/emoji6"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_margin="4dp"
+                android:padding="8dp"
+                android:src="@drawable/angry_expression" />
+        </GridLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- 変更ボタン -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/changeBtn"
-        android:layout_width="150dp"
+        android:layout_width="180dp"
         android:layout_height="60dp"
-        android:layout_marginTop="30dp"
-        app:backgroundTint="#FF8A80"
+        android:layout_marginTop="24dp"
         android:text="変更"
-        android:textSize="20sp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:backgroundTint="#FF8A80"
+        app:cornerRadius="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/emojiGrid" />
+        app:layout_constraintTop_toBottomOf="@id/emojiCard" />
 
-    <!-- スイッチ -->
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/changeSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="表情の自動変更"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/changeBtn" />
-
-    <TextView
-        android:id="@+id/switchDescription"
+    <!-- 自動変更設定カード -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/switchCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginTop="8dp"
-        android:text="ONの場合、歩行速度に合わせて表情が変化します。
-OFFの場合、上で選択した表情に固定されます。"
-        android:gravity="center_horizontal"
-        app:layout_constraintTop_toBottomOf="@id/changeSwitch"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/changeBtn">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/changeSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="表情の自動変更"
+                android:textColor="#2D3748"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/switchDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="ONの場合、歩行速度に合わせて表情が変化します 。\nOFFの場合、上で選択した表情に固定されます。"
+                android:textColor="#718096"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ボトムナビゲーション（元のデザインを維持） -->
     <LinearLayout
         android:id="@+id/bottom_nav"
         android:layout_width="0dp"
@@ -142,8 +170,7 @@ OFFの場合、上で選択した表情に固定されます。"
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_home_button"
+            android:contentDescription="Home"
             android:scaleType="fitCenter"
             android:src="@drawable/home_button" />
 
@@ -155,8 +182,7 @@ OFFの場合、上で選択した表情に固定されます。"
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_passing_button"
+            android:contentDescription="Passing"
             android:scaleType="fitCenter"
             android:src="@drawable/passing_button" />
 
@@ -168,8 +194,7 @@ OFFの場合、上で選択した表情に固定されます。"
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_history_button"
+            android:contentDescription="History"
             android:scaleType="fitCenter"
             android:src="@drawable/history_button" />
 
@@ -181,8 +206,7 @@ OFFの場合、上で選択した表情に固定されます。"
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_emotion_button"
+            android:contentDescription="Emotion"
             android:scaleType="fitCenter"
             android:src="@drawable/emotion_button" />
 
@@ -194,11 +218,9 @@ OFFの場合、上で選択した表情に固定されます。"
             android:layout_marginBottom="7dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_gear_button"
+            android:contentDescription="Settings"
             android:scaleType="fitCenter"
             android:src="@drawable/gear_button" />
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
