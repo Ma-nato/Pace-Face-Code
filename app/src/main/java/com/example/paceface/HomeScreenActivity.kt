@@ -1,6 +1,9 @@
 package com.example.paceface
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothSocket
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,6 +12,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,11 +30,27 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.UUID
 
 class HomeScreenActivity : AppCompatActivity() {
+
+    private val SPP_UUID: UUID =
+        UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+
+    private var isConnecting = false
+
+    private var piOutputStream: OutputStream? = null
+
+    private var piSocket: BluetoothSocket? = null
+
+    private var bluetoothSocket: BluetoothSocket? = null
+
+    private var lastSentEmotionId: Int? = null
 
     private lateinit var binding: HomeScreenBinding
     private lateinit var appDatabase: AppDatabase
@@ -57,9 +77,23 @@ class HomeScreenActivity : AppCompatActivity() {
 
     private val speedUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent == null) return
+            // 両方の変更を統合:
+            // - ログ出力 / intent null チェック（PR 側）
+            // - viewModel を使って状態管理する（master 側）
+            Log.d("PaceFace", "① Broadcast received")
+            if (intent == null) {
+                Log.e("PaceFace", "intent is null")
+                return
+            }
             val speed = intent.getFloatExtra(LocationTrackingService.EXTRA_SPEED, 0f)
-            viewModel.updateSpeed(speed)
+            Log.d("PaceFace", "② Broadcast speed=$speed")
+
+            // ViewModel が初期化済みならそちらへ渡し、未初期化なら直接 UI 更新
+            if (this@HomeScreenActivity::viewModel.isInitialized) {
+                viewModel.updateSpeed(speed)
+            } else {
+                updateSpeedUI(speed)
+            }
         }
     }
 
@@ -145,6 +179,7 @@ class HomeScreenActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.tvTitle.text = "現在の歩行速度"
+        checkAndInsertDefaultSpeedRules() // SpeedRuleの初期値設定を追加
         setupNavigation()
         setupChart()
         setupViewModel()
@@ -154,6 +189,10 @@ class HomeScreenActivity : AppCompatActivity() {
             .registerReceiver(speedUpdateReceiver, IntentFilter(LocationTrackingService.BROADCAST_SPEED_UPDATE))
 
         loadAndApplyEmotionSetting()
+        //仮追加
+        checkAndInsertDefaultSpeedRules()
+
+        connectToRaspberryPiOnce()
     }
 
     override fun onResume() {
@@ -181,6 +220,7 @@ class HomeScreenActivity : AppCompatActivity() {
             action = LocationTrackingService.ACTION_STOP
         }
         startService(stopIntent)
+        // Bluetoothは「毎回接続型」なので何もしない
     }
 
     private fun checkPermissionsAndStartService() {
@@ -212,6 +252,7 @@ class HomeScreenActivity : AppCompatActivity() {
     }
 
     private fun updateSpeedUI(speed: Float) {
+        Log.d("PaceFace", "③ updateSpeedUI called speed=$speed")
         binding.tvSpeedValue.text = String.format(Locale.getDefault(), "%.1f", speed)
         updateFaceIconBasedOnSpeed(speed)
     }
@@ -224,9 +265,11 @@ class HomeScreenActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val speedRule = withContext(Dispatchers.IO) {
-                appDatabase.speedRuleDao().getSpeedRuleForSpeed(localUserId, speed)
-            }
-            val faceIconResId = when (speedRule?.emotionId) {
+                appDatabase.speedRuleDao()
+                    .getSpeedRuleForSpeed(localUserId, speed)
+            } ?: return@launch
+            val emotionId = speedRule.emotionId
+            val faceIconResId = when (emotionId) {
                 1 -> R.drawable.impatient_expression
                 2 -> R.drawable.smile_expression
                 3 -> R.drawable.smile_expression
@@ -234,7 +277,11 @@ class HomeScreenActivity : AppCompatActivity() {
                 5 -> R.drawable.sad_expression
                 else -> R.drawable.normal_expression
             }
-            binding.ivFaceIcon.setImageResource(faceIconResId)
+            withContext(Dispatchers.Main) {
+                binding.ivFaceIcon.setImageResource(faceIconResId)
+            }
+             //★ 完成版：変化したときだけ送信
+            sendEmotionIfChanged(emotionId)
         }
     }
 
