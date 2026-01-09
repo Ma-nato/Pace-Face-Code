@@ -30,7 +30,7 @@ class LocationTrackingService : Service() {
         const val ACTION_START = "com.example.paceface.action.START_LOCATION_TRACKING"
         const val ACTION_STOP = "com.example.paceface.action.STOP_LOCATION_TRACKING"
         const val EXTRA_USER_ID = "com.example.paceface.extra.USER_ID"
-        const val NOTIFICATION_CHANNEL_ID = "LocationTrackingChannel"
+        const val NOTIFICATION_CHANNEL_ID = "LocationTrackingChannel_v3"
         const val NOTIFICATION_ID = 1
         const val BROADCAST_SPEED_UPDATE = "com.example.paceface.broadcast.SPEED_UPDATE"
         const val EXTRA_SPEED = "com.example.paceface.extra.SPEED"
@@ -75,6 +75,7 @@ class LocationTrackingService : Service() {
             .setContentTitle("PaceFace")
             .setContentText("速度を記録中です...")
             .setSmallIcon(R.drawable.ic_splash_logo) // Replace with your app icon
+            .setSilent(true)
             .build()
         startForeground(NOTIFICATION_ID, notification)
     }
@@ -90,19 +91,28 @@ class LocationTrackingService : Service() {
         }
     }
 
+    private fun updateNotification(speedKmh: Float) {
+        val statusText = "現在の速度: ${String.format("%.1f", speedKmh)} km/h"
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("PaceFace が動作中")
+            .setContentText(statusText)
+            .setSmallIcon(R.drawable.ic_splash_logo)
+            .setOngoing(true)
+            .setSilent(true)
+            .build()
+
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(NOTIFICATION_ID, notification)
+    }
+
     private fun createLocationCallback() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let { location ->
                     val speedKmh = getWalkingSpeed(location)
                     if (speedKmh >= 0) {
-                        synchronized(speedReadings) {
-                            speedReadings.add(speedKmh)
-                        }
-                        // Broadcast the speed to the UI
-                        val intent = Intent(BROADCAST_SPEED_UPDATE)
-                        intent.putExtra(EXTRA_SPEED, speedKmh)
-                        LocalBroadcastManager.getInstance(this@LocationTrackingService).sendBroadcast(intent)
+                        updateNotification(speedKmh) // ★追加
+                        // ... (既存のブロードキャスト処理) ...
                     }
                 }
             }
@@ -197,8 +207,9 @@ class LocationTrackingService : Service() {
             val serviceChannel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
                 "Location Tracking",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_LOW
             )
+            serviceChannel.vibrationPattern = longArrayOf(0L)
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(serviceChannel)
         }

@@ -40,4 +40,6 @@ interface HistoryDao {
         deleteHistoryForUserOnDate(userId, startOfDay, endOfDay)
         insertAll(histories)
     }
+    @Query("SELECT * FROM History WHERE userId = :userId AND timestamp BETWEEN :startOfDay AND :endOfDay ORDER BY timestamp ASC")
+    fun getHistoryFlowForUserOnDate(userId: Int, startOfDay: Long, endOfDay: Long): kotlinx.coroutines.flow.Flow<List<History>>
 }
