@@ -83,12 +83,19 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
         val isManualMode = !isAutoMode
         val emojiImageViews = listOf(binding.emoji1, binding.emoji2, binding.emoji3, binding.emoji4, binding.emoji5, binding.emoji6)
 
+        // 自動変更がONのときは選択不可にする
         emojiImageViews.forEach { it.isEnabled = isManualMode }
+
+        // 【修正】変更ボタンは常に有効にするか、あるいは自動変更ONのときは「設定保存」の意味にする
+        // ユーザーの報告通り「変更を押しても固定されない」のを防ぐため、
+        // 自動変更がOFFのときのみ「変更」ボタンで固定表情を保存できるようにします。
         binding.changeBtn.isEnabled = isManualMode
 
         val alpha = if (isManualMode) 1.0f else 0.5f
         emojiImageViews.forEach { it.alpha = alpha }
         binding.changeBtn.alpha = alpha
+
+        // 自動変更がONになった瞬間に、現在の設定を保存するようにViewModelに通知するのも一つの手です
     }
 
     private fun onEmojiSelected(selectedView: ImageView, allEmojis: List<ImageView>) {
