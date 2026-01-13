@@ -185,7 +185,6 @@ class HomeScreenActivity : AppCompatActivity() {
             .registerReceiver(speedUpdateReceiver, IntentFilter(LocationTrackingService.BROADCAST_SPEED_UPDATE))
 
         loadAndApplyEmotionSetting()
-        checkAndInsertDefaultSpeedRules()
     }
 
     override fun onResume() {
@@ -290,14 +289,7 @@ class HomeScreenActivity : AppCompatActivity() {
                 } ?: return@launch
 
                 val emotionId = speedRule.emotionId
-                val faceIconResId = when (emotionId) {
-                    1 -> R.drawable.impatient_expression
-                    2 -> R.drawable.smile_expression
-                    3 -> R.drawable.smile_expression
-                    4 -> R.drawable.normal_expression
-                    5 -> R.drawable.sad_expression
-                    else -> R.drawable.normal_expression
-                }
+                val faceIconResId = getDrawableIdForEmotion(emotionId.toString())
 
                 withContext(Dispatchers.Main) {
                     binding.ivFaceIcon.setImageResource(faceIconResId)
@@ -312,17 +304,25 @@ class HomeScreenActivity : AppCompatActivity() {
 
     private fun loadAndApplyEmotionSetting() {
         val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
-        val savedTag = emojiPrefs.getString(KEY_SELECTED_EMOJI_TAG, "1") ?: "1"
-        val faceIconResId = when (savedTag) {
-            "1" -> R.drawable.impatient_expression
-            "2" -> R.drawable.smile_expression
-            "3" -> R.drawable.smile_expression
-            "4" -> R.drawable.normal_expression
+        val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
+
+        if (!isAutoChangeEnabled) {
+            val savedTag = emojiPrefs.getString(KEY_SELECTED_EMOJI_TAG, "1") ?: "1"
+            val faceIconResId = getDrawableIdForEmotion(savedTag)
+            binding.ivFaceIcon.setImageResource(faceIconResId)
+        }
+    }
+
+    private fun getDrawableIdForEmotion(tag: String): Int {
+        return when (tag) {
+            "1" -> R.drawable.normal_expression
+            "2" -> R.drawable.troubled_expression
+            "3" -> R.drawable.impatient_expression
+            "4" -> R.drawable.smile_expression
             "5" -> R.drawable.sad_expression
             "6" -> R.drawable.angry_expression
             else -> R.drawable.normal_expression
         }
-        binding.ivFaceIcon.setImageResource(faceIconResId)
     }
 
     private fun setupNavigation() {
@@ -387,10 +387,10 @@ class HomeScreenActivity : AppCompatActivity() {
             if (existingRules.isEmpty()) {
                 val defaultRules = listOf(
                     SpeedRule(userId = localUserId, minSpeed = 0f, maxSpeed = 3.0f, emotionId = 5),
-                    SpeedRule(userId = localUserId, minSpeed = 3.0f, maxSpeed = 4.5f, emotionId = 4),
-                    SpeedRule(userId = localUserId, minSpeed = 4.5f, maxSpeed = 5.5f, emotionId = 3),
-                    SpeedRule(userId = localUserId, minSpeed = 5.5f, maxSpeed = 7.0f, emotionId = 2),
-                    SpeedRule(userId = localUserId, minSpeed = 7.0f, maxSpeed = 999f, emotionId = 1)
+                    SpeedRule(userId = localUserId, minSpeed = 3.0f, maxSpeed = 4.5f, emotionId = 1),
+                    SpeedRule(userId = localUserId, minSpeed = 4.5f, maxSpeed = 5.5f, emotionId = 4),
+                    SpeedRule(userId = localUserId, minSpeed = 5.5f, maxSpeed = 7.0f, emotionId = 4),
+                    SpeedRule(userId = localUserId, minSpeed = 7.0f, maxSpeed = 999f, emotionId = 3)
                 )
                 appDatabase.speedRuleDao().insertAll(defaultRules)
             }
