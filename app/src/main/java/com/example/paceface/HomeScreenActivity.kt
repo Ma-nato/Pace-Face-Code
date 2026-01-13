@@ -261,26 +261,43 @@ class HomeScreenActivity : AppCompatActivity() {
         updateFaceIconBasedOnSpeed(speed)
     }
 
+
     private fun updateFaceIconBasedOnSpeed(speed: Float) {
         lifecycleScope.launch {
-            val speedRule = withContext(Dispatchers.IO) {
-                appDatabase.speedRuleDao()
-                    .getSpeedRuleForSpeed(localUserId, speed)
-            } ?: return@launch
-            val emotionId = speedRule.emotionId
-            val faceIconResId = when (emotionId) {
-                1 -> R.drawable.impatient_expression
-                2 -> R.drawable.smile_expression
-                3 -> R.drawable.smile_expression
-                4 -> R.drawable.normal_expression
-                5 -> R.drawable.sad_expression
-                else -> R.drawable.normal_expression
+            // 1. 自動変更設定を確認
+            val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
+            val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
+
+            if (isAutoChangeEnabled) {
+                // 自動変更がONの場合：速度に基づいて表情を決定
+                val speedRule = withContext(Dispatchers.IO) {
+                    appDatabase.speedRuleDao()
+                        .getSpeedRuleForSpeed(localUserId, speed)
+                } ?: return@launch
+
+                val emotionId = speedRule.emotionId
+                val faceIconResId = when (emotionId) {
+                    1 -> R.drawable.impatient_expression
+                    2 -> R.drawable.smile_expression
+                    3 -> R.drawable.smile_expression
+                    4 -> R.drawable.normal_expression
+                    5 -> R.drawable.sad_expression
+                    else -> R.drawable.normal_expression
+                }
+
+                withContext(Dispatchers.Main) {
+                    binding.ivFaceIcon.setImageResource(faceIconResId)
+                }
+                sendEmotionIfChanged(emotionId)
+            } else {
+                // 自動変更がOFFの場合：保存された固定表情を維持
+                val savedTag = emojiPrefs.getString(KEY_SELECTED_EMOJI_TAG, "1") ?: "1"
+                withContext(Dispatchers.Main) {
+                    applyManualFaceIcon(savedTag)
+                }
+                // 固定表情のIDを送信（必要に応じて）
+                sendEmotionIfChanged(savedTag.toInt())
             }
-            withContext(Dispatchers.Main) {
-                binding.ivFaceIcon.setImageResource(faceIconResId)
-            }
-            //★ 完成版：変化したときだけ送信
-            sendEmotionIfChanged(emotionId)
         }
     }
 
