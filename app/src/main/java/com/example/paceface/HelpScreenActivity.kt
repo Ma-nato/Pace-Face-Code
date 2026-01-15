@@ -17,7 +17,7 @@ class HelpScreenActivity : AppCompatActivity() {
         binding = HelpScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnBack.setOnClickListener {
+        binding.btnBack2.setOnClickListener {
             finish() // この画面を閉じて前の画面に戻る
         }
 
