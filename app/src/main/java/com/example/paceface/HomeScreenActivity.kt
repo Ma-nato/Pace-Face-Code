@@ -43,6 +43,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
+import java.util.Date
 
 class HomeScreenActivity : AppCompatActivity() {
 
@@ -365,6 +366,8 @@ class HomeScreenActivity : AppCompatActivity() {
                 } else {
                     updateChart(historyList)
                 }
+                // グラフ更新のタイミングで最終更新日時を更新
+                updateLastUpdateTime()
             }
         }
     }
@@ -379,6 +382,12 @@ class HomeScreenActivity : AppCompatActivity() {
         val lineData = LineData(dataSet)
         binding.lineChart.data = lineData
         binding.lineChart.invalidate()
+    }
+
+    private fun updateLastUpdateTime() {
+        val now = Date()
+        val formattedDate = dateFormatter.format(now)
+        binding.tvLastUpdate.text = "最終更新日時：$formattedDate"
     }
 
     private fun checkAndInsertDefaultSpeedRules() {
