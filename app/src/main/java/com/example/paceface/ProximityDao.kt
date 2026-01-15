@@ -27,14 +27,11 @@ interface ProximityDao {
     @Query("SELECT COUNT(*) FROM Proximity WHERE userId = :userId")
     suspend fun getProximityCountForUser(userId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM Proximity WHERE userId = :userId AND STRFTIME('%H', timestamp / 1000, 'unixepoch') BETWEEN '22' AND '05'")
+    @Query("SELECT COUNT(*) FROM Proximity WHERE userId = :userId AND STRFTIME('%H', timestamp / 1000, 'unixepoch') BETWEEN '20' AND '05'")
     suspend fun getNightProximityCountForUser(userId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM Proximity WHERE userId = :userId AND STRFTIME('%H', timestamp / 1000, 'unixepoch') BETWEEN '06' AND '09'")
+    @Query("SELECT COUNT(*) FROM Proximity WHERE userId = :userId AND STRFTIME('%H', timestamp / 1000, 'unixepoch') BETWEEN '06' AND '10'")
     suspend fun getMorningProximityCountForUser(userId: Int): Int
-
-    @Query("SELECT DISTINCT passedUserEmotionId FROM Proximity WHERE userId = :userId")
-    suspend fun getEncounteredEmotionIds(userId: Int): List<Int>
 
     @Query("SELECT EXISTS(SELECT 1 FROM Proximity WHERE userId = :userId AND passedUserEmotionId = :emotionId)")
     suspend fun hasEncounteredEmotion(userId: Int, emotionId: Int): Boolean
