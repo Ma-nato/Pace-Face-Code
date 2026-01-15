@@ -115,8 +115,9 @@ class HistoryScreenActivity : AppCompatActivity() {
     }
 
     private fun updatePieChart(historyData: List<History>) {
+        // 1から6までのすべての表情IDを集計対象にする
         val emotionCounts = historyData.groupingBy { it.emotionId }.eachCount()
-            .filterKeys { it in 1..5 }
+            .filterKeys { it in 1..6 }
 
         if (emotionCounts.isEmpty()) {
             binding.pieChart.clear()
@@ -124,12 +125,15 @@ class HistoryScreenActivity : AppCompatActivity() {
             return
         }
 
-        val pieEntries = emotionCounts.map { (emotionId, count) ->
-            PieEntry(count.toFloat(), getEmotionLabel(emotionId))
+        // データの順序を固定（1:通常, 2:困惑, 3:焦り, 4:笑顔, 5:悲しみ, 6:怒り）
+        val sortedEmotionIds = emotionCounts.keys.sorted()
+        val pieEntries = sortedEmotionIds.map { emotionId ->
+            PieEntry(emotionCounts[emotionId]!!.toFloat(), getEmotionLabel(emotionId))
         }
 
         val dataSet = PieDataSet(pieEntries, "").apply {
-            colors = ColorTemplate.MATERIAL_COLORS.toList()
+            // 表情IDに基づいた色分けを設定
+            colors = sortedEmotionIds.map { getEmotionColor(it) }
             setDrawValues(true)
         }
 
@@ -145,12 +149,25 @@ class HistoryScreenActivity : AppCompatActivity() {
 
     private fun getEmotionLabel(emotionId: Int): String {
         return when (emotionId) {
-            1 -> "驚き"
-            2 -> "興奮"
-            3 -> "嬉しい"
-            4 -> "普通"
-            5 -> "悲しい"
+            1 -> "通常"
+            2 -> "困惑"
+            3 -> "焦り"
+            4 -> "笑顔"
+            5 -> "悲しみ"
+            6 -> "怒り"
             else -> "不明"
+        }
+    }
+
+    private fun getEmotionColor(emotionId: Int): Int {
+        return when (emotionId) {
+            1 -> Color.parseColor("#A0AEC0") // 通常: グレー
+            2 -> Color.parseColor("#F6AD55") // 困惑: オレンジ
+            3 -> Color.parseColor("#FC8181") // 焦り: 薄い赤
+            4 -> Color.parseColor("#68D391") // 笑顔: 緑
+            5 -> Color.parseColor("#63B3ED") // 悲しみ: 青
+            6 -> Color.parseColor("#E53E3E") // 怒り: 赤
+            else -> Color.GRAY
         }
     }
 
