@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    
+
     entities = [
         User::class,
         History::class,
@@ -89,7 +89,8 @@ abstract class AppDatabase : RoomDatabase() {
                 Emotion(3, "焦り", "impatient_expression", "急いでいて落ち着かない状態"),
                 Emotion(4, "笑顔", "smile_expression", "楽しくて嬉しい状態"),
                 Emotion(5, "悲しみ", "sad_expression", "悲しくて元気がない状態"),
-                Emotion(6, "怒り", "angry_expression", "何かに腹を立てている状態")
+                Emotion(6, "怒り", "angry_expression", "何かに腹を立てている状態"),
+                Emotion(7, "睡眠", "sleep_expression", "眠っている状態")
             )
             emotionDao.insertAll(emotions)
 

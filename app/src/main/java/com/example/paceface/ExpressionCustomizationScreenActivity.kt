@@ -37,7 +37,8 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
 
         val emojiImageViews = listOf(
             binding.emoji1, binding.emoji2, binding.emoji3,
-            binding.emoji4, binding.emoji5, binding.emoji6
+            binding.emoji4, binding.emoji5, binding.emoji6,
+            binding.emoji7
         )
 
         // タグの初期化を先に行う
@@ -82,7 +83,11 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
 
     private fun updateUiForMode(isAutoMode: Boolean) {
         val isManualMode = !isAutoMode
-        val emojiImageViews = listOf(binding.emoji1, binding.emoji2, binding.emoji3, binding.emoji4, binding.emoji5, binding.emoji6)
+        val emojiImageViews = listOf(
+            binding.emoji1, binding.emoji2, binding.emoji3,
+            binding.emoji4, binding.emoji5, binding.emoji6,
+            binding.emoji7
+        )
 
         // 自動変更がONのときは選択不可にする
         emojiImageViews.forEach { it.isEnabled = isManualMode }
