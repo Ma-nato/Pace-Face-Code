@@ -71,7 +71,18 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
         val currentUserId = 1
 
         lifecycleScope.launch {
-            val history = appDatabase.proximityDao().getProximityHistoryWithUser(currentUserId)
+            var history = appDatabase.proximityDao().getProximityHistoryWithUser(currentUserId)
+
+            // データベースが空の場合、表示確認用のダミーデータを追加
+            if (history.isEmpty()) {
+                val now = System.currentTimeMillis()
+                history = listOf(
+                    ProximityHistoryItem(1, 2, "Bob", now - (1000 * 60 * 5), false, null, 2),
+                    ProximityHistoryItem(2, 3, "Charlie", now - (1000 * 60 * 60), true, null, 4),
+                    ProximityHistoryItem(3, 4, "Dave", now - (1000 * 60 * 60 * 24), true, null, 1)
+                )
+            }
+
             runOnUiThread {
                 adapter.updateData(history)
                 binding.tvCount.text = "すれちがい回数: ${history.size}回"

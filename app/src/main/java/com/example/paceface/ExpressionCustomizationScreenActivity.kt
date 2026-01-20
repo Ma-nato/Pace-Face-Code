@@ -86,7 +86,7 @@ class ExpressionCustomizationScreenActivity : AppCompatActivity() {
         val emojiImageViews = listOf(
             binding.emoji1, binding.emoji2, binding.emoji3,
             binding.emoji4, binding.emoji5, binding.emoji6,
-            binding.emoji7
+            binding.emoji7, binding.emoji8, binding.emoji9
         )
 
         // 自動変更がONのときは選択不可にする
