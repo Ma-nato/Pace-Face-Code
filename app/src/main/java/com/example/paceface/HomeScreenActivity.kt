@@ -323,7 +323,9 @@ class HomeScreenActivity : AppCompatActivity() {
             "5" -> R.drawable.sad_expression
             "6" -> R.drawable.angry_expression
             "7" -> R.drawable.sleep_expression
-            else -> R.drawable.normal_expression
+            "8" -> R.drawable.wink_expression
+            "9" -> R.drawable.smug_expression
+            else -> R.drawable.sleep_expression
         }
     }
 

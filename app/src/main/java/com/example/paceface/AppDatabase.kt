@@ -87,7 +87,9 @@ abstract class AppDatabase : RoomDatabase() {
                 Emotion(4, "笑顔", "smile_expression", "楽しくて嬉しい状態"),
                 Emotion(5, "悲しみ", "sad_expression", "悲しくて元気がない状態"),
                 Emotion(6, "怒り", "angry_expression", "何かに腹を立てている状態"),
-                Emotion(7, "睡眠", "sleep_expression", "眠っている状態")
+                Emotion(7, "睡眠", "sleep_expression", "眠っている状態"),
+                Emotion(8, "ウィンク", "wink_expression", "楽しんでいる状態"),
+                Emotion(9, "どや顔", "smug_expression", "自信に満ちている状態")
             )
             // OnConflictStrategy.REPLACE を使用して、既存の ID があれば更新、なければ挿入する
             emotionDao.insertAll(emotions)
@@ -108,7 +110,9 @@ abstract class AppDatabase : RoomDatabase() {
                 Emotion(4, "笑顔", "smile_expression", "楽しくて嬉しい状態"),
                 Emotion(5, "悲しみ", "sad_expression", "悲しくて元気がない状態"),
                 Emotion(6, "怒り", "angry_expression", "何かに腹を立てている状態"),
-                Emotion(7, "睡眠", "sleep_expression", "眠っている状態")
+                Emotion(7, "睡眠", "sleep_expression", "眠っている状態"),
+                Emotion(8, "ウィンク", "wink_expression", "楽しんでいる状態"),
+                Emotion(9, "どや顔", "smug_expression", "自信に満ちている状態")
             )
             emotionDao.insertAll(emotions)
 

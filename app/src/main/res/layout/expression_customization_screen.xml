@@ -112,6 +112,22 @@
                         android:layout_margin="4dp"
                         android:padding="8dp"
                         android:src="@drawable/sleep_expression" />
+
+                    <ImageView
+                        android:id="@+id/emoji8"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_margin="4dp"
+                        android:padding="8dp"
+                        android:src="@drawable/wink_expression" />
+
+                    <ImageView
+                        android:id="@+id/emoji9"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_margin="4dp"
+                        android:padding="8dp"
+                        android:src="@drawable/smug_expression" />
                 </GridLayout>
             </com.google.android.material.card.MaterialCardView>
 
