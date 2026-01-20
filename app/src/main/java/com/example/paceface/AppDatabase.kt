@@ -67,12 +67,30 @@ abstract class AppDatabase : RoomDatabase() {
             super.onOpen(db)
             INSTANCE?.let { database ->
                 CoroutineScope(Dispatchers.IO).launch {
+                    // 感情データの更新（新しい表情 sleep_expression を確実に追加するため）
+                    updateEmotionData(database)
+
                     // ユーザーが一人もいなければ（＝初回起動時）、ダミーデータを投入する
                     if (database.userDao().getUserCount() == 0) {
                         populateWithDummyData(database)
                     }
                 }
             }
+        }
+
+        private suspend fun updateEmotionData(database: AppDatabase) {
+            val emotionDao = database.emotionDao()
+            val emotions = listOf(
+                Emotion(1, "通常", "normal_expression", "平常心を保っている状態"),
+                Emotion(2, "困惑", "troubled_expression", "どうしていいか分からない状態"),
+                Emotion(3, "焦り", "impatient_expression", "急いでいて落ち着かない状態"),
+                Emotion(4, "笑顔", "smile_expression", "楽しくて嬉しい状態"),
+                Emotion(5, "悲しみ", "sad_expression", "悲しくて元気がない状態"),
+                Emotion(6, "怒り", "angry_expression", "何かに腹を立てている状態"),
+                Emotion(7, "睡眠", "sleep_expression", "眠っている状態")
+            )
+            // OnConflictStrategy.REPLACE を使用して、既存の ID があれば更新、なければ挿入する
+            emotionDao.insertAll(emotions)
         }
 
         private suspend fun populateWithDummyData(database: AppDatabase) {

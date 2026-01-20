@@ -8,7 +8,7 @@ import androidx.room.Query
 
 @Dao
 interface EmotionDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(emotions: List<Emotion>)
 
     // 【新規追加】感情IDに基づいてEmotionオブジェクトを取得する
