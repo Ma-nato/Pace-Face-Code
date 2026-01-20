@@ -23,7 +23,26 @@ class LocationTrackingService : Service() {
     private lateinit var appDatabase: AppDatabase
     private var currentUserId: Int = -1
 
+    // BluetoothService 関連
+    private var bluetoothService: BluetoothService? = null
+    private var isBound = false
+    private var lastSentEmotionId: Int? = null
+
     private val serviceScope = CoroutineScope(Dispatchers.IO)
+
+    private val connection = object : android.content.ServiceConnection {
+        override fun onServiceConnected(name: android.content.ComponentName?, service: android.os.IBinder?) {
+            val binder = service as BluetoothService.BluetoothBinder
+            bluetoothService = binder.getService()
+            isBound = true
+            bluetoothService?.connectToRaspberryPi()
+        }
+
+        override fun onServiceDisconnected(name: android.content.ComponentName?) {
+            bluetoothService = null
+            isBound = false
+        }
+    }
     private val speedReadings = mutableListOf<Float>()
 
     companion object {
@@ -42,6 +61,10 @@ class LocationTrackingService : Service() {
         appDatabase = AppDatabase.getDatabase(this)
         createLocationCallback()
         createNotificationChannel()
+
+        // BluetoothService にバインド
+        val intent = Intent(this, BluetoothService::class.java)
+        bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -122,8 +145,31 @@ class LocationTrackingService : Service() {
                         val intent = Intent(BROADCAST_SPEED_UPDATE)
                         intent.putExtra(EXTRA_SPEED, speedKmh)
                         LocalBroadcastManager.getInstance(this@LocationTrackingService).sendBroadcast(intent)
+
+                        // 表情を送信
+                        sendEmotionBasedOnSpeed(speedKmh)
                     }
                 }
+            }
+        }
+    }
+
+    private fun sendEmotionBasedOnSpeed(speed: Float) {
+        serviceScope.launch {
+            val emojiPrefs = getSharedPreferences("EmojiPrefs", Context.MODE_PRIVATE)
+            val isAutoChangeEnabled = emojiPrefs.getBoolean("autoChangeEnabled", false)
+
+            val emotionId = if (isAutoChangeEnabled) {
+                val speedRule = appDatabase.speedRuleDao().getSpeedRuleForSpeed(currentUserId, speed)
+                speedRule?.emotionId ?: 1
+            } else {
+                val savedTag = emojiPrefs.getString("selectedEmojiTag", "1") ?: "1"
+                savedTag.toInt()
+            }
+
+            if (lastSentEmotionId != emotionId) {
+                bluetoothService?.sendEmotion(emotionId)
+                lastSentEmotionId = emotionId
             }
         }
     }
@@ -204,6 +250,10 @@ class LocationTrackingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (isBound) {
+            unbindService(connection)
+            isBound = false
+        }
         serviceScope.cancel()
     }
 

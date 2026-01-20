@@ -295,10 +295,6 @@ class HomeScreenActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     binding.ivFaceIcon.setImageResource(faceIconResId)
                 }
-                sendEmotionIfChanged(emotionId)
-            } else {
-                val savedTag = emojiPrefs.getString(KEY_SELECTED_EMOJI_TAG, "1") ?: "1"
-                sendEmotionIfChanged(savedTag.toInt())
             }
         }
     }
