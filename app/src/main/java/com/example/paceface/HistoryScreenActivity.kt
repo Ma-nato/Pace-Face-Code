@@ -75,8 +75,38 @@ class HistoryScreenActivity : AppCompatActivity() {
             val startOfDay = getStartOfDay(cal).timeInMillis
             val endOfDay = getEndOfDay(cal).timeInMillis
 
-            val historyData = withContext(Dispatchers.IO) {
+            var historyData = withContext(Dispatchers.IO) {
                 appDatabase.historyDao().getHistoryForUserOnDate(currentUserId, startOfDay, endOfDay)
+            }
+
+            // 2026年1月19日のダミーデータを追加
+            if (cal.get(Calendar.YEAR) == 2026 && cal.get(Calendar.MONTH) == Calendar.JANUARY && cal.get(Calendar.DAY_OF_MONTH) == 19) {
+                if (historyData.isEmpty()) {
+                    val dummyHistory = mutableListOf<History>()
+                    val baseTime = cal.timeInMillis
+                    // 7時から21時までのダミーデータを作成してより密度を濃くする
+                    for (hour in 7..21) {
+                        // 1時間ごとに3つのデータポイントを作成してグラフを滑らかにする
+                        for (minute in listOf(0, 20, 40)) {
+                            val timestamp = baseTime + (hour * 60 * 60 * 1000) + (minute * 60 * 1000)
+
+                            // 速度の変化をより大きく (2.0 ~ 7.5 km/h)
+                            val speed = 2.5f + (Math.sin(hour.toDouble() / 2.0).toFloat() * 2.0f) + (minute / 20.0f)
+
+                            // 表情ID (1:通常, 2:困惑, 3:焦り, 4:笑顔, 5:悲しみ, 6:怒り) をバラけさせる
+                            val emotionId = when {
+                                hour in 8..9 -> 3   // 朝の通勤は「焦り」
+                                hour in 12..13 -> 4 // 昼食時は「笑顔」
+                                hour in 15..16 -> 2 // 夕方は「困惑」
+                                hour in 18..19 -> 6 // 帰宅ラッシュは「怒り」
+                                hour >= 20 -> 5     // 夜は「悲しみ」
+                                else -> 1           // その他は「通常」
+                            }
+                            dummyHistory.add(History(0, currentUserId, timestamp, speed, "", emotionId))
+                        }
+                    }
+                    historyData = dummyHistory
+                }
             }
 
             withContext(Dispatchers.Main) {
