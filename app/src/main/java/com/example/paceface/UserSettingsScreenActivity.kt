@@ -19,16 +19,10 @@ class UserSettingsScreenActivity : AppCompatActivity() {
 
         tokenManager = TokenManager(this)
 
-        // アニメーションの適用
-        binding.settingsListLayout.translationY = 200f
-        binding.settingsListLayout.alpha = 0f
-
-        binding.settingsListLayout.animate()
-            .translationY(0f)
-            .alpha(1f)
-            .setDuration(500)
-            .setStartDelay(200) // 少し遅れて開始
-            .start()
+        // アニメーションの適用（新しいレイアウト構造に合わせて修正）
+        // ScrollView内のコンテンツをフェードインさせる
+        binding.tvTitle.alpha = 0f
+        binding.tvTitle.animate().alpha(1f).setDuration(500).start()
 
         // NavigationUtils を使用して共通ナビゲーションをセットアップ
         NavigationUtils.setupCommonNavigation(
@@ -44,8 +38,6 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         // --- Settings Button Listeners ---
 
         binding.btnUserInfo.setOnClickListener {
-            // ★★★ ここを修正しました！ ★★★
-
             // SharedPreferencesからログイン中のユーザーIDを読み出します
             val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
             val loggedInUserId = sharedPrefs.getInt("LOGGED_IN_USER_ID", -1) // 保存されていない場合は-1
@@ -68,8 +60,8 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         }
 
         binding.btnAbout.setOnClickListener {
-             val intent = Intent(this, AboutScreenActivity::class.java)
-             startActivity(intent)
+            val intent = Intent(this, AboutScreenActivity::class.java)
+            startActivity(intent)
         }
 
         binding.btnLogout.setOnClickListener {
@@ -78,8 +70,8 @@ class UserSettingsScreenActivity : AppCompatActivity() {
         }
 
         binding.btnDeleteAccount.setOnClickListener {
-             val intent = Intent(this, AccountDeletionConfirmationScreenActivity::class.java)
-             startActivity(intent)
+            val intent = Intent(this, AccountDeletionConfirmationScreenActivity::class.java)
+            startActivity(intent)
         }
     }
 }

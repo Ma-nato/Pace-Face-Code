@@ -1,131 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--badge_screen.xml-->
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCE6F2">
+    android:background="@color/background">
 
-    <ImageButton
-        android:id="@+id/btn_back"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="28dp"
-        android:adjustViewBounds="true"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        android:src="@drawable/back_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+    <!-- Header -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="バッジ一覧"
-        android:textColor="#000000"
-        android:textSize="24sp"
+        android:textColor="@color/gray_800"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/back_button"
+        app:layout_constraintBottom_toBottomOf="@+id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tvTitle"/>
+
+    <!-- Content -->
     <ScrollView
-        android:layout_width="325dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_nav_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
         <LinearLayout
             android:id="@+id/badgeContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            tools:context=".BadgeScreenActivity">
+            android:padding="16dp"
+            android:paddingBottom="32dp">
 
             <!-- Badge items will be programmatically added here -->
 
         </LinearLayout>
     </ScrollView>
 
-    <LinearLayout
-        android:id="@+id/bottom_nav"
+    <!-- Navigation Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_nav_container"
         android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:background="#E0E0E0"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageButton
-            android:id="@+id/home_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/home_button" />
+        <LinearLayout
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
 
-        <ImageButton
-            android:id="@+id/passing_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/passing_button" />
+            <ImageButton
+                android:id="@+id/home_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/home_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/history_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/history_button" />
+            <ImageButton
+                android:id="@+id/passing_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/passing_button"
+                app:tint="@color/colorPrimary" />
 
-        <ImageButton
-            android:id="@+id/emotion_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/emotion_button" />
+            <ImageButton
+                android:id="@+id/history_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/history_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/gear_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/gear_button" />
+            <ImageButton
+                android:id="@+id/emotion_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/emotion_button"
+                app:tint="@color/nav_item_unselected" />
 
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/gear_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/gear_button"
+                app:tint="@color/nav_item_unselected" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

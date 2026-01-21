@@ -215,13 +215,7 @@ class HomeScreenActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 位置情報サービス停止
-        val stopIntent = Intent(this, LocationTrackingService::class.java).apply {
-            action = LocationTrackingService.ACTION_STOP
-        }
-        startService(stopIntent)
-
-        // サービスのアンバインド
+        // サービスのアンバインドのみ行い、サービス自体はバックグラウンドで継続させる
         if (isBound) {
             unbindService(connection)
             isBound = false
@@ -303,7 +297,14 @@ class HomeScreenActivity : AppCompatActivity() {
         val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
         val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
 
-        if (!isAutoChangeEnabled) {
+        // 「表情自動更新中」の表示を切り替え
+        if (isAutoChangeEnabled) {
+            binding.tvStatus.visibility = android.view.View.VISIBLE
+            binding.tvStatus.text = "表情自動更新中"
+        } else {
+            binding.tvStatus.visibility = android.view.View.GONE
+
+            // 自動更新OFFの場合は保存された表情を適用
             val savedTag = emojiPrefs.getString(KEY_SELECTED_EMOJI_TAG, "1") ?: "1"
             val faceIconResId = getDrawableIdForEmotion(savedTag)
             binding.ivFaceIcon.setImageResource(faceIconResId)

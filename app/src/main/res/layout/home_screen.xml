@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--home_screen.xml-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCE6F2">
+    android:background="@color/background">
 
-    <!-- Main Info Card -->
+    <!-- Header / Main Info Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/mainInfoCard"
+        style="@style/Widget.PaceFace.Card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        app:cardCornerRadius="8dp"
-        app:cardBackgroundColor="#6A5ACD"
+        android:layout_margin="16dp"
+        app:cardBackgroundColor="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -25,58 +22,77 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
-
-            <ImageView
-                android:id="@+id/ivFaceIcon"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:src="@drawable/normal_expression"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            android:padding="20dp">
 
             <TextView
                 android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/home_title"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:alpha="0.9"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/tvSpeedValue"
+            <ImageView
+                android:id="@+id/ivFaceIcon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/normal_expression"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/speedContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/home_speed_placeholder"
-                android:textColor="#FFFFFF"
-                android:textSize="48sp"
-                android:textStyle="bold"
+                android:gravity="bottom"
+                android:orientation="horizontal"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+                app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
-            <TextView
-                android:id="@+id/tvSpeedUnit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="km/h"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/tvSpeedValue"
-                app:layout_constraintStart_toEndOf="@+id/tvSpeedValue" />
+                <TextView
+                    android:id="@+id/tvSpeedValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.0"
+                    android:textColor="@color/white"
+                    android:textSize="56sp"
+                    android:textStyle="bold"
+                    tools:text="2.0" />
+
+                <TextView
+                    android:id="@+id/tvSpeedUnit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="km/h"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:alpha="0.8" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                tools:text="表情固定中"
-                android:textColor="#FFFFFF"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/badge_background"
+                android:backgroundTint="#4D000000"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:text="表情自動更新中"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvSpeedValue" />
+                app:layout_constraintTop_toBottomOf="@+id/speedContainer"
+                tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -84,110 +100,127 @@
     <!-- Chart Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/chartCard"
+        style="@style/Widget.PaceFace.Card"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/tvLastUpdate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mainInfoCard">
 
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/lineChart"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="12dp">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="速度履歴"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/gray_600"
+                android:layout_marginBottom="8dp"/>
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/lineChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/tvLastUpdate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="@string/home_last_update_placeholder"
-        android:textColor="#333333"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/gray_600"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_nav_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="最終更新: 2026/01/21 11:21:00" />
 
-    <LinearLayout
-        android:id="@+id/bottom_nav"
+    <!-- Navigation Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_nav_container"
         android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:background="#E0E0E0"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageButton
-            android:id="@+id/home_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_home_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/home_button" />
+        <LinearLayout
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
 
-        <ImageButton
-            android:id="@+id/passing_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_passing_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/passing_button" />
+            <ImageButton
+                android:id="@+id/home_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/home_button"
+                app:tint="@color/colorPrimary" />
 
-        <ImageButton
-            android:id="@+id/history_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_history_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/history_button" />
+            <ImageButton
+                android:id="@+id/passing_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/passing_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/emotion_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_emotion_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/emotion_button" />
+            <ImageButton
+                android:id="@+id/history_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/history_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/gear_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/content_description_gear_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/gear_button" />
+            <ImageButton
+                android:id="@+id/emotion_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/emotion_button"
+                app:tint="@color/nav_item_unselected" />
 
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/gear_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/gear_button"
+                app:tint="@color/nav_item_unselected" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

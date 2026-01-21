@@ -9,11 +9,16 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.R
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class PasswordChangeScreenActivity : AppCompatActivity() {
 
     private lateinit var db: AppDatabase
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +27,7 @@ class PasswordChangeScreenActivity : AppCompatActivity() {
         db = AppDatabase.getDatabase(this)
 
         // --- View 紐付け ---
-        val btnBack = findViewById<ImageButton>(R.id.button)
+        val btnBack = findViewById<ImageButton>(R.id.backButton)
 
         val etCurrent = findViewById<EditText>(R.id.textView6)
         val etNew = findViewById<EditText>(R.id.textView3)
@@ -58,42 +63,50 @@ class PasswordChangeScreenActivity : AppCompatActivity() {
             }
 
             lifecycleScope.launch {
-                val user = db.userDao().getUserById(userId)
+                val user = withContext(Dispatchers.IO) { db.userDao().getUserById(userId) }
 
                 if (user == null) {
-                    runOnUiThread {
-                        Toast.makeText(this@PasswordChangeScreenActivity, "ユーザーが見つかりません", Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(this@PasswordChangeScreenActivity, "ユーザーが見つかりません", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
-                // --- ハッシュ化してパスワードを比較 ---
+                // --- バリデーション ---
                 val isCurrentPasswordValid = user.password == User.hashPassword(currentPw)
                 val isNewPasswordLongEnough = newPw.length >= 8
                 val doNewPasswordsMatch = newPw == confirmPw
 
                 if (isCurrentPasswordValid && isNewPasswordLongEnough && doNewPasswordsMatch) {
-                    // --- 検証成功：新しいパスワードをハッシュ化してDBを更新 ---
-                    val updatedUser = user.copy(password = User.hashPassword(newPw))
-                    db.userDao().update(updatedUser)
+                    try {
+                        // 1. Firebase Auth のパスワード更新
+                        val firebaseUser = auth.currentUser
+                        if (firebaseUser != null) {
+                            firebaseUser.updatePassword(newPw).await()
+                        } else {
+                            throw Exception("Firebaseユーザーが認証されていません。再ログインしてください。")
+                        }
 
-                    runOnUiThread {
+                        // 2. ローカルDBの更新
+                        val updatedUser = user.copy(password = User.hashPassword(newPw))
+                        withContext(Dispatchers.IO) { db.userDao().update(updatedUser) }
+
+                        Toast.makeText(this@PasswordChangeScreenActivity, "パスワードを変更しました", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this@PasswordChangeScreenActivity, PasswordChangeCompleteScreenActivity::class.java)
                         startActivity(intent)
                         finish()
+
+                    } catch (e: Exception) {
+                        Toast.makeText(this@PasswordChangeScreenActivity, "エラー: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
                     }
                 } else {
-                    // --- 検証失敗：UIスレッドでエラー表示 ---
-                    runOnUiThread {
-                        if (!isCurrentPasswordValid) {
-                            errorCurrent.visibility = View.VISIBLE
-                        }
-                        if (!isNewPasswordLongEnough) {
-                            errorNew.visibility = View.VISIBLE
-                        }
-                        if (!doNewPasswordsMatch) {
-                            errorConfirm.visibility = View.VISIBLE
-                        }
+                    // --- 検証失敗：エラー表示 ---
+                    if (!isCurrentPasswordValid) {
+                        errorCurrent.visibility = View.VISIBLE
+                    }
+                    if (!isNewPasswordLongEnough) {
+                        errorNew.visibility = View.VISIBLE
+                    }
+                    if (!doNewPasswordsMatch) {
+                        errorConfirm.visibility = View.VISIBLE
                     }
                 }
             }

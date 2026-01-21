@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.paceface.databinding.BadgeItemBinding
 import com.example.paceface.databinding.BadgeScreenBinding
@@ -27,7 +28,7 @@ class BadgeScreenActivity : AppCompatActivity() {
 
         appDatabase = AppDatabase.getDatabase(this)
 
-        binding.btnBack.setOnClickListener {
+        binding.backButton.setOnClickListener {
             finish()
         }
 
@@ -81,14 +82,17 @@ class BadgeScreenActivity : AppCompatActivity() {
 
             if (badgeInfo.isAchieved) {
                 // --- Style for achieved badge ---
-                cardView.setCardBackgroundColor(Color.WHITE)
-                badgeItemBinding.badgeIcon.setColorFilter(Color.WHITE) // White icon
-                badgeItemBinding.badgeText.setTextColor(Color.BLACK)
+                // メインカラー（青）を背景にし、テキストとアイコンを白にして強調
+                cardView.setCardBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                badgeItemBinding.badgeIcon.setColorFilter(Color.WHITE)
+                badgeItemBinding.badgeText.setTextColor(Color.WHITE)
+                cardView.cardElevation = 8f // 達成済みは少し浮かせる
             } else {
                 // --- Style for unachieved badge ---
-                cardView.setCardBackgroundColor(Color.parseColor("#E0E0E0")) // Light gray
-                badgeItemBinding.badgeIcon.setColorFilter(Color.GRAY) // Grayed out icon
-                badgeItemBinding.badgeText.setTextColor(Color.GRAY)
+                cardView.setCardBackgroundColor(Color.parseColor("#F5F5F5")) // より薄いグレー
+                badgeItemBinding.badgeIcon.setColorFilter(Color.parseColor("#BDBDBD")) // 薄いグレーのアイコン
+                badgeItemBinding.badgeText.setTextColor(Color.parseColor("#9E9E9E"))
+                cardView.cardElevation = 0f // 未達成は平坦に
             }
 
             // Set layout parameters with margin
