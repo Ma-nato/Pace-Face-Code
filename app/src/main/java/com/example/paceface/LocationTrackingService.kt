@@ -44,6 +44,8 @@ class LocationTrackingService : Service() {
         }
     }
     private val speedReadings = mutableListOf<Float>()
+    private val movingAverageWindow = mutableListOf<Float>()
+    private val WINDOW_SIZE = 5 // 移動平均のウィンドウサイズ（5秒分）
 
     companion object {
         const val ACTION_START = "com.example.paceface.action.START_LOCATION_TRACKING"
@@ -104,7 +106,10 @@ class LocationTrackingService : Service() {
     }
 
     private fun startLocationUpdates() {
+        // 取得間隔を1秒、最小更新間隔を0.5秒に設定し、高精度モードを維持
         val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+            .setMinUpdateIntervalMillis(500)
+            .setWaitForAccurateLocation(true) // 精度が低い初期データは待機
             .build()
 
         try {
@@ -132,25 +137,41 @@ class LocationTrackingService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let { location ->
-                    val speedKmh = getWalkingSpeed(location)
-                    if (speedKmh >= 0) {
-                        updateNotification(speedKmh)
+                    // 精度が極端に低いデータ（誤差30m以上）は無視
+                    if (location.accuracy > 30) return
 
-                        // 速度リストに追加（平均計算用）
+                    val rawSpeedKmh = getWalkingSpeed(location)
+                    if (rawSpeedKmh >= 0) {
+                        // 移動平均フィルタを適用
+                        val filteredSpeedKmh = applyMovingAverage(rawSpeedKmh)
+
+                        updateNotification(filteredSpeedKmh)
+
+                        // 速度リストに追加（1分間の平均計算用）
                         synchronized(speedReadings) {
-                            speedReadings.add(speedKmh)
+                            speedReadings.add(filteredSpeedKmh)
                         }
 
                         // リアルタイム速度をブロードキャスト送信
                         val intent = Intent(BROADCAST_SPEED_UPDATE)
-                        intent.putExtra(EXTRA_SPEED, speedKmh)
+                        intent.putExtra(EXTRA_SPEED, filteredSpeedKmh)
                         LocalBroadcastManager.getInstance(this@LocationTrackingService).sendBroadcast(intent)
 
                         // 表情を送信
-                        sendEmotionBasedOnSpeed(speedKmh)
+                        sendEmotionBasedOnSpeed(filteredSpeedKmh)
                     }
                 }
             }
+        }
+    }
+
+    private fun applyMovingAverage(newSpeed: Float): Float {
+        synchronized(movingAverageWindow) {
+            movingAverageWindow.add(newSpeed)
+            if (movingAverageWindow.size > WINDOW_SIZE) {
+                movingAverageWindow.removeAt(0)
+            }
+            return movingAverageWindow.average().toFloat()
         }
     }
 

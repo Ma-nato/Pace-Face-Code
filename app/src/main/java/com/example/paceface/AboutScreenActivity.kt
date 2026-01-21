@@ -23,11 +23,6 @@ class AboutScreenActivity : AppCompatActivity() {
             finish()
         }
 
-        // お問い合わせリンクの処理
-        binding.contactLink.setOnClickListener {
-            sendContactEmail()
-        }
-        
         // 下部ナビゲーションのセットアップ
         NavigationUtils.setupCommonNavigation(
             this,
@@ -58,3 +53,5 @@ class AboutScreenActivity : AppCompatActivity() {
         }
     }
 }
+
+

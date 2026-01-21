@@ -1,358 +1,213 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--help_screen.xml-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCE6F2">
+    android:background="@color/background">
 
-    <!-- 上部ヘッダー: 戻るボタン -->
+    <!-- Header -->
     <TextView
         android:id="@+id/help_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:gravity="center"
+        android:layout_marginTop="32dp"
         android:text="@string/help_screen_title"
+        android:textColor="@color/gray_800"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- スクロール部分 -->
     <ImageButton
-        android:id="@+id/btn_back"
-        android:layout_width="44dp"
-        android:layout_height="43dp"
-        android:layout_marginStart="16dp"
-        android:adjustViewBounds="true"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/button_back"
+        android:id="@+id/backButton"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
         android:scaleType="fitCenter"
         android:src="@drawable/back_button"
         app:layout_constraintBottom_toBottomOf="@+id/help_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/help_title" />
 
-    <ImageButton
-        android:id="@+id/btn_back2"
-        android:layout_width="44dp"
-        android:layout_height="43dp"
-        android:layout_marginStart="16dp"
-        android:adjustViewBounds="true"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/button_back"
-        android:scaleType="fitCenter"
-        android:src="@drawable/back_button"
-        app:layout_constraintBottom_toBottomOf="@+id/help_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/help_title" />
-
+    <!-- Content -->
     <ScrollView
-        android:id="@+id/scroll_area"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_nav_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/help_title">
+        app:layout_constraintTop_toBottomOf="@+id/help_title">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:paddingBottom="32dp">
 
-            <!-- ユーザー情報について -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
-
+                android:layout_marginBottom="16dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
-
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/help_user_info_title"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black" />
-
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
                     <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/help_user_info_check_method_title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_user_info_check_method_description" />
-
-                    <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="@string/help_user_info_change_method_title" />
-
+                        android:text="@string/help_user_info_check_method_title"
+                        android:textColor="@color/gray_800"
+                        android:textStyle="bold" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="@string/help_user_info_change_method_description" />
-
+                        android:text="@string/help_user_info_check_method_description"
+                        android:textColor="@color/gray_600" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="@string/help_password_change_method_title" />
-
+                        android:text="@string/help_user_info_change_method_title"
+                        android:textColor="@color/gray_800"
+                        android:textStyle="bold" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="@string/help_password_change_method_description" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/help_account_delete_method_title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_account_delete_method_description" />
-
+                        android:text="@string/help_user_info_change_method_description"
+                        android:textColor="@color/gray_600" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-
-            <!-- 機能の使い方 -->
             <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
-
+                android:layout_marginBottom="16dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
-
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/help_function_usage_title"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black" />
-
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
                     <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/help_basic_operation_title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_basic_operation_description" />
-
-                    <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="@string/help_home_screen_usage_title" />
-
+                        android:text="@string/help_basic_operation_title"
+                        android:textColor="@color/gray_800"
+                        android:textStyle="bold" />
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="@string/help_home_screen_usage_description" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/help_passing_function_title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_passing_function_description" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/help_history_check_title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_history_check_description" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/help_emotion_change_title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_emotion_change_description" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/help_settings_title" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_settings_description" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 連絡先 -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/help_contact_title"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/help_contact_address" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/help_contact_phone" />
-
+                        android:text="@string/help_basic_operation_description"
+                        android:textColor="@color/gray_600" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- 下部ナビゲーション -->
-    <LinearLayout
-        android:id="@+id/bottom_nav"
+    <!-- Navigation Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_nav_container"
         android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:background="#E0E0E0"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageButton
-            android:id="@+id/home_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/content_description_home_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/home_button" />
+        <LinearLayout
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
 
-        <ImageButton
-            android:id="@+id/passing_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/content_description_passing_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/passing_button" />
+            <ImageButton
+                android:id="@+id/home_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/home_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/history_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/content_description_history_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/history_button" />
+            <ImageButton
+                android:id="@+id/passing_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/passing_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/emotion_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/content_description_emotion_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/emotion_button" />
+            <ImageButton
+                android:id="@+id/history_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/history_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/gear_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/content_description_gear_button"
-            android:scaleType="fitCenter"
-            android:src="@drawable/gear_button" />
+            <ImageButton
+                android:id="@+id/emotion_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/emotion_button"
+                app:tint="@color/nav_item_unselected" />
 
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/gear_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/gear_button"
+                app:tint="@color/colorPrimary" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

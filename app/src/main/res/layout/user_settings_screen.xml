@@ -1,162 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--user_settings_screen-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCE6F2">
+    android:background="@color/background">
 
     <!-- 上部タイトル -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:gravity="center"
+        android:layout_marginTop="32dp"
         android:text="ユーザー設定"
+        android:textColor="@color/gray_800"
         android:textSize="20sp"
-        android:textColor="@color/black"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <!-- 設定項目リスト -->
-    <LinearLayout
-        android:id="@+id/settingsListLayout"
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_nav_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnUserInfo"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="8dp"
-            android:text="ユーザー情報"
-            android:textColor="@android:color/black"
-            app:backgroundTint="#EFEFEF" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPasswordChange"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="8dp"
-            android:text="パスワード変更"
-            android:textColor="@android:color/black"
-            app:backgroundTint="#EFEFEF" />
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnHelp"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="8dp"
-            android:text="ヘルプ"
-            android:textColor="@android:color/black"
-            app:backgroundTint="#EFEFEF" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAbout"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="8dp"
-            android:text="Pace Faceについて"
-            android:textColor="@android:color/black"
-            app:backgroundTint="#EFEFEF" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUserInfo"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:gravity="start|center_vertical"
+                        android:text="ユーザー情報"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        app:icon="@drawable/gear_button"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/gray_600" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogout"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="8dp"
-            android:text="ログアウト"
-            android:textColor="#FF0000"
-            app:backgroundTint="#FFDDDD" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:background="@color/gray_200" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDeleteAccount"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="8dp"
-            android:text="アカウントの削除"
-            android:textColor="@android:color/white"
-            app:backgroundTint="#FF8A8A" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPasswordChange"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:gravity="start|center_vertical"
+                        android:text="パスワード変更"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        app:icon="@drawable/gear_button"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/gray_600" />
 
-    </LinearLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:background="@color/gray_200" />
 
-    <LinearLayout
-        android:id="@+id/bottom_nav"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnHelp"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:gravity="start|center_vertical"
+                        android:text="ヘルプ"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        app:icon="@drawable/gear_button"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/gray_600" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:background="@color/gray_200" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAbout"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:gravity="start|center_vertical"
+                        android:text="Pace Faceについて"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        app:icon="@drawable/gear_button"
+                        app:iconGravity="textStart"
+                        app:iconTint="@color/gray_600" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogout"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:text="ログアウト"
+                android:textColor="@color/error"
+                app:backgroundTint="#FFF0F0" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDeleteAccount"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="アカウントの削除"
+                android:textColor="@color/gray_600"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Navigation Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_nav_container"
         android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:background="#E0E0E0"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageButton
-            android:id="@+id/home_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/home_button" />
+        <LinearLayout
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
 
-        <ImageButton
-            android:id="@+id/passing_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/passing_button" />
+            <ImageButton
+                android:id="@+id/home_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/home_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/history_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/history_button" />
+            <ImageButton
+                android:id="@+id/passing_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/passing_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/emotion_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/emotion_button" />
+            <ImageButton
+                android:id="@+id/history_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/history_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/gear_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/gear_button" />
+            <ImageButton
+                android:id="@+id/emotion_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/emotion_button"
+                app:tint="@color/nav_item_unselected" />
 
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/gear_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/gear_button"
+                app:tint="@color/colorPrimary" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

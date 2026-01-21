@@ -4,30 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCE6F2">
+    android:background="@color/background">
 
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="24dp">
+            android:paddingBottom="40dp"> <!-- 下部の余白を増やして切れを防止 -->
 
             <!-- 質問タイトル -->
             <TextView
                 android:id="@+id/titleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="32dp"
                 android:text="どの表情に変更しますか？"
-                android:textColor="#2D3748"
-                android:textSize="20sp"
+                android:textColor="@color/gray_800"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -36,14 +37,12 @@
             <!-- 表情選択カード -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/emojiCard"
+                style="@style/Widget.PaceFace.Card"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginEnd="24dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/titleText">
@@ -63,6 +62,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/normal_expression" />
 
                     <ImageView
@@ -71,6 +71,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/troubled_expression" />
 
                     <ImageView
@@ -79,6 +80,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/impatient_expression" />
 
                     <ImageView
@@ -87,6 +89,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/smile_expression" />
 
                     <ImageView
@@ -95,6 +98,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/sad_expression" />
 
                     <ImageView
@@ -103,6 +107,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/angry_expression" />
 
                     <ImageView
@@ -111,6 +116,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/sleep_expression" />
 
                     <ImageView
@@ -119,6 +125,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/wink_expression" />
 
                     <ImageView
@@ -127,6 +134,7 @@
                         android:layout_height="80dp"
                         android:layout_margin="4dp"
                         android:padding="8dp"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/smug_expression" />
                 </GridLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -134,14 +142,13 @@
             <!-- 変更ボタン -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/changeBtn"
-                android:layout_width="180dp"
-                android:layout_height="60dp"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="200dp"
+                android:layout_height="56dp"
                 android:layout_marginTop="24dp"
-                android:text="変更"
-                android:textSize="18sp"
+                android:text="変更を保存"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                app:backgroundTint="#FF8A80"
-                app:cornerRadius="30dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/emojiCard" />
@@ -149,14 +156,13 @@
             <!-- 自動変更設定カード -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/switchCard"
+                style="@style/Widget.PaceFace.Card"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginEnd="24dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
+                android:layout_marginBottom="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/changeBtn">
@@ -172,7 +178,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="表情の自動変更"
-                        android:textColor="#2D3748"
+                        android:textColor="@color/gray_800"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -181,9 +187,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="ONの場合、歩行速度に合わせて表情が変化します 。
-OFFの場合、上で選択した表情に固定されます。"
-                        android:textColor="#718096"
+                        android:text="ONの場合、歩行速度に合わせて表情が変化します。\nOFFの場合、上で選択した表情に固定されます。"
+                        android:textColor="@color/gray_600"
                         android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -192,77 +197,82 @@ OFFの場合、上で選択した表情に固定されます。"
 
     </ScrollView>
 
-    <!-- ボトムナビゲーション（元のデザインを維持） -->
-    <LinearLayout
-        android:id="@+id/bottom_nav"
+    <!-- Navigation Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_nav_container"
         android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:background="#E0E0E0"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageButton
-            android:id="@+id/home_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="Home"
-            android:scaleType="fitCenter"
-            android:src="@drawable/home_button" />
+        <LinearLayout
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
 
-        <ImageButton
-            android:id="@+id/passing_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="Passing"
-            android:scaleType="fitCenter"
-            android:src="@drawable/passing_button" />
+            <ImageButton
+                android:id="@+id/home_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/home_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/history_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="History"
-            android:scaleType="fitCenter"
-            android:src="@drawable/history_button" />
+            <ImageButton
+                android:id="@+id/passing_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/passing_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/emotion_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="Emotion"
-            android:scaleType="fitCenter"
-            android:src="@drawable/emotion_button" />
+            <ImageButton
+                android:id="@+id/history_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/history_button"
+                app:tint="@color/nav_item_unselected" />
 
-        <ImageButton
-            android:id="@+id/gear_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="7dp"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:contentDescription="Settings"
-            android:scaleType="fitCenter"
-            android:src="@drawable/gear_button" />
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/emotion_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/emotion_button"
+                app:tint="@color/colorPrimary" />
+
+            <ImageButton
+                android:id="@+id/gear_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="16dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/gear_button"
+                app:tint="@color/nav_item_unselected" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
