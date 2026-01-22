@@ -55,8 +55,18 @@ class ProximityHistoryAdapter(private var history: List<ProximityHistoryItem>) :
         }
 
         private fun getEmotionResource(emotionId: Int): Int {
-            // TODO: 適切な感情アイコンのリソースを返すように修正してください
-            return R.drawable.emotion_button
+            return when (emotionId) {
+                1 -> R.drawable.normal_expression
+                2 -> R.drawable.troubled_expression
+                3 -> R.drawable.impatient_expression
+                4 -> R.drawable.smile_expression
+                5 -> R.drawable.sad_expression
+                6 -> R.drawable.angry_expression
+                7 -> R.drawable.sleep_expression
+                8 -> R.drawable.wink_expression
+                9 -> R.drawable.smug_expression
+                else -> R.drawable.normal_expression
+            }
         }
     }
 }

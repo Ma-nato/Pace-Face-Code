@@ -23,7 +23,33 @@
     <string name="button_delete">削除</string>
 
     <!-- Help Screen -->
-    <string name="help_screen_title">ヘルプ画面</string>
+    <string name="help_screen_title">Pace-Face ヘルプ</string>
+
+    <!-- 1. Pace-Faceとは？ -->
+    <string name="help_what_is_paceface_title">Pace-Faceとは？</string>
+    <string name="help_what_is_paceface_description">Pace-Faceは、あなたの<b>歩行速度</b>と<b>感情</b>を可視化し、すれ違ったユーザーと共有することで、日常の移動に新たな気づきと交流をもたらすアプリケーションです。自分のペースや心の状態を把握し、周囲とのコミュニケーションを豊かにすることを目指しています。</string>
+
+    <!-- 2. 基本操作 -->
+    <string name="help_basic_operation_title">アプリの基本操作</string>
+    <string name="help_basic_operation_description">アプリの主要な機能は、画面下部の<b>ナビゲーションバー</b>からアクセスできます。左から順に、<b>ホーム</b>（現在の速度と状態）、<b>すれちがい</b>（すれちがい機能の有効化）、<b>履歴</b>（過去のデータ確認）、<b>表情</b>（自分の表情設定）、<b>設定</b>（各種設定）となっています。各アイコンをタップして、目的の画面に移動してください。</string>
+
+    <!-- 3. すれちがい機能 -->
+    <string name="help_passing_feature_title">すれちがい機能について</string>
+    <string name="help_passing_feature_description"><b>すれちがいボタン</b>をタップして機能を有効にすると、近くにいるPace-Faceユーザーとあなたの<b>歩行速度</b>と<b>設定した表情</b>が自動的に交換・記録されます。この機能により、あなたがどんなペースで、どんな気持ちで移動していたかを後から振り返ることができます。すれ違ったユーザーの表情や名前は<b>履歴画面</b>で確認できます。</string>
+
+    <!-- 4. 表情設定 -->
+    <string name="help_emotion_setting_title">表情（エモーション）の設定</string>
+    <string name="help_emotion_setting_description"><b>表情ボタン</b>から、あなたのアバターの表情を設定できます。表情はあなたの<b>現在の気分</b>や<b>アプリ利用の目的</b>に合わせて自由に選択してください。設定した表情は、すれ違った相手に共有されます。例えば、「笑顔」は友好的な気持ちを、「困惑」は何かを探している状態を示すなど、非言語的なコミュニケーションツールとして活用できます。</string>
+
+    <!-- 5. 履歴の確認 -->
+    <string name="help_history_check_title">履歴画面の見方</string>
+    <string name="help_history_check_description"><b>履歴ボタン</b>からアクセスできる画面では、過去の歩行データや、すれ違ったユーザーの情報を確認できます。特に<b>すれ違い履歴</b>では、<b>すれ違った日時</b>、<b>相手のユーザー名</b>、そして<b>その時の相手の表情</b>が一覧で表示されます。これにより、誰と、いつ、どんな気持ちですれ違ったのかを詳細に把握できます。</string>
+
+    <!-- 6. 各種設定とアカウント管理 -->
+    <string name="help_settings_title">各種設定とアカウント管理</string>
+    <string name="help_settings_description"><b>設定ボタン</b>（歯車アイコン）からは、<b>ユーザー情報</b>の確認・変更、<b>パスワード</b>の変更、<b>デバイス接続</b>（歩行速度計測のための外部デバイス連携）、<b>ヘルプ</b>、<b>アカウント削除</b>などの重要な操作を行うことができます。プライバシー設定やデータ管理はここから行ってください。</string>
+
+    <!-- 既存のユーザー情報関連のヘルプを再利用 -->
     <string name="help_user_info_title">ユーザー情報について</string>
     <string name="help_user_info_check_method_title">・ユーザー情報の確認方法</string>
     <string name="help_user_info_check_method_description">画面右下の歯車のアイコンをタップし、「ユーザー情報」を選択すると、登録されているユーザー名やその他の情報を確認できます。</string>
@@ -33,19 +59,8 @@
     <string name="help_password_change_method_description">設定画面から「パスワードの変更」を選択し、現在のパスワードと新しいパスワードを入力して更新してください。</string>
     <string name="help_account_delete_method_title">・アカウントの削除方法</string>
     <string name="help_account_delete_method_description">設定画面から「アカウントの削除」を選択し、指示に従って手続きを進めてください。アカウントを削除すると、すべてのデータが失われますのでご注意ください。</string>
-    <string name="help_function_usage_title">機能の使い方</string>
-    <string name="help_basic_operation_title">・基本的な画面操作</string>
-    <string name="help_basic_operation_description">アプリの主要な機能は画面下部のナビゲーションバーからアクセスできます。ホーム、すれちがい、履歴、表情、設定の各ボタンをタップして画面を切り替えてください。</string>
-    <string name="help_home_screen_usage_title">・ホーム画面の利用</string>
-    <string name="help_home_screen_usage_description">ログイン後、ホーム画面には現在の歩行速度や状態が表示されます。</string>
-    <string name="help_passing_function_title">・すれちがい機能</string>
-    <string name="help_passing_function_description">すれちがいボタンをタップすると、近くのユーザーと速度情報を共有できます。</string>
-    <string name="help_history_check_title">・履歴の確認</string>
-    <string name="help_history_check_description">履歴ボタンから、過去の歩行データや感情の履歴を確認できます。</string>
-    <string name="help_emotion_change_title">・表情の変更</string>
-    <string name="help_emotion_change_description">表情ボタンから、自分のアバターの表情をカスタマイズできます。</string>
-    <string name="help_settings_title">・各種設定</string>
-    <string name="help_settings_description">歯車ボタンをタップすると、ユーザー情報やパスワードの変更、デバイス接続などの設定を行えます。</string>
+
+    <!-- 連絡先はそのまま残す -->
     <string name="help_contact_title">連絡先</string>
     <string name="help_contact_address">所在地： 〒890-0065 鹿児島県鹿児島市郡元１丁目９−５</string>
     <string name="help_contact_phone">電話番号： 099-258-0121</string>

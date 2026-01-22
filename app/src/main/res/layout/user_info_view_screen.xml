@@ -102,7 +102,9 @@
                         android:hint="メールアドレス"
                         android:paddingHorizontal="16dp"
                         android:textColor="@color/gray_800"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:singleLine="true"
+                        android:ellipsize="end" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

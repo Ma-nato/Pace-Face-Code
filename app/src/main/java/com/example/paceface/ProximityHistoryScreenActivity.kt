@@ -77,9 +77,11 @@ class ProximityHistoryScreenActivity : AppCompatActivity() {
             if (history.isEmpty()) {
                 val now = System.currentTimeMillis()
                 history = listOf(
-                    ProximityHistoryItem(1, 2, "Bob", now - (1000 * 60 * 5), false, null, 2),
-                    ProximityHistoryItem(2, 3, "Charlie", now - (1000 * 60 * 60), true, null, 4),
-                    ProximityHistoryItem(3, 4, "Dave", now - (1000 * 60 * 60 * 24), true, null, 1)
+                    ProximityHistoryItem(1, 2, "Bob", now - (1000 * 60 * 5), false, null, 4), // 笑顔
+                    ProximityHistoryItem(2, 3, "Charlie", now - (1000 * 60 * 60), true, null, 2), // 困惑
+                    ProximityHistoryItem(3, 4, "Dave", now - (1000 * 60 * 60 * 24), true, null, 9), // どや顔
+                    ProximityHistoryItem(4, 5, "Eve", now - (1000 * 60 * 60 * 2), false, null, 8), // ウィンク
+                    ProximityHistoryItem(5, 6, "Frank", now - (1000 * 60 * 60 * 5), true, null, 7) // 睡眠
                 )
             }
 

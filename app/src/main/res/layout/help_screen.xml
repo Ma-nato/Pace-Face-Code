@@ -50,6 +50,175 @@
             android:padding="16dp"
             android:paddingBottom="32dp">
 
+            <!-- 1. Pace-Faceとは？ -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_what_is_paceface_title"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/help_what_is_paceface_description"
+                        android:textColor="@color/gray_600"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 2. 基本操作 -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_basic_operation_title"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/help_basic_operation_description"
+                        android:textColor="@color/gray_600"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 3. すれちがい機能 -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_passing_feature_title"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/help_passing_feature_description"
+                        android:textColor="@color/gray_600"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 4. 表情設定 -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_emotion_setting_title"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/help_emotion_setting_description"
+                        android:textColor="@color/gray_600"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 5. 履歴の確認 -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_history_check_title"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/help_history_check_description"
+                        android:textColor="@color/gray_600"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 6. 各種設定とアカウント管理 -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PaceFace.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/help_settings_title"
+                        android:textColor="@color/gray_800"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/help_settings_description"
+                        android:textColor="@color/gray_600"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 7. ユーザー情報について -->
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.PaceFace.Card"
                 android:layout_width="match_parent"
@@ -93,9 +262,36 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/help_user_info_change_method_description"
                         android:textColor="@color/gray_600" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/help_password_change_method_title"
+                        android:textColor="@color/gray_800"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/help_password_change_method_description"
+                        android:textColor="@color/gray_600" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/help_account_delete_method_title"
+                        android:textColor="@color/gray_800"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/help_account_delete_method_description"
+                        android:textColor="@color/gray_600" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- 8. 連絡先 -->
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.PaceFace.Card"
                 android:layout_width="match_parent"
@@ -109,22 +305,21 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/help_function_usage_title"
+                        android:text="@string/help_contact_title"
                         android:textColor="@color/gray_800"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/help_basic_operation_title"
-                        android:textColor="@color/gray_800"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="8dp"
+                        android:text="@string/help_contact_address"
+                        android:textColor="@color/gray_600" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="@string/help_basic_operation_description"
+                        android:text="@string/help_contact_phone"
                         android:textColor="@color/gray_600" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

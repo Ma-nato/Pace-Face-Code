@@ -114,11 +114,17 @@ abstract class AppDatabase : RoomDatabase() {
             userDao.insert(User(userId = 1, firebaseUid = null, email = "user1@example.com", name = "Alice", password = ""))
             userDao.insert(User(userId = 2, firebaseUid = null, email = "user2@example.com", name = "Bob", password = ""))
             userDao.insert(User(userId = 3, firebaseUid = null, email = "user3@example.com", name = "Charlie", password = ""))
+            userDao.insert(User(userId = 4, firebaseUid = null, email = "user4@example.com", name = "Dave", password = ""))
+            userDao.insert(User(userId = 5, firebaseUid = null, email = "user5@example.com", name = "Eve", password = ""))
+            userDao.insert(User(userId = 6, firebaseUid = null, email = "user6@example.com", name = "Frank", password = ""))
 
             // Add dummy proximity data
             val now = System.currentTimeMillis()
-            proximityDao.insert(Proximity(userId = 1, passedUserId = 2, timestamp = now - (1000 * 60), isConfirmed = false, badgeId = null, emotionId = 1, passedUserEmotionId = 2))
-            proximityDao.insert(Proximity(userId = 1, passedUserId = 3, timestamp = now - (1000 * 60 * 120), isConfirmed = true, badgeId = null, emotionId = 3, passedUserEmotionId = 4))
+            proximityDao.insert(Proximity(userId = 1, passedUserId = 2, timestamp = now - (1000 * 60 * 5), isConfirmed = false, badgeId = null, emotionId = 1, passedUserEmotionId = 4)) // 笑顔
+            proximityDao.insert(Proximity(userId = 1, passedUserId = 3, timestamp = now - (1000 * 60 * 60), isConfirmed = true, badgeId = null, emotionId = 3, passedUserEmotionId = 2)) // 困惑
+            proximityDao.insert(Proximity(userId = 1, passedUserId = 4, timestamp = now - (1000 * 60 * 60 * 24), isConfirmed = true, badgeId = null, emotionId = 1, passedUserEmotionId = 9)) // どや顔
+            proximityDao.insert(Proximity(userId = 1, passedUserId = 5, timestamp = now - (1000 * 60 * 60 * 2), isConfirmed = false, badgeId = null, emotionId = 1, passedUserEmotionId = 8)) // ウィンク
+            proximityDao.insert(Proximity(userId = 1, passedUserId = 6, timestamp = now - (1000 * 60 * 60 * 5), isConfirmed = true, badgeId = null, emotionId = 1, passedUserEmotionId = 7)) // 睡眠
 
             // Add dummy badges
             badgeDao.insert(Badge(badgeId = 1, name = "First Passing", description = "すれちがい合計人数\n10人達成", imageUrl = ""))
