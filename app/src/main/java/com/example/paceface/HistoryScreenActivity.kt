@@ -145,9 +145,9 @@ class HistoryScreenActivity : AppCompatActivity() {
     }
 
     private fun updatePieChart(historyData: List<History>) {
-        // 1から6までのすべての表情IDを集計対象にする
+        // 1から9までのすべての表情IDを集計対象にする
         val emotionCounts = historyData.groupingBy { it.emotionId }.eachCount()
-            .filterKeys { it in 1..6 }
+            .filterKeys { it in 1..9 }
 
         if (emotionCounts.isEmpty()) {
             binding.pieChart.clear()
@@ -155,7 +155,7 @@ class HistoryScreenActivity : AppCompatActivity() {
             return
         }
 
-        // データの順序を固定（1:通常, 2:困惑, 3:焦り, 4:笑顔, 5:悲しみ, 6:怒り）
+        // データの順序を固定（1:通常, 2:困惑, 3:焦り, 4:笑顔, 5:悲しみ, 6:怒り, 7:睡眠, 8:ウィンク, 9:どや顔）
         val sortedEmotionIds = emotionCounts.keys.sorted()
         val pieEntries = sortedEmotionIds.map { emotionId ->
             PieEntry(emotionCounts[emotionId]!!.toFloat(), getEmotionLabel(emotionId))
@@ -185,6 +185,9 @@ class HistoryScreenActivity : AppCompatActivity() {
             4 -> "笑顔"
             5 -> "悲しみ"
             6 -> "怒り"
+            7 -> "睡眠"
+            8 -> "ウインク顔"
+            9 -> "どや顔"
             else -> "不明"
         }
     }
@@ -197,6 +200,9 @@ class HistoryScreenActivity : AppCompatActivity() {
             4 -> Color.parseColor("#68D391") // 笑顔: 緑
             5 -> Color.parseColor("#63B3ED") // 悲しみ: 青
             6 -> Color.parseColor("#E53E3E") // 怒り: 赤
+            7 -> Color.parseColor("#4A5568") // 睡眠: ダークグレー
+            8 -> Color.parseColor("#F687B3") // ウィンク: ピンク
+            9 -> Color.parseColor("#9F7AEA") // どや顔: パープル
             else -> Color.GRAY
         }
     }
