@@ -75,6 +75,7 @@ class HomeScreenActivity : AppCompatActivity() {
     private val EMOJI_PREFS_NAME = "EmojiPrefs"
     private val KEY_SELECTED_EMOJI_TAG = "selectedEmojiTag"
     private val KEY_AUTO_CHANGE_ENABLED = "autoChangeEnabled"
+    private val KEY_LAST_DISPLAYED_EMOTION = "lastDisplayedEmotion"
 
     // サービス接続の管理
     private val connection = object : ServiceConnection {
@@ -129,6 +130,9 @@ class HomeScreenActivity : AppCompatActivity() {
 
         appDatabase = AppDatabase.getDatabase(this)
         auth = Firebase.auth
+
+        // 起動時・遷移時の「真顔」を避けるため、前回の表情を即座に適用
+        applyLastDisplayedEmotion()
 
         // BluetoothService を開始してバインド
         val intent = Intent(this, BluetoothService::class.java)
@@ -272,6 +276,18 @@ class HomeScreenActivity : AppCompatActivity() {
         updateFaceIconBasedOnSpeed(speed)
     }
 
+    private fun applyLastDisplayedEmotion() {
+        val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
+        val isAutoChangeEnabled = emojiPrefs.getBoolean(KEY_AUTO_CHANGE_ENABLED, false)
+
+        val emotionTag = if (isAutoChangeEnabled) {
+            emojiPrefs.getString(KEY_LAST_DISPLAYED_EMOTION, "7") ?: "7"
+        } else {
+            emojiPrefs.getString(KEY_SELECTED_EMOJI_TAG, "1") ?: "1"
+        }
+        binding.ivFaceIcon.setImageResource(getDrawableIdForEmotion(emotionTag))
+    }
+
     private fun updateFaceIconBasedOnSpeed(speed: Float) {
         lifecycleScope.launch {
             val emojiPrefs = getSharedPreferences(EMOJI_PREFS_NAME, Context.MODE_PRIVATE)
@@ -284,10 +300,13 @@ class HomeScreenActivity : AppCompatActivity() {
                 } ?: return@launch
 
                 val emotionId = speedRule.emotionId
-                val faceIconResId = getDrawableIdForEmotion(emotionId.toString())
+                val emotionTag = emotionId.toString()
+                val faceIconResId = getDrawableIdForEmotion(emotionTag)
 
                 withContext(Dispatchers.Main) {
                     binding.ivFaceIcon.setImageResource(faceIconResId)
+                    // 次回表示用に保存
+                    emojiPrefs.edit().putString(KEY_LAST_DISPLAYED_EMOTION, emotionTag).apply()
                 }
             }
         }
