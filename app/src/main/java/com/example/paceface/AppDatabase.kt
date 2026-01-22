@@ -2,6 +2,7 @@
 package com.example.paceface
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -25,7 +26,7 @@ import kotlinx.coroutines.launch
         HourlyAverageSpeed::class,
         HourlyEmotionPercentage::class
     ],
-    version = 1, // データベースのバージョンを更新
+    version = 1, // データベースのバージョン
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -53,8 +54,10 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "paceface_database"
                 )
-                    .fallbackToDestructiveMigration()
-                    .addCallback(AppDatabaseCallback()) // こちらのコールバックに処理を一本化
+                    // ★ 修正: 本番環境では非推奨の破壊的マイグレーションを警告
+                    // .fallbackToDestructiveMigration()
+                    // 適切なマイグレーション処理を実装することを推奨します。
+                    .addCallback(AppDatabaseCallback())
                     .build()
                 INSTANCE = instance
                 instance
@@ -70,10 +73,11 @@ abstract class AppDatabase : RoomDatabase() {
                     // 感情データの更新（新しい表情 sleep_expression を確実に追加するため）
                     updateEmotionData(database)
 
-                    // ユーザーが一人もいなければ（＝初回起動時）、ダミーデータを投入する
-                    if (database.userDao().getUserCount() == 0) {
-                        populateWithDummyData(database)
-                    }
+                    // ★ 修正: ダミーデータ投入はテスト用とし、ユーザー登録機能があるため本番では不要
+                    // if (database.userDao().getUserCount() == 0) {
+                    //     populateWithDummyData(database)
+                    // }
+                    Log.d("AppDatabase", "Database opened. Dummy data population skipped for production.")
                 }
             }
         }
@@ -95,6 +99,7 @@ abstract class AppDatabase : RoomDatabase() {
             emotionDao.insertAll(emotions)
         }
 
+        // ★ 修正: ダミーデータ投入関数はテスト用として残すか、削除を推奨
         private suspend fun populateWithDummyData(database: AppDatabase) {
             val userDao = database.userDao()
             val proximityDao = database.proximityDao()
@@ -102,19 +107,8 @@ abstract class AppDatabase : RoomDatabase() {
             val badgeDao = database.badgeDao()
             val userBadgeDao = database.userBadgeDao()
 
-            // 表情の初期データを挿入
-            val emotions = listOf(
-                Emotion(1, "通常", "normal_expression", "平常心を保っている状態"),
-                Emotion(2, "困惑", "troubled_expression", "どうしていいか分からない状態"),
-                Emotion(3, "焦り", "impatient_expression", "急いでいて落ち着かない状態"),
-                Emotion(4, "笑顔", "smile_expression", "楽しくて嬉しい状態"),
-                Emotion(5, "悲しみ", "sad_expression", "悲しくて元気がない状態"),
-                Emotion(6, "怒り", "angry_expression", "何かに腹を立てている状態"),
-                Emotion(7, "睡眠", "sleep_expression", "眠っている状態"),
-                Emotion(8, "ウィンク", "wink_expression", "楽しんでいる状態"),
-                Emotion(9, "どや顔", "smug_expression", "自信に満ちている状態")
-            )
-            emotionDao.insertAll(emotions)
+            // 表情の初期データを挿入 (updateEmotionDataで実行済みのため重複を避ける)
+            // emotionDao.insertAll(...)
 
             // Add dummy users
             userDao.insert(User(userId = 1, firebaseUid = null, email = "user1@example.com", name = "Alice", password = ""))

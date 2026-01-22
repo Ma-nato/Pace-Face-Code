@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.paceface"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -31,6 +31,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -50,12 +51,16 @@ kapt {
 dependencies {
     val room_version = "2.8.4"
 
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
+    // Health Connect SDK (この行が必要です)
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha11")
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
@@ -64,6 +69,7 @@ dependencies {
 
     // Coroutines for Play Services await()
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0") // ★★★ これがフリーズを解決する鍵 ★★★
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
     // 基本ライブラリ
     implementation("androidx.core:core-ktx:1.12.0")

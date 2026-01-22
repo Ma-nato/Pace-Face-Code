@@ -24,17 +24,16 @@ suspend fun saveUserDataToFirestoreAfterEmailVerification(context: Context) {
 
     val currentUser = auth.currentUser
     if (currentUser != null) {
-        // ここでのreloadは呼び出し元で行われているはずだが、念のため
+        // ユーザー情報をリロード
         try {
             currentUser.reload().await()
-            Log.d("FirestoreSave", "（FirebaseUtils内）ユーザー情報をリロードしました。")
         } catch (e: Exception) {
-            Log.e("FirestoreSave", "（FirebaseUtils内）ユーザー情報のリロードに失敗しました: ${e.message}")
+            Log.e("FirestoreSave", "ユーザー情報のリロードに失敗しました: ${e.message}")
             return
         }
 
         if (currentUser.isEmailVerified) {
-            Log.d("FirestoreSave", "（FirebaseUtils内）メールアドレスが認証済みです。Firestoreへのデータ保存を試みます。")
+            Log.d("FirestoreSave", "メールアドレスが認証済みです。Firestoreへのデータ保存を試みます。")
 
             val tempPrefs = context.getSharedPreferences("PendingRegistrations", Context.MODE_PRIVATE)
             val email = currentUser.email
@@ -60,7 +59,7 @@ suspend fun saveUserDataToFirestoreAfterEmailVerification(context: Context) {
                         // データ保存後、一時保存したSharedPreferencesのデータを削除
                         with(tempPrefs.edit()) {
                             remove("${email}_name")
-                            remove("${email}_password")
+                            // remove("${email}_password") // UserRegistrationScreenActivity.ktで既に削除済み
                             apply()
                         }
                         Log.d("FirestoreSave", "一時保存されたユーザーデータを削除しました。")
@@ -73,9 +72,9 @@ suspend fun saveUserDataToFirestoreAfterEmailVerification(context: Context) {
                 Log.w("FirestoreSave", "SharedPreferencesからユーザー名またはメールアドレスを取得できませんでした。メール: $email, 名前: $name")
             }
         } else {
-            Log.d("FirestoreSave", "（FirebaseUtils内）メールアドレスはまだ認証されていません。Firestoreには保存しません。")
+            Log.d("FirestoreSave", "メールアドレスはまだ認証されていません。Firestoreには保存しません。")
         }
     } else {
-        Log.d("FirestoreSave", "（FirebaseUtils内）ログインしているユーザーがいません。")
+        Log.d("FirestoreSave", "ログインしているユーザーがいません。")
     }
 }

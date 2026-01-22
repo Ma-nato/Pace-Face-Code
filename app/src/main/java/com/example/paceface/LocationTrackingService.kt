@@ -9,15 +9,21 @@ import android.content.Intent
 import android.location.Location
 import android.os.Build
 import android.os.IBinder
+import android.os.Looper
+import android.util.Log
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Looper
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.records.SpeedRecord
+import androidx.health.connect.client.units.Velocity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
+import java.time.Instant
 import java.util.Calendar
 import kotlin.math.sqrt
 
@@ -43,6 +49,9 @@ class LocationTrackingService : Service() {
     private val MOVEMENT_THRESHOLD = 0.5f // 加速度の閾値（m/s^2）
     private val STATIONARY_DELAY_MS = 3000L // 静止と判断するまでの時間（3秒）
 
+    // 1分間の平均速度計算用
+    private val speedReadings = mutableListOf<Float>()
+
     private val sensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
             if (event?.sensor?.type == Sensor.TYPE_LINEAR_ACCELERATION) {
@@ -55,6 +64,7 @@ class LocationTrackingService : Service() {
                     lastMovementTimestamp = System.currentTimeMillis()
                     isMoving = true
                 } else {
+                    // 閾値を下回ってから一定時間経過したら静止とみなす
                     if (System.currentTimeMillis() - lastMovementTimestamp > STATIONARY_DELAY_MS) {
                         isMoving = false
                     }
@@ -78,9 +88,6 @@ class LocationTrackingService : Service() {
             isBound = false
         }
     }
-    private val speedReadings = mutableListOf<Float>()
-    private val movingAverageWindow = mutableListOf<Float>()
-    private val WINDOW_SIZE = 5 // 移動平均のウィンドウサイズ（5秒分）
 
     companion object {
         const val ACTION_START = "com.example.paceface.action.START_LOCATION_TRACKING"
@@ -124,6 +131,7 @@ class LocationTrackingService : Service() {
             ACTION_STOP -> {
                 fusedLocationClient.removeLocationUpdates(locationCallback)
                 serviceScope.launch {
+                    // 停止直前に現在のデータを保存
                     saveMinuteAverageSpeedToDb()
                     withContext(Dispatchers.Main) {
                         val stopIntent = Intent(BROADCAST_SPEED_UPDATE)
@@ -141,23 +149,23 @@ class LocationTrackingService : Service() {
         val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("PaceFace")
             .setContentText("速度を記録中です...")
-            .setSmallIcon(R.drawable.ic_splash_logo) // Replace with your app icon
+            .setSmallIcon(R.drawable.ic_splash_logo)
             .setSilent(true)
             .build()
         startForeground(NOTIFICATION_ID, notification)
     }
 
     private fun startLocationUpdates() {
-        // 取得間隔を1秒、最小更新間隔を0.5秒に設定し、高精度モードを維持
         val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
             .setMinUpdateIntervalMillis(500)
-            .setWaitForAccurateLocation(true) // 精度が低い初期データは待機
+            .setWaitForAccurateLocation(true)
+            .setGranularity(Granularity.GRANULARITY_FINE)
             .build()
 
         try {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         } catch (e: SecurityException) {
-            // Handle exception
+            Log.e("LocationTrackingService", "Location permission missing or denied.", e)
         }
     }
 
@@ -179,47 +187,64 @@ class LocationTrackingService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let { location ->
-                    // 精度が極端に低いデータ（誤差30m以上）は無視
-                    if (location.accuracy > 30) return
 
-                    var rawSpeedKmh = getWalkingSpeed(location)
+                    // FLPの提供する速度をそのまま利用 (m/s)
+                    var speedMps = if (location.hasSpeed()) location.speed else 0f
 
-                    // 加速度センサーが利用可能で、かつ動きが検知されない場合は速度を0にする
-                    if (linearAccelerometer != null && !isMoving && rawSpeedKmh > 0) {
-                        rawSpeedKmh = 0.0f
+                    // 加速度センサーで静止と判定されている場合は、速度を強制的に0にする
+                    if (!isMoving) {
+                        speedMps = 0f
                     }
 
-                    if (rawSpeedKmh >= 0) {
-                        // 移動平均フィルタを適用
-                        val filteredSpeedKmh = applyMovingAverage(rawSpeedKmh)
+                    // km/h に変換
+                    val speedKmh = speedMps * 3.6f
 
-                        updateNotification(filteredSpeedKmh)
+                    if (speedKmh >= 0) {
+                        updateNotification(speedKmh)
 
                         // 速度リストに追加（1分間の平均計算用）
                         synchronized(speedReadings) {
-                            speedReadings.add(filteredSpeedKmh)
+                            speedReadings.add(speedKmh)
                         }
 
                         // リアルタイム速度をブロードキャスト送信
                         val intent = Intent(BROADCAST_SPEED_UPDATE)
-                        intent.putExtra(EXTRA_SPEED, filteredSpeedKmh)
+                        intent.putExtra(EXTRA_SPEED, speedKmh)
                         LocalBroadcastManager.getInstance(this@LocationTrackingService).sendBroadcast(intent)
 
                         // 表情を送信
-                        sendEmotionBasedOnSpeed(filteredSpeedKmh)
+                        sendEmotionBasedOnSpeed(speedKmh)
+
+                        // Health Connect への書き込み
+                        writeSpeedToHealthConnect(speedMps)
                     }
                 }
             }
         }
     }
 
-    private fun applyMovingAverage(newSpeed: Float): Float {
-        synchronized(movingAverageWindow) {
-            movingAverageWindow.add(newSpeed)
-            if (movingAverageWindow.size > WINDOW_SIZE) {
-                movingAverageWindow.removeAt(0)
+    private fun writeSpeedToHealthConnect(speedMps: Float) {
+        serviceScope.launch {
+            try {
+                val healthConnectClient = HealthConnectClient.getOrCreate(this@LocationTrackingService)
+                val now = Instant.now()
+                val speedRecord = SpeedRecord(
+                    startTime = now,
+                    startZoneOffset = null,
+                    endTime = now.plusMillis(100),
+                    endZoneOffset = null,
+                    samples = listOf(
+                        SpeedRecord.Sample(
+                            time = now,
+                            speed = Velocity.metersPerSecond(speedMps.toDouble())
+                        )
+                    )
+                )
+                healthConnectClient.insertRecords(listOf(speedRecord))
+                Log.d("HealthConnect", "Speed data written to Health Connect: $speedMps m/s")
+            } catch (e: Exception) {
+                Log.e("HealthConnect", "Failed to write speed data to Health Connect", e)
             }
-            return movingAverageWindow.average().toFloat()
         }
     }
 
@@ -230,7 +255,7 @@ class LocationTrackingService : Service() {
 
             val emotionId = if (isAutoChangeEnabled) {
                 val speedRule = appDatabase.speedRuleDao().getSpeedRuleForSpeed(currentUserId, speed)
-                speedRule?.emotionId ?: 1
+                speedRule?.emotionId ?: 7 // Default to Sleep (7)
             } else {
                 val savedTag = emojiPrefs.getString("selectedEmojiTag", "1") ?: "1"
                 savedTag.toInt()
@@ -243,41 +268,17 @@ class LocationTrackingService : Service() {
         }
     }
 
-    private fun getWalkingSpeed(location: Location): Float {
-        // Android標準の速度情報 (location.speed) が利用できるかチェック
-        if (location.hasSpeed()) {
-            val speedKmh = location.speed * 3.6f
-
-            // 異常値を除外（歩行速度として妥当な0〜15km/hの範囲に限定）
-            if (speedKmh in 0f..15f) {
-                // 静止状態に近い微小な値は0.0fとして扱う
-                if (speedKmh < 0.5f) {
-                    return 0.0f
-                }
-                return speedKmh
-            }
-        }
-
-        // 速度が取得できない、または範囲外の場合は無効な値として-1fを返す
-        return -1f
-    }
-
     private fun startMinuteTickLoop() {
         serviceScope.launch {
-            // サービス起動後、最初の「次の分の始まり」まで待つ
             val now = Calendar.getInstance()
             val seconds = now.get(Calendar.SECOND)
             val initialDelayMillis = (60 - seconds) * 1000L
-
-            // 最初のディレイ
             delay(initialDelayMillis)
 
-            // 次の分の始まりで最初の保存を実行
+            // 最初の保存を実行
             saveMinuteAverageSpeedToDb()
 
-            // 以降、60秒（1分）ごとに保存処理を実行するループ
             while (isActive) {
-                // 実行タイミングがズレないように、固定で60秒待機する
                 delay(60000L)
                 saveMinuteAverageSpeedToDb()
             }
@@ -298,13 +299,14 @@ class LocationTrackingService : Service() {
 
             serviceScope.launch {
                 val timestampCal = Calendar.getInstance()
+                // 1分前のタイムスタンプとして保存
                 timestampCal.add(Calendar.MINUTE, -1)
                 timestampCal.set(Calendar.SECOND, 0)
                 timestampCal.set(Calendar.MILLISECOND, 0)
                 val timestamp = timestampCal.timeInMillis
 
                 val speedRule = appDatabase.speedRuleDao().getSpeedRuleForSpeed(currentUserId, averageSpeed)
-                val emotionId = speedRule?.emotionId ?: 7 // Default to Normal
+                val emotionId = speedRule?.emotionId ?: 7
 
                 val newHistory = History(
                     userId = currentUserId,
@@ -313,6 +315,7 @@ class LocationTrackingService : Service() {
                     emotionId = emotionId
                 )
                 appDatabase.historyDao().insert(newHistory)
+                Log.d("LocationTrackingService", "Saved average speed to DB: $averageSpeed km/h")
             }
         }
     }
@@ -320,7 +323,9 @@ class LocationTrackingService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         // センサーの登録解除
-        sensorManager.unregisterListener(sensorEventListener)
+        if (::sensorManager.isInitialized) {
+            sensorManager.unregisterListener(sensorEventListener)
+        }
 
         if (isBound) {
             unbindService(connection)

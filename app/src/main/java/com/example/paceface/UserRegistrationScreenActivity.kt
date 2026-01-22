@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
 import android.view.View
-
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
@@ -40,16 +39,13 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
         setupPasswordVisibilityToggles()
 
         binding.btnBack.setOnClickListener {
-            // 遷移先を SelectionScreenActivity に変更
             val intent = Intent(this, SelectionScreenActivity::class.java)
-            // 戻る操作なので、現在のActivityを終了する
             startActivity(intent)
             finish()
         }
 
-        binding.btnRegister.setOnClickListener { // btnRegister は登録ボタンのIDと仮定
+        binding.btnRegister.setOnClickListener {
             if (validateInputs()) {
-                // 入力値の検証に成功した場合のみ、アカウント作成とメール送信の処理を実行
                 createAccountAndSendVerificationEmail()
             }
         }
@@ -77,7 +73,6 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
     }
 
     private fun validateInputs(): Boolean {
-        Log.d("UserRegistration", "validateInputs() が呼び出されました。")
         binding.tvUserNameError.visibility = View.GONE
         binding.tvEmailError.visibility = View.GONE
         binding.tvPasswordError.visibility = View.GONE
@@ -89,7 +84,6 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
             binding.tvUserNameError.text = "※ユーザー名が入力されていません"
             binding.tvUserNameError.visibility = View.VISIBLE
             isValid = false
-            Log.d("UserRegistration", "validateInputs: ユーザー名エラー")
         }
 
         val email = binding.etEmail.text.toString().trim()
@@ -97,63 +91,53 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
             binding.tvEmailError.text = "※正しいメールアドレスを入力してください"
             binding.tvEmailError.visibility = View.VISIBLE
             isValid = false
-            Log.d("UserRegistration", "validateInputs: メールアドレスエラー")
         }
 
         val password = binding.etPassword.text.toString()
         if (password.length < 8) {
+            binding.tvPasswordError.text = "※パスワードは8文字以上で入力してください"
             binding.tvPasswordError.visibility = View.VISIBLE
             isValid = false
-            Log.d("UserRegistration", "validateInputs: パスワード長エラー")
         }
 
         if (password != binding.etPassword2.text.toString()) {
+            binding.tvPassword2Error.text = "※パスワードが一致しません"
             binding.tvPassword2Error.visibility = View.VISIBLE
             isValid = false
-            Log.d("UserRegistration", "validateInputs: パスワード不一致エラー")
         }
-        Log.d("UserRegistration", "validateInputs() が終了しました。結果: $isValid")
         return isValid
     }
 
     private fun createAccountAndSendVerificationEmail() {
-        Log.d("UserRegistration", "createAccountAndSendVerificationEmail() が呼び出されました。")
         val name = binding.etUsername.text.toString().trim()
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString()
 
         binding.btnRegister.isEnabled = false
-        Log.d("UserRegistration", "登録ボタンを無効化しました。")
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                Log.d("UserRegistration", "コルーチン内部: Firebase Authでのユーザー作成を試行します。")
                 val authResult = auth.createUserWithEmailAndPassword(email, password).await()
                 val firebaseUser = authResult.user ?: throw Exception("Firebaseユーザーの作成に失敗しました。")
-                Log.d("UserRegistration", "コルーチン内部: Firebaseユーザーが作成されました: ${firebaseUser.uid}")
 
-                // Store registration info temporarily for later use after email verification
-                Log.d("UserRegistration", "一時的にユーザー情報をSharedPreferencesに保存します。")
+                // ★ 修正: パスワードの平文保存を削除。名前とメールのみを一時保存。
                 val tempPrefs = getSharedPreferences("PendingRegistrations", Context.MODE_PRIVATE)
                 with(tempPrefs.edit()) {
                     putString("${email}_name", name)
-                    putString("${email}_password", password) // Needed for local DB hash
+                    // remove("${email}_password") // 以前のコードから削除
                     apply()
                 }
-                Log.d("UserRegistration", "一時情報の保存が完了しました。")
+                Log.d("UserRegistration", "一時的にユーザー名とメールをSharedPreferencesに保存しました。")
 
-
-                Log.d("UserRegistration", "コルーチン内部: メール認証の送信を試行します。")
                 val actionCodeSettings = ActionCodeSettings.newBuilder()
-                    .setUrl("https://pace-face-18862.firebaseapp.com") // This URL will be handled by DeepLinkActivity
+                    .setUrl("https://pace-face-18862.firebaseapp.com")
                     .setHandleCodeInApp(true)
                     .setAndroidPackageName("com.example.paceface", true, null)
                     .build()
                 firebaseUser.sendEmailVerification(actionCodeSettings).await()
-                Log.d("UserRegistration", "コルーチン内部: メール認証が送信されました。")
+                Log.d("UserRegistration", "メール認証が送信されました。")
 
                 withContext(Dispatchers.Main) {
-                    Log.i("UserRegistration", "コルーチン内部: 登録成功。EmailVerificationScreenActivityへ遷移します。")
                     val intent = Intent(this@UserRegistrationScreenActivity, EmailVerificationScreenActivity::class.java).apply {
                         putExtra("USER_EMAIL", email)
                     }
@@ -164,17 +148,14 @@ class UserRegistrationScreenActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     if (e is FirebaseAuthUserCollisionException) {
-                        Log.w("UserRegistration", "このメールアドレスは既に使用されています。", e)
                         Snackbar.make(binding.root, "このメールアドレスは既に使用されています。", Snackbar.LENGTH_LONG).show()
                     } else {
-                        Log.e("UserRegistration", "コルーチン内部: 登録処理中にエラーが発生しました: ${e.message}", e)
                         Snackbar.make(binding.root, "登録に失敗しました: ${e.message}", Snackbar.LENGTH_LONG).show()
                     }
                 }
             } finally {
                 withContext(Dispatchers.Main) {
                     binding.btnRegister.isEnabled = true
-                    Log.d("UserRegistration", "コルーチン内部: 登録処理が終了しました。ボタンを再度有効にしました。")
                 }
             }
         }
