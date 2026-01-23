@@ -81,6 +81,9 @@ class LocationTrackingService : Service() {
             bluetoothService = binder.getService()
             isBound = true
             bluetoothService?.connectToRaspberryPi()
+            if (currentUserId != -1) {
+                bluetoothService?.startProximityFeature(currentUserId)
+            }
         }
 
         override fun onServiceDisconnected(name: android.content.ComponentName?) {
@@ -126,6 +129,9 @@ class LocationTrackingService : Service() {
                     startForegroundService()
                     startLocationUpdates()
                     startMinuteTickLoop()
+                    if (isBound) {
+                        bluetoothService?.startProximityFeature(currentUserId)
+                    }
                 }
             }
             ACTION_STOP -> {
