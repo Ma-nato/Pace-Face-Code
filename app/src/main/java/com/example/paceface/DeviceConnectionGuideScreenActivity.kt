@@ -35,6 +35,13 @@ class DeviceConnectionGuideScreenActivity : AppCompatActivity() {
         binding = DeviceConnectionGuideScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 「ホームへ」ボタンがクリックされた時の処理
+        binding.btnToHome.setOnClickListener {
+            val intent = Intent(this, HomeScreenActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         // 「設定へ」ボタンがクリックされた時の処理
         binding.btnToSettings.setOnClickListener {
             // Bluetooth設定画面を開くためのIntentを作成
