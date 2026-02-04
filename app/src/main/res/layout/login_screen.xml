@@ -7,7 +7,11 @@
     android:padding="20dp"
     android:background="#D8E6F5">
 
+<<<<<<< 終わり
     <!-- 上部の戻るボタン (追加 ) -->
+=======
+    <!-- 上部の戻るボタン -->
+>>>>>>> master
     <ImageButton
         android:id="@+id/btn_back"
         android:layout_width="48dp"
@@ -20,7 +24,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+<<<<<<< 終わり
     <!-- タイトル：ログイン (位置調整) -->
+=======
+    <!-- タイトル：ログイン -->
+>>>>>>> master
     <TextView
         android:id="@+id/title_login"
         android:layout_width="wrap_content"
