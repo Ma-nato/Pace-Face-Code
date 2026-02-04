@@ -80,12 +80,16 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
 
     private fun setEditMode(isEditing: Boolean) {
         this.isEditing = isEditing
+        // 名前のみ編集可能にする
         binding.etUsername.isEnabled = isEditing
         binding.etUsername.isFocusable = isEditing
         binding.etUsername.isFocusableInTouchMode = isEditing
-        binding.etEmail.isEnabled = isEditing
-        binding.etEmail.isFocusable = isEditing
-        binding.etEmail.isFocusableInTouchMode = isEditing
+
+        // メールアドレスは常に編集不可
+        binding.etEmail.isEnabled = false
+        binding.etEmail.isFocusable = false
+        binding.etEmail.isFocusableInTouchMode = false
+
         binding.btnEdit.text = if (isEditing) "保存" else "編集"
         if (isEditing) {
             binding.etUsername.requestFocus()
@@ -99,6 +103,8 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
                 currentUser?.let {
                     binding.etUsername.setText(it.name)
                     binding.etEmail.setText(it.email)
+                    // 初期状態では編集不可
+                    setEditMode(false)
                 } ?: showErrorAndFinish("ユーザー情報が見つかりません")
             }
         }
@@ -107,7 +113,7 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
     private fun showConfirmationDialog() {
         AlertDialog.Builder(this)
             .setTitle("変更の確認")
-            .setMessage("入力された内容で変更を保存しますか？\n(メールアドレスの変更には再認証が必要な場合があります)")
+            .setMessage("入力された内容でユーザー名を変更しますか？")
             .setPositiveButton("はい") { _, _ ->
                 saveChanges()
             }
@@ -117,39 +123,33 @@ class UserInfoViewScreenActivity : AppCompatActivity() {
 
     private fun saveChanges() {
         val newUsername = binding.etUsername.text.toString().trim()
-        val newEmail = binding.etEmail.text.toString().trim()
 
-        if (newUsername.isEmpty() || newEmail.isEmpty()) {
-            Toast.makeText(this, "ユーザー名とメールアドレスを入力してください", Toast.LENGTH_SHORT).show()
+        if (newUsername.isEmpty()) {
+            Toast.makeText(this, "ユーザー名を入力してください", Toast.LENGTH_SHORT).show()
             return
         }
 
         currentUser?.let { user ->
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    // 1. Firebase Auth のメールアドレス更新 (必要な場合)
                     val firebaseUser = auth.currentUser
-                    if (firebaseUser != null && firebaseUser.email != newEmail) {
-                        firebaseUser.updateEmail(newEmail).await()
-                    }
 
-                    // 2. Firestore のユーザー情報更新
+                    // 1. Firestore のユーザー情報更新 (名前のみ)
                     if (firebaseUser != null) {
                         val updates = hashMapOf<String, Any>(
-                            "name" to newUsername,
-                            "email" to newEmail
+                            "name" to newUsername
                         )
                         firestore.collection("users").document(firebaseUser.uid)
                             .update(updates)
                             .await()
                     }
 
-                    // 3. ローカルDBの更新
-                    val updatedUser = user.copy(name = newUsername, email = newEmail)
+                    // 2. ローカルDBの更新 (名前のみ)
+                    val updatedUser = user.copy(name = newUsername)
                     userDao.update(updatedUser)
 
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@UserInfoViewScreenActivity, "ユーザー情報を更新しました", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@UserInfoViewScreenActivity, "ユーザー名を更新しました", Toast.LENGTH_SHORT).show()
                         setEditMode(false)
                         // 完了画面へ遷移
                         val intent = Intent(this@UserInfoViewScreenActivity, ExpressionChangeCompleteScreenActivity::class.java)
