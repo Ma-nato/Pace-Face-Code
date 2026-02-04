@@ -102,13 +102,4 @@ class MainActivity : AppCompatActivity() {
         }
         finish()
     }
-
-    override fun onStart() {
-        super.onStart()
-        // FirebaseUtils.kt から関数を呼び出すのは、この場所では適切ではありません。
-        // メール認証後のFirestoreへの保存は、ユーザー登録時やメール認証完了時に実行すべきです。
-        // lifecycleScope.launch {
-        //     saveUserDataToFirestoreAfterEmailVerification(applicationContext)
-        // }
-    }
 }

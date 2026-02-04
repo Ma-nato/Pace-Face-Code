@@ -53,6 +53,12 @@ class LoginActivity : AppCompatActivity() {
 
         setupPasswordToggle(binding.inputPassword, binding.btnEye)
 
+        binding.btnBack.setOnClickListener {
+            val intent = Intent(this, SelectionScreenActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         binding.btnLogin.setOnClickListener {
             Log.d("LoginActivity", "Login button clicked.")
             login()
