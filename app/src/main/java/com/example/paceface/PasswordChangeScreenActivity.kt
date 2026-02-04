@@ -77,9 +77,15 @@ class PasswordChangeScreenActivity : AppCompatActivity() {
 
                 if (isCurrentPasswordValid && isNewPasswordLongEnough && doNewPasswordsMatch) {
                     try {
-                        // 1. Firebase Auth のパスワード更新
+                        // 1. Firebase Auth の再認証とパスワード更新
                         val firebaseUser = auth.currentUser
-                        if (firebaseUser != null) {
+                        if (firebaseUser != null && firebaseUser.email != null) {
+                            // セキュリティのため再認証を行う
+                            // インポートエラーを回避するため、フルパス（完全修飾名）で指定
+                            val credential = com.google.firebase.auth.EmailPasswordAuthProvider.getCredential(firebaseUser.email!!, currentPw)
+                            firebaseUser.reauthenticate(credential).await()
+
+                            // パスワード更新
                             firebaseUser.updatePassword(newPw).await()
                         } else {
                             throw Exception("Firebaseユーザーが認証されていません。再ログインしてください。")
