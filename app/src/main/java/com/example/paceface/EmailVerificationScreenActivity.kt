@@ -52,8 +52,8 @@ class EmailVerificationScreenActivity : AppCompatActivity() {
         }
 
         binding.btnLogin.setOnClickListener { // XMLのID: btnLogin
-            // 「ログイン画面へ」ボタンは、認証済み確認と、認証されていない場合はログイン画面へ遷移する役割
-            startEmailVerificationCheck()
+            // 「ログイン画面へ」ボタンが押されたら、ログイン画面へ遷移する
+            navigateToLoginScreen()
         }
     }
 
@@ -159,8 +159,10 @@ class EmailVerificationScreenActivity : AppCompatActivity() {
     }
 
     private fun navigateToLoginScreen() {
-        // 変更: ログイン画面ではなく、デバイス接続ガイド画面へ遷移する
-        val intent = Intent(this, DeviceConnectionGuideScreenActivity::class.java)
+        // Firebaseからログアウト（別のカウントでログインし直せるようにするため）
+        auth.signOut()
+        // ログイン画面へ遷移する
+        val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
