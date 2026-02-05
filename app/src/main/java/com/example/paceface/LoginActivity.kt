@@ -53,10 +53,7 @@ class LoginActivity : AppCompatActivity() {
 
         setupPasswordToggle(binding.inputPassword, binding.btnEye)
 
-<<<<<<< 終わり
         // 戻るボタンの処理を追加
-=======
->>>>>>> master
         binding.btnBack.setOnClickListener {
             val intent = Intent(this, SelectionScreenActivity::class.java)
             startActivity(intent)
