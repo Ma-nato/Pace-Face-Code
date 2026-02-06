@@ -8,7 +8,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.paceface.R
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,8 +81,7 @@ class PasswordChangeScreenActivity : AppCompatActivity() {
                         val firebaseUser = auth.currentUser
                         if (firebaseUser != null && firebaseUser.email != null) {
                             // セキュリティのため再認証を行う
-                            // インポートエラーを回避するため、フルパス（完全修飾名）で指定
-                            val credential = com.google.firebase.auth.EmailPasswordAuthProvider.getCredential(firebaseUser.email!!, currentPw)
+                            val credential = EmailAuthProvider.getCredential(firebaseUser.email!!, currentPw)
                             firebaseUser.reauthenticate(credential).await()
 
                             // パスワード更新
